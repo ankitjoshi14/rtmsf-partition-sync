@@ -1,0 +1,9 @@
+# No external dependencies — RTMSF uses the Python standard library only.
+# Python 3.8+ required.
+#
+# To set up a virtual environment:
+#   python -m venv .venv
+#   source .venv/bin/activate      # macOS/Linux
+#   .venv\Scripts\activate         # Windows
+#   pip install -r requirements.txt  # no-op; included for standard workflow
+#   python benchmark.py

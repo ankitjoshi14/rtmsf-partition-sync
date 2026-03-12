@@ -68,7 +68,15 @@ Experiment 2 (W=5, G=1): median latency 6.001 s  (= W + G + ε)
 Experiment 3 (f=0.01):  ~212,000 events/sec,  ~38,500 partitions/sec
 ```
 
-**Requirements:** Python 3.8+, no pip installs needed.
+**Requirements:** Python 3.8+, no external packages needed.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate      # macOS/Linux
+# .venv\Scripts\activate       # Windows
+pip install -r requirements.txt  # no-op; zero dependencies
+python benchmark.py
+```
 
 ---
 
