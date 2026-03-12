@@ -3,4 +3,3 @@ __pycache__/
 *.pyc
 *.pyo
 benchmark_results_*.txt
-!benchmark_results_20260311_154324.txt
