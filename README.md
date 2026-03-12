@@ -30,7 +30,7 @@ event_generator.py   — Synthetic workload generator (§3.8.2 parameters)
 mock_storage.py      — In-memory object store; counts HEAD and LIST requests
 mock_catalog.py      — In-memory partition catalog; raises AlreadyExistsException / NotFoundException
 benchmark.py         — Three-experiment benchmark harness (§3.11)
-benchmark_results_20260311_154324.txt  — Canonical benchmark output
+sample_output.txt            — Sample benchmark output for reference
 ```
 
 All modules use the Python standard library only — no external dependencies.
@@ -60,7 +60,7 @@ across W = 1 s to 120 s at f = 0.01, G = 1 s.
 Single-threaded, in-memory, W = G = 0. Reports events/sec and partitions/sec
 across f = 0.001 to 1.0.
 
-Expected output (matches `benchmark_results_20260311_154324.txt`):
+Expected output (matches `sample_output.txt`):
 
 ```
 Experiment 1 (f=0.01):  4,380 committed,  4,380 requests,  104× reduction,  $0.022/day
@@ -71,11 +71,11 @@ Experiment 3 (f=0.01):  ~212,000 events/sec,  ~38,500 partitions/sec
 **Requirements:** Python 3.8+, no external packages needed.
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate      # macOS/Linux
 # .venv\Scripts\activate       # Windows
 pip install -r requirements.txt  # no-op; zero dependencies
-python benchmark.py
+python3 benchmark.py
 ```
 
 ---
