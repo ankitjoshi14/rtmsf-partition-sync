@@ -15,7 +15,6 @@ RETRY/ERROR semantics mirror the paper:
   NOOP  — already in desired state; no mutation needed.
 """
 
-import random
 from dataclasses import dataclass
 from typing import Optional
 
@@ -35,7 +34,6 @@ IGNORE_PREFIXES = {"_SUCCESS", ".crc", "_temporary"}
 class Result:
     status: str             # "APPLIED" | "NOOP" | "RETRY" | "ERROR"
     reason: Optional[str] = None
-    backoff: float = 0.0
 
 
 # ----------------------------------------------------------------- pmcp class
@@ -51,11 +49,12 @@ class PMCP:
       errors   — fatal failures sent to DLQ
     """
 
-    MAX_BACKOFF = 60.0   # seconds (capped exponential backoff per §3.5)
 
-    def __init__(self, storage: MockStorage, catalog: MockCatalog):
+    def __init__(self, storage: MockStorage, catalog: MockCatalog,
+                 enable_drop: bool = True):
         self.storage = storage
         self.catalog = catalog
+        self.enable_drop = enable_drop
         self.applied = 0
         self.noops   = 0
         self.retries = 0
@@ -67,6 +66,9 @@ class PMCP:
         if eff.kind == "ADD":
             return self.apply_add(eff)
         elif eff.kind == "DROP":
+            if not self.enable_drop:
+                self.noops += 1
+                return Result("NOOP", "drop_disabled")
             return self.apply_drop(eff)
         self.errors += 1
         return Result("ERROR", "unknown_kind")
@@ -80,10 +82,30 @@ class PMCP:
         Fast-path: HEAD on bounded proof keys (K=3).
         Fallback:  LIST prefix with max_keys=1 (handles visibility jitter).
         """
-        # Optimization: catalog check first avoids all storage I/O
+        # If partition already in catalog:
+        # - enable_drop=false: NOOP immediately (ADD-only mode, no storage check)
+        # - enable_drop=true:  verify storage to detect stale entries.
+        #   ADD-dominant may fire in a window containing both DELETE and CREATE events;
+        #   if the final state has no files, the catalog entry must be cleaned up here —
+        #   no correcting DROP event will arrive (all events already consumed this window).
         if self.catalog.has_partition(eff.key):
-            self.noops += 1
-            return Result("NOOP", "already_exists")
+            if not self.enable_drop:
+                self.noops += 1
+                return Result("NOOP", "already_exists")
+            try:
+                if self.storage.prefix_non_empty(eff.partition_prefix, IGNORE_PREFIXES):
+                    self.noops += 1
+                    return Result("NOOP", "already_exists_verified")
+                else:
+                    try:
+                        self.catalog.drop_partition(eff.key)
+                    except NotFoundException:
+                        pass  # concurrent worker already removed it
+                    self.retries += 1
+                    return Result("RETRY", "stale_catalog_entry_cleared")
+            except StorageTransientException:
+                self.retries += 1
+                return Result("RETRY", "storage_transient")
 
         # Fast-path: HEAD on proof objects
         for proof in eff.proof_keys:
@@ -92,7 +114,7 @@ class PMCP:
                     return self._create_partition(eff)
             except StorageTransientException:
                 self.retries += 1
-                return Result("RETRY", "storage_transient", self._backoff())
+                return Result("RETRY", "storage_transient")
 
         # Fallback: minimal LIST to handle proof-key visibility jitter
         try:
@@ -100,11 +122,11 @@ class PMCP:
                 return self._create_partition(eff)
         except StorageTransientException:
             self.retries += 1
-            return Result("RETRY", "storage_transient", self._backoff())
+            return Result("RETRY", "storage_transient")
 
         # Storage evidence not yet visible — retry later
         self.retries += 1
-        return Result("RETRY", "not_visible_yet", self._backoff())
+        return Result("RETRY", "not_visible_yet")
 
     # --------------------------------------------------------------- apply_drop
 
@@ -126,7 +148,7 @@ class PMCP:
                 return Result("NOOP", "still_non_empty")
         except StorageTransientException:
             self.retries += 1
-            return Result("RETRY", "storage_transient", self._backoff())
+            return Result("RETRY", "storage_transient")
 
         try:
             self.catalog.drop_partition(eff.key)
@@ -137,7 +159,7 @@ class PMCP:
             return Result("NOOP", "not_found")
         except CatalogTransientException:
             self.retries += 1
-            return Result("RETRY", "catalog_transient", self._backoff())
+            return Result("RETRY", "catalog_transient")
         except CatalogFatalException:
             self.errors += 1
             return Result("ERROR", "catalog_fatal")
@@ -155,14 +177,11 @@ class PMCP:
             return Result("NOOP", "already_exists")
         except CatalogTransientException:
             self.retries += 1
-            return Result("RETRY", "catalog_transient", self._backoff())
+            return Result("RETRY", "catalog_transient")
         except CatalogFatalException:
             self.errors += 1
             return Result("ERROR", "catalog_fatal")
 
-    def _backoff(self) -> float:
-        """Exponential backoff with full jitter [19], capped at MAX_BACKOFF."""
-        return random.uniform(0, self.MAX_BACKOFF)
 
     # ------------------------------------------------------------------ utils
 

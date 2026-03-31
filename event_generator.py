@@ -10,12 +10,11 @@ in a three-level hierarchy (dt × region × hour), with configurable:
   - out-of-order jitter: events are shuffled before return
 """
 
-import hashlib
 import random
 import time
 from typing import List, Tuple
 
-from rtmsf_worker import EventEnvelope, TABLE_ROOT, TENANT_ID, TABLE_FQN
+from rtmsf_worker import EventEnvelope, TABLE_ROOT, TENANT_ID
 
 # --------------------------------------------------------- hierarchy constants
 # Match exactly §3.8.2: c₁=365, c₂=50, c₃=24 → P=438,000
@@ -91,29 +90,78 @@ def generate_events(
         for file_idx in range(files_per_partition):
             okey     = object_key(pkey, file_idx)
             evt_time = base_time + random.uniform(-10.0, 10.0)   # jitter
-            eid      = hashlib.md5(f"{okey}:CREATED:{base_time}".encode()).hexdigest()
 
             events.append(EventEnvelope(
                 tenant_id  = TENANT_ID,
-                table_fqn  = TABLE_FQN,
                 op         = "OBJECT_CREATED",
                 object_key = okey,
                 event_time = evt_time,
-                event_id   = eid,
             ))
 
             # Simulate at-least-once duplicate delivery
             if random.random() < duplicate_rate:
                 events.append(EventEnvelope(
                     tenant_id  = TENANT_ID,
-                    table_fqn  = TABLE_FQN,
                     op         = "OBJECT_CREATED",
                     object_key = okey,
-                    event_time = evt_time + 0.001,
-                    event_id   = eid,          # same ID → WOERA deduplicates it
+                    event_time = evt_time + 0.001,  # same file → coalesces naturally in WOERA
                 ))
 
     # Shuffle to simulate out-of-order delivery (§3.1 assumption 2)
     random.shuffle(events)
 
     return events, delta_p, partition_keys
+
+
+def generate_delete_events(
+    partition_keys: List[str],
+    drop_fraction: float,
+    files_per_partition: int = 5,
+    duplicate_rate: float = 0.10,
+    seed: int = 99,
+) -> Tuple[List[EventEnvelope], int, List[str]]:
+    """
+    Generate synthetic OBJECT_DELETED events for a fraction of existing partitions.
+
+    Args:
+      partition_keys:       list of partition_key strings (from generate_events)
+      drop_fraction:        fraction of partition_keys to delete (0.0–1.0)
+      files_per_partition:  file events per dropped partition (must match creation)
+      duplicate_rate:       fraction of events duplicated (at-least-once)
+      seed:                 random seed for reproducibility
+
+    Returns:
+      events:           shuffled list of OBJECT_DELETED EventEnvelope
+      delta_drop:       number of partitions targeted for deletion
+      dropped_keys:     list of partition_key strings that were deleted
+    """
+    random.seed(seed)
+    base_time = time.time()
+
+    delta_drop = max(1, round(drop_fraction * len(partition_keys)))
+    dropped_keys = random.sample(partition_keys, delta_drop)
+
+    events: List[EventEnvelope] = []
+
+    for pkey in dropped_keys:
+        for file_idx in range(files_per_partition):
+            okey = object_key(pkey, file_idx)
+            evt_time = base_time + random.uniform(-10.0, 10.0)
+
+            events.append(EventEnvelope(
+                tenant_id  = TENANT_ID,
+                op         = "OBJECT_DELETED",
+                object_key = okey,
+                event_time = evt_time,
+            ))
+
+            if random.random() < duplicate_rate:
+                events.append(EventEnvelope(
+                    tenant_id  = TENANT_ID,
+                    op         = "OBJECT_DELETED",
+                    object_key = okey,
+                    event_time = evt_time + 0.001,
+                ))
+
+    random.shuffle(events)
+    return events, delta_drop, dropped_keys
