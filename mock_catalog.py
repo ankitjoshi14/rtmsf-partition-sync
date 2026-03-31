@@ -48,6 +48,14 @@ class MockCatalog:
         self._partitions: dict = {}   # key (tuple) -> location (str)
         self.creates: int = 0
         self.drops: int = 0
+        self._fail_next_create: Exception = None
+        self._fail_next_drop: Exception = None
+
+    def fail_next_create(self, exc: Exception):
+        self._fail_next_create = exc
+
+    def fail_next_drop(self, exc: Exception):
+        self._fail_next_drop = exc
 
     # ------------------------------------------------------------------ reads
 
@@ -57,12 +65,20 @@ class MockCatalog:
     # ----------------------------------------------------------------- writes
 
     def create_partition(self, key: tuple, location: str) -> None:
+        if self._fail_next_create is not None:
+            exc = self._fail_next_create
+            self._fail_next_create = None
+            raise exc
         if key in self._partitions:
             raise AlreadyExistsException(f"Already exists: {key}")
         self._partitions[key] = location
         self.creates += 1
 
     def drop_partition(self, key: tuple) -> None:
+        if self._fail_next_drop is not None:
+            exc = self._fail_next_drop
+            self._fail_next_drop = None
+            raise exc
         if key not in self._partitions:
             raise NotFoundException(f"Not found: {key}")
         del self._partitions[key]

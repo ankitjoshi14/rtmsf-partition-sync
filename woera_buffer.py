@@ -13,7 +13,9 @@ Key design choices (mirroring the paper):
     activity to eventually cease).
   - Min-heap + version counters for O(log A) flush scheduling (lazy updates).
   - ADD-dominant rule: ADD wins over DROP within the same window.
-  - Dedup by dedup_key before dominance logic.
+
+Deduplication is a natural byproduct of coalescing — WOERA emits one intent
+per partition key regardless of how many events arrive.
 """
 
 import heapq
@@ -31,8 +33,6 @@ class CandidateIntent:
     partition_key: str          # canonical "dt=.../region=.../hour=..." string
     partition_prefix: str       # full object-store prefix for this partition
     kind: str                   # "ADD_CANDIDATE" | "DROP_CANDIDATE"
-    event_time: float           # original event timestamp
-    dedup_key: str              # stable identifier for deduplication
     proof: Optional[str]        # object_key for ADD; None for DROP
 
 
@@ -43,7 +43,6 @@ class EffectiveIntent:
     partition_prefix: str
     kind: str                   # "ADD" | "DROP"
     proof_keys: List[str]       # bounded (K=3); empty for DROP
-    window_end: float           # processing time when window closed
 
 
 # --------------------------------------------------------------- buffer class
@@ -65,15 +64,14 @@ class WOERABuffer:
         """
         W:       quiet-window seconds — how long to wait after last intent before flushing.
         G:       grace-interval seconds — watermark lag (wm_worker = now() - G).
-        T_max:   optional maximum buffering deadline (§3.4, Appendix B).
-                 flush_at[k] is capped at first_seen[k] + T_max; the key becomes
-                 flush-eligible when now() >= first_seen[k] + T_max + G.
-                 None = pure quiet-window semantics (default).
+        T_max:   maximum buffering deadline (§3.4, Appendix B). Defaults to 5*W per
+                 paper recommendation. flush_at[k] is capped at first_seen[k] + T_max;
+                 the key becomes flush-eligible when now() >= first_seen[k] + T_max + G.
         clock_fn: injectable clock for testing/simulation (default: time.time).
         """
         self.W     = W
         self.G     = G
-        self.T_max = T_max
+        self.T_max = T_max if T_max is not None else 5 * W
         self._clock = clock_fn or time.time
 
         self._events:     dict = {}    # key -> List[CandidateIntent]
@@ -140,45 +138,37 @@ class WOERABuffer:
         """
         Algorithm 4: WOERA reconciliation.
 
-        1. Deduplicate by dedup_key.
-        2. ADD-dominant rule: if any ADD_CANDIDATE survives, emit single ADD.
-        3. DROP-only: if only DROP_CANDIDATEs, emit single DROP.
-        4. All duplicates: return empty list (no mutation).
+        1. ADD-dominant rule: if any ADD_CANDIDATE present, emit single ADD.
+        2. DROP-only: if only DROP_CANDIDATEs, emit single DROP.
+
+        Deduplication is implicit: coalescing emits one EffectiveIntent per
+        partition key regardless of how many candidate events arrived.
         """
         if not intents:
             return []
 
-        # Step 1 — dedup
-        seen: dict = {}
-        for intent in intents:
-            if intent.dedup_key not in seen:
-                seen[intent.dedup_key] = intent
-        deduped = list(seen.values())
+        has_add  = any(i.kind == "ADD_CANDIDATE"  for i in intents)
+        has_drop = any(i.kind == "DROP_CANDIDATE" for i in intents)
+        prefix   = intents[0].partition_prefix
 
-        has_add  = any(i.kind == "ADD_CANDIDATE"  for i in deduped)
-        has_drop = any(i.kind == "DROP_CANDIDATE" for i in deduped)
-        prefix   = deduped[0].partition_prefix
-
-        # Step 2 — ADD dominant
+        # ADD dominant
         if has_add:
-            proofs = [i.proof for i in deduped
+            proofs = [i.proof for i in intents
                       if i.proof is not None][:self.MAX_PROOF_KEYS]
             return [EffectiveIntent(
                 key=key,
                 partition_prefix=prefix,
                 kind="ADD",
                 proof_keys=proofs,
-                window_end=self._clock()
             )]
 
-        # Step 3 — DROP only
+        # DROP only
         if has_drop:
             return [EffectiveIntent(
                 key=key,
                 partition_prefix=prefix,
                 kind="DROP",
                 proof_keys=[],
-                window_end=self._clock()
             )]
 
         return []
@@ -188,3 +178,19 @@ class WOERABuffer:
     @property
     def active_key_count(self) -> int:
         return len(self._events)
+
+    @property
+    def buffer_snapshot(self) -> dict:
+        """Read-only snapshot of buffer state for display/simulation use."""
+        now = self._clock()
+        result = {}
+        for key, intents in self._events.items():
+            flush_at   = self._flush_at.get(key, now)
+            first_seen = self._first_seen.get(key, now)
+            result[key] = {
+                "count":    len(intents),
+                "flush_in": max(0.0, flush_at - now),
+                "age_s":    now - first_seen,
+                "kind":     intents[-1].kind if intents else "UNKNOWN",
+            }
+        return result
