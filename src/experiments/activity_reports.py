@@ -1,0 +1,49 @@
+"""Regenerate the activity tables and CSVs from retained report inputs."""
+import csv
+import json
+from pathlib import Path
+
+DATA_COLUMNS = ('condition', 'method', 'repetition', 'completed_operations', 'write_duration_s',
+    'pmcp_attempts', 's3_head_requests', 's3_get_requests', 's3_list_requests', 'catalog_api_attempts',
+    'first_partition_visibility_s', 'attempts_during_writes', 'processed_events_during_writes',
+    'partitions_processed_during_writes', 'peak_queue_visible', 'peak_queue_inflight', 'drain_s')
+TIME_COLUMNS = ('condition', 'method', 'repetition', 'elapsed_s', 'completed_operations',
+    'first_partition_present', 'observed_elapsed_s', 'queue_visible', 'queue_inflight', 'error')
+
+
+def write_activity_reports(root, rows, timeline, errors):
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    payload = dict(kind='bounded_activity_validation', rows=rows, timeline=timeline, errors=errors)
+    (root / 'report_inputs.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+    for name, fields, records in (('activity_data.csv', DATA_COLUMNS, rows), ('activity_timeline.csv', TIME_COLUMNS, timeline)):
+        with (root / name).open('w', newline='') as stream:
+            writer = csv.DictWriter(stream, fieldnames=fields, extrasaction='ignore', lineterminator='\n')
+            writer.writeheader()
+            writer.writerows({key: round(value, 3) if isinstance(value, float) else value
+                              for key, value in record.items()} for record in records)
+    lines = ['# Activity validation', '', 'Ankit Joshi', '',
+        'Small AWS validation; one repetition does not establish stable latency or capacity limits.', '',
+        '| Condition | Method | Repeat | PMCP attempts | HEAD / GET / LIST | First partition visible (s) | Drain (s) | Outcome |',
+        '|---|---|---:|---:|---|---:|---:|---|']
+    def number(value):
+        return 'unknown' if value is None else f'{value:.3f}' if isinstance(value, float) else str(value)
+    for row in rows:
+        requests = ' / '.join(number(row.get(k)) for k in ('s3_head_requests', 's3_get_requests', 's3_list_requests'))
+        lines.append(f'| {row["condition"]} | {row["method"]} | {row["repetition"]} | {number(row.get("pmcp_attempts"))} | {requests} | {number(row.get("first_partition_visibility_s"))} | {number(row.get("drain_s"))} | {row["status"]} |')
+    lines += ['', 'Visibility covers the first new partition, polled independently. Queue counts are approximate.',
+              'Drain includes observation/telemetry waits and eight seconds of observed queue emptiness.',
+              'S3 counts require agreement between CloudWatch, CloudTrail and worker API records.', '']
+    lines += [f'- {row["condition"]}/{row["method"]}: {row["error"]}' for row in rows if row.get('error')]
+    lines += [f'- {error}' for error in errors]
+    (root / 'SUMMARY.md').write_text('\n'.join(lines) + '\n')
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--results', type=Path, required=True)
+    parser.add_argument('--output-dir', type=Path, required=True)
+    args = parser.parse_args()
+    data = json.loads(args.results.read_text())
+    write_activity_reports(args.output_dir, data['rows'], data['timeline'], data['errors'])

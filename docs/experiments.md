@@ -299,24 +299,72 @@ uv run --frozen --extra experiment python -m experiments.figures \
 
 The manuscript's prior-work omissions, crawler ADD/append scope, inferred-zero
 explanation, and checksum/verification wording are corrected. Existing evidence
-stays intact. The following work is pending, not an implemented protocol or result.
+stays intact. The bounded activity pilot is implemented and has run; the
+[evidence index](../evidence/README.md) records its outcomes and remaining limits.
 
 | To-do | Purpose and completion evidence |
 |---|---|
-| Save full catalog checks | Save the expected and observed partition values, locations and columns already read by `Pilot.verify()`, before assertions. Retain failed checks too; no extra AWS requests are needed. Historical missing snapshots remain missing. |
+| Save full catalog checks | **Implemented and validated.** `Pilot.verify()` saves expected and observed values, locations and columns before assertions, including failed checks. No extra AWS requests. Historical missing snapshots remain missing. |
 | Settle marker handling | Deleting `_SUCCESS` after the last Parquet file can leave an empty partition registered. The current narrow scope documents this. Choose whether to retain that restriction or implement and test broader event coverage; disclosure alone is not a fix. |
-| Compare with an immediate handler | Same storage verification, ownership, retries and acknowledgement rules; process each event without deliberate grouping. Compare concentrated bursts, spaced arrivals, distributed changes and ADD/DELETE mixtures. Record PMCP attempts, storage/catalog calls, observed delay and final correctness. Setting Q=0 alone may still group a received batch. |
-| Exercise continuous updates | Keep writes/deletes arriving across several partitions at stated rates. Record actual arrivals, completed work, backlog/age, observed catalog transitions, retries/DLQ outcomes, and drain time after writes stop. Check correctness during stable observation points and after draining. Final correctness alone does not prove progress during traffic. |
+| Compare with an immediate handler | **Bounded pilot complete; repetitions pending.** The same worker/PMCP processes separate per-event intents, preserving verification, ownership, retries and ACK rules. Quick, spaced, distributed and mixed bursts have recorded calls, delay and final correctness. This is a controlled comparison, not a new independent production implementation. |
+| Exercise continuous updates | **Bounded pilot complete; stronger repetition/capacity evidence pending.** At stated rates, retain actual arrivals, processing during writes, approximate queue counts, visibility, retries/DLQ outcomes, observed drain and final correctness. The pilot demonstrates progress at its tested loads, not maximum sustainable throughput. |
 | Repeat representative conditions | Apply the existing three correctness/fault repetitions and five comparison repetitions to a bounded representative matrix first. Retain failures and variation; these counts do not establish failure rates or tail latency. Larger historical tables are separate scaling evidence. |
 | Finish the paper artifact | Regenerate reports from retained inputs, make offline reproduction self-contained, prepare source/evidence for public release, and revise the manuscript to match the new results. If the simple handler performs similarly, narrow the contribution claim. |
 
-For the two proposed workload families, exact schedules, rates, durations,
-repetitions and output columns must be recorded here before implementation.
-Reuse existing burst/multi-table helpers where suitable. Keep the comparator and
-load-generation code in experiments; start with compact results tables, without
-automatically adding more numbered graphs.
+The bounded validation protocol below supplies the first workload schedules and
+outputs. Final paper repetitions remain separate. Keep the comparator and load
+generation in experiments; retain the five existing numbered graphs.
 
 The window remains fixed at 10 seconds. We will measure behavior under different
 traffic, without claiming that 10 seconds is optimal. This leaves the reviewer's
 literal request for window sensitivity unperformed. Multi-cloud testing and new
 Snowflake/projection performance baselines are outside this follow-up scope.
+
+### Bounded activity validation
+
+Checkpoint: `f1af80f`. Keep `src/rtmsf` unchanged and retain the documented marker
+restriction. Save catalog snapshots in the existing verifier. Add the per-event
+launcher and activity runner under `src/experiments/aws`; extend only experiment
+image/measurement plumbing. Check batching, retry/ACK ownership, snapshot retention,
+and workload schedules locally before running AWS.
+
+Each condition gets a fresh bucket/table with 100 registered one-file partitions,
+the shared date/site/hour layout and identical payloads. Use one repetition for
+this pilot. RTMSF uses Q=10/T_max=31; the immediate control uses the same worker,
+PMCP and recovery rules, with a separate pending intent for every received event.
+It cannot combine events from one SQS batch. Both run in the same Fargate image
+and resource size. Rotate method order when repetitions are increased.
+
+| Condition | Actions | Methods |
+|---|---|---|
+| Quick burst | 20 uploads into one new partition, back-to-back | RTMSF, immediate |
+| Spaced burst | 20 uploads into one new partition at 0, 2, ..., 38 seconds | RTMSF, immediate |
+| Distributed burst | One upload into each of 20 new partitions | RTMSF, immediate |
+| Mixed burst | Alternate 10 uploads into one new partition with deletion of the sole file from each of 10 existing partitions | RTMSF, immediate |
+| Continuous mixed traffic | 120 seconds at 1 or 3 operations/second, with 10 or 20 new upload-target partitions. Every fourth operation deletes a distinct original partition's sole file; other operations append across the upload targets. | RTMSF |
+
+Record intended and actual operation times; late uploads must not masquerade as
+the requested rate. Independently poll the first new partition and SQS visible/
+in-flight counts about once per second. This visibility probe represents one
+partition, not all-partition tail latency. Worker telemetry records progress
+across all changed partitions. SQS counts are approximate and omit notifications
+not delivered yet; they are not exact outstanding-work counts.
+
+Prepare and verify all baselines before measurement. Reuse isolated CloudWatch
+buckets and CloudTrail calibration, wait 15 minutes for activation, then leave two
+complete quiet minutes after the last setup read. Once each workload ends, match
+every changed file to received notifications and ACKs, then observe the queue
+draining. Keep buckets idle until the final 10-minute delivery wait and frozen
+metric cutoff. Save final full catalog checks and query rows afterward.
+
+`activity_data.csv` contains condition, method, repetition, completed operations,
+actual write duration, PMCP attempts, separate HEAD/GET/LIST counts, catalog API
+attempts, first-new-partition visibility delay, processing attempts, completed event
+observations and distinct processed partitions while writes continued, approximate
+peak visible/in-flight queue counts, and observed drain
+seconds. `activity_timeline.csv` retains the independent time samples.
+`report_inputs.json` retains outcomes/errors and detailed measurements; `SUMMARY.md`
+is the readable table. Missing values stay blank. Reconcile S3 counters with raw
+CloudTrail and worker API records; failures and incomplete conditions stay visible.
+Stop the worker, restore its previous task definition, and clean only owned trial
+buckets/tables and temporary policies after retaining evidence.

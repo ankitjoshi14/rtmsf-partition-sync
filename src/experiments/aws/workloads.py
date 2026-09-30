@@ -187,6 +187,11 @@ class Pilot(AwsRuntime):
         parts = []
         for page in self.clients['glue'].get_paginator('get_partitions').paginate(DatabaseName=self.outputs['GlueDatabaseName'], TableName=fixture['table']['Name']):
             parts.extend(page.get('Partitions', []))
+        expected = [{'Values': list(values), 'Location': fixture['table']['StorageDescriptor']['Location'] + self.path(values, fixture.get('layout')),
+                     'Columns': fixture['table']['StorageDescriptor']['Columns']} for values in expected_values]
+        observed = [{'Values': part['Values'], 'Location': part['StorageDescriptor'].get('Location'),
+                     'Columns': part['StorageDescriptor'].get('Columns')} for part in parts]
+        self.bundle.write(f'catalog/{label}.json', {'expected': expected, 'observed': observed})
         if sorted(tuple(part['Values']) for part in parts) != expected_values:
             raise AssertionError(f'{label}: complete catalog membership differs')
         for part in parts:

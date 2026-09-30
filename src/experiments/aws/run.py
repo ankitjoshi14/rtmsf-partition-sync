@@ -151,7 +151,8 @@ def main() -> int:
         runtime_files = sorted((project / 'src/rtmsf').rglob('*.py')) + [
             project / name for name in ('src/experiments/__init__.py',
                                        'src/experiments/aws/__init__.py',
-                                       'src/experiments/aws/crash_worker.py')]
+                                       'src/experiments/aws/crash_worker.py',
+                                       'src/experiments/aws/activity_worker.py')]
         expected = {str(path.relative_to(project)): hashlib.sha256(path.read_bytes()).hexdigest() for path in runtime_files}
         if not isinstance(build.get('files'), dict) or not isinstance(build.get('image'), str) or '@sha256:' not in build['image']:
             raise ValueError('build manifest needs files and an immutable image digest; rebuild using docs/aws.md')

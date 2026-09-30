@@ -13,7 +13,7 @@ ENTRYPOINT ["python", "-m", "rtmsf.aws_app"]
 
 FROM runtime AS experiment
 COPY src/experiments/__init__.py ./src/experiments/__init__.py
-COPY src/experiments/aws/__init__.py src/experiments/aws/crash_worker.py ./src/experiments/aws/
+COPY src/experiments/aws/__init__.py src/experiments/aws/crash_worker.py src/experiments/aws/activity_worker.py ./src/experiments/aws/
 ENV PYTHONPATH=/app/src
 ENTRYPOINT ["python", "-m", "experiments.aws.crash_worker"]
 

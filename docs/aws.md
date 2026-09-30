@@ -92,7 +92,8 @@ root = Path('/app')
 files = sorted((root / 'src/rtmsf').rglob('*.py')) + [
     root / name for name in ('src/experiments/__init__.py',
                             'src/experiments/aws/__init__.py',
-                            'src/experiments/aws/crash_worker.py')]
+                            'src/experiments/aws/crash_worker.py',
+                            'src/experiments/aws/activity_worker.py')]
 print(json.dumps({
     'files': {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
     'runtime_dependencies': {n: importlib.metadata.version(n) for n in ('boto3', 'botocore')},
@@ -359,6 +360,31 @@ export RTMSF_RUN=runs/REPLACE_WITH_PRINTED_PILOT_ID
 uv run --frozen --extra experiment python -m experiments.figures \
   --csv "$RTMSF_RUN/graph_data.csv" --results "$RTMSF_RUN/report_inputs.json" \
   --output-dir "${RTMSF_RUN}-regenerated"
+```
+
+## Bounded activity validation
+
+The [activity protocol](experiments.md#bounded-activity-validation) compares the
+complete worker with an experiment-only immediate handler and exercises ongoing
+mixed traffic. It uses the same stack and experiment image. Build and deploy that
+image above, then run:
+
+```bash
+uv run --frozen --extra experiment python -m experiments.aws.activity \
+  --stack "$RTMSF_STACK" --expected-account "$RTMSF_ACCOUNT" \
+  --profile "$RTMSF_PROFILE" --region "$RTMSF_REGION" \
+  --build-manifest "$RTMSF_BUILD_MANIFEST" --repetitions 1 --max-minutes 65
+```
+
+Use `--conditions quick spaced distributed mixed` for just the comparison, or
+select continuous conditions listed by `--help`. The deadline stops new work;
+measurement delivery and cleanup finish afterward. The printed `runs/<execution>`
+contains `activity_data.csv`, `activity_timeline.csv`, `SUMMARY.md` and supporting
+records. It does not replace the five-graph results. Regenerate its tables offline:
+
+```bash
+uv run --frozen --extra experiment python -m experiments.activity_reports \
+  --results "$RTMSF_RUN/report_inputs.json" --output-dir "${RTMSF_RUN}-regenerated"
 ```
 
 ## Shutdown and retained resources

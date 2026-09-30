@@ -54,11 +54,14 @@ src/
     aws_app.py            Start the normal AWS worker
   experiments/
     figures.py            Graph CSV, plots and outcome tables; works offline
+    activity_reports.py   Activity comparison tables and CSVs; works offline
     evidence.py           Save run files and identify their source
     aws/                  AWS experiment runner and its helpers
       run.py              Settings, execution order, final reports and cleanup
       workloads.py        Fixtures, five-graph workloads and crash recovery
       checks.py           Supporting burst, routing and retry checks
+      activity.py         Bounded handler comparison and continuous workloads
+      activity_worker.py  Experiment-only per-event control using the real worker
       runtime.py          Worker control, query checks and observations
       crash_worker.py     Experiment-only fault injection around the real worker
       crawler.py          Glue event-based baseline

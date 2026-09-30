@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -13,6 +14,9 @@ def bucket_name(trial, run_id):
     files = f'-f{trial["x"]}' if trial['graph'] == 4 else ''
     layout = {'day_first': '-day-tenant', 'tenant_first': '-tenant-day'}.get(trial.get('layout'), '')
     name = f'rtmsf-g{trial["graph"]}-{method}-p{trial["base"]}{files}{layout}-r{trial["repetition"]}-{run_id.replace("_", "-")}'
+    if trial.get('condition'):
+        suffix = hashlib.sha256(run_id.encode()).hexdigest()[:10]
+        name = f'rtmsf-{trial["condition"].replace("_", "-")}-{trial["handler"]}-p{trial["base"]}-r{trial["repetition"]}-{suffix}'
     if len(name) > 63 or not re.fullmatch(r'[a-z0-9][a-z0-9-]+[a-z0-9]', name):
         raise ValueError('invalid trial bucket name')
     return name
