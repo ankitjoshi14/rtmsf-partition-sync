@@ -93,8 +93,11 @@ deployment wait; 285 local tests and a separate AWS startup check pass.
 
 The archive contains selected observations, exact source snapshots and instructions;
 credential identity fields are excluded from exported records. It is local and
-Git-ignored, not a public release. The manuscript still uses the older bundle below;
-integration, larger repeated runs and scientific reassessment remain pending.
+Git-ignored, not a public release. The manuscript retains the older five figures
+below and now incorporates this validation and activity evidence separately.
+Independent AI reassessment found no material contradictions in the audited
+claims, while research significance remains unresolved. Larger repeated runs
+and public release remain pending.
 
 ## Local activity validation — September 30, 2026
 
@@ -134,10 +137,12 @@ created tables were cleaned. The successful run used fresh fixtures.
 
 ## Current manuscript data — September 30, 2026
 
-The manuscript now uses `runs/run_20260930_004034_214f/`, a completed local bundle
+The manuscript's five figures use `runs/run_20260930_004034_214f/`, a completed local bundle
 with 10, 100, 500 and 1,000 starting partitions and two comparison repetitions.
 Graph 4 uses 1 and 100 existing files with 100 starting partitions. The lifecycle,
 four crash cases and seven supporting checks each ran once.
+The later graph, activity and buffer validations above supply separately labelled
+results in the reconciled manuscript; they are not pooled into these figures.
 
 All 64 distinct comparison trials passed. Graphs 2 and 3 share 24 of those trials;
 they are not separate repetitions. All 192 HEAD/GET/LIST values agree between

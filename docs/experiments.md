@@ -281,8 +281,8 @@ uv run --frozen --extra experiment python -m experiments.figures \
 
 ## Settled scope and reproduction
 
-- Preserve the five existing graphs and recovery table. The review follow-ups
-  below propose a focused immediate-handler comparison and active-load evidence;
+- Preserve the five existing graphs and recovery table. The completed review follow-ups
+  below add a focused immediate-handler comparison and active-load evidence;
   they supersede the earlier decision to rely on burst checks alone.
 - Keep Q=10 seconds and T_max=31 seconds. No settling-window or scheduler-interval
   sweep. Report actual delays; neither setting is an end-to-end latency guarantee
@@ -298,19 +298,22 @@ uv run --frozen --extra experiment python -m experiments.figures \
 
 ## Review follow-ups — remaining work
 
-The manuscript's prior-work omissions, crawler ADD/append scope, inferred-zero
-explanation, and checksum/verification wording are corrected. Existing evidence
-stays intact. The bounded activity pilot is implemented and has run; the
-[evidence index](../evidence/README.md) records its outcomes and remaining limits.
+The manuscript now includes the immediate-handler, active-load, marker and
+bounded-buffer results, with separate source identities and retained failures.
+Prior-work coverage, crawler ADD/append scope and measurement limitations are
+reconciled. Independent AI reassessment supports the bounded empirical claims;
+research significance remains unresolved. The [evidence index](../evidence/README.md)
+records measured outcomes. Larger repeated runs and public release remain separate work.
 
 | To-do | Purpose and completion evidence |
 |---|---|
 | Save full catalog checks | **Implemented and validated.** `Pilot.verify()` saves expected and observed values, locations and columns before assertions, including failed checks. No extra AWS requests. Historical missing snapshots remain missing. |
 | Settle marker handling | **Implemented and AWS-validated in the lean run.** Routing covers all objects below a fully matched partition path, matching PMCP storage checks. Local regression and the AWS marker lifecycle check cover marker-only creation and marker-last deletion. |
 | Compare with an immediate handler | **Bounded pilot complete; repetitions pending.** The same worker/PMCP processes separate per-event intents, preserving verification, ownership, retries and ACK rules. Quick, spaced, distributed and mixed bursts have recorded calls, delay and final correctness. This is a controlled comparison, not a new independent production implementation. |
-| Exercise continuous updates | **Bounded pilot complete; stronger repetition/capacity evidence pending.** At stated rates, retain actual arrivals, processing during writes, approximate queue counts, visibility, retries/DLQ outcomes, observed drain and final correctness. The pilot demonstrates progress at its tested loads, not maximum sustainable throughput. |
+| Exercise continuous updates | **Bounded pilot and focused two-repeat buffer comparison complete.** Actual arrivals, processing during writes, backlog/age, visibility where applicable, retries/DLQ outcomes, observed drain, memory and exact final state are retained. The 1,000-target workload still accumulates backlog at 20/s with the larger buffer; maximum sustainable throughput is not established. |
+| Strengthen the research case | **Independent review finding, unresolved.** First compare the design analytically with a simple handler that already groups events and retains messages until completion. Identify the distinction before choosing more tests. A concrete workflow requiring catalog enumeration/removal and representative activity would strengthen practical significance; larger partition counts alone do not answer these questions. |
 | Repeat representative conditions | Apply the existing three correctness/fault repetitions and five comparison repetitions to a bounded representative matrix first. Retain failures and variation; these counts do not establish failure rates or tail latency. Larger historical tables are separate scaling evidence. |
-| Finish the paper artifact | Regenerate reports from retained inputs, make offline reproduction self-contained, prepare source/evidence for public release, and revise the manuscript to match the new results. If the simple handler performs similarly, narrow the contribution claim. |
+| Finish the paper artifact | **Manuscript reconciled; reports regenerate offline.** The local archive and per-run source/evidence are retained. Public release and broader repetitions remain pending. The paper reports the immediate control's lower delay and equal storage work for the distributed burst. |
 
 The bounded validation protocol below supplies the first workload schedules and
 outputs. Final paper repetitions remain separate. Keep the comparator and load
@@ -324,10 +327,10 @@ Snowflake/projection performance baselines are outside this follow-up scope.
 ### Bounded activity validation
 
 Historical pilot at checkpoint `f1af80f`: this run kept `src/rtmsf` unchanged and
-retained the then-documented marker restriction. Catalog snapshots were added to the verifier. Add the per-event
-launcher and activity runner under `src/experiments/aws`; extend only experiment
-image/measurement plumbing. Check batching, retry/ACK ownership, snapshot retention,
-and workload schedules locally before running AWS.
+retained the then-documented marker restriction. It added catalog snapshots to
+the verifier and the per-event launcher/activity runner under `src/experiments/aws`,
+with experiment image and measurement plumbing. Local checks covered batching,
+retry/ACK ownership, snapshot retention, and workload schedules before AWS execution.
 
 Each condition gets a fresh bucket/table with 100 registered one-file partitions,
 the shared date/site/hour layout and identical payloads. Use one repetition for
@@ -453,3 +456,11 @@ Completed September 30, 2026: eight conditions, two repetitions per configuratio
 improved grouping and observed drain; the 1,000-target workload still accumulated
 backlog at 20 operations/s. Peak worker RSS stayed below 65 MiB. See the
 [recorded results and limits](../evidence/README.md#focused-buffer-validation--september-30-2026).
+
+Further throughput tuning is deferred: the worker currently acknowledges one
+delivery at a time and processes partition checks serially. Native ACK batching
+or bounded concurrency may improve throughput but are not measured gains or new
+algorithmic contributions. Keep provider batching inside the adapter contract;
+other providers may acknowledge individually. Retain overload evidence and the
+single-worker limit in the manuscript. No extra graph or multi-worker test is
+part of this reconciliation.

@@ -39,8 +39,10 @@ and metadata maintenance, rather than automatically correcting wrong query rows.
 This table states the desired outcome, not an unconditional guarantee. RTMSF's
 [contract] defines notification/availability assumptions, non-atomic storage
 checks, single-worker scope, and terminal failures. Its empty-prefix check
-counts any remaining object, including markers. Marker-only changes can be ignored
-by routing and leave stale membership; the contract records that coverage gap.
+counts any remaining object, including markers. Routing now covers all objects
+under a fully matched partition path. The later marker lifecycle validates the
+previously missing final-marker deletion; older figure inputs retain their
+original source and do not acquire that coverage retroactively.
 
 ## Measured benefit for this task
 
@@ -70,6 +72,12 @@ or constant work across retries and other workloads. The event crawler used 6
 and 113 total HEAD/GET/LIST requests at the two file counts. In the new-partition
 response-time comparison, Athena was faster than RTMSF at every tested size and
 repetition; reduced storage work is not a universal latency advantage.
+
+The later graph validation (`run_20260930_113402_14ae`) separately tested 1, 100,
+and 1,000 existing files once per method. Crawler totals were 6, 103, and 1,038
+requests, including 2, 101, and 1,001 GETs; RTMSF used one LIST at every count.
+The changing HEAD counts illustrate why exact totals should not be treated as
+universal. These follow-up points are not pooled into the earlier Figure 4.
 
 The measured crawler uses `UpdateBehavior=LOG`, `DeleteBehavior=LOG`, and inherited
 partition schema. It is an ADD/append comparison, not a comparison between two
@@ -128,10 +136,15 @@ not appear in the focused comparison. Neither belongs beside Glue as an equal
 functional alternative merely because it manages state or metadata.
 
 A simple current-prefix reconcile handler with retained deliveries and retries
-is also a relevant engineering comparator. Existing AWS-service comparisons do
-not isolate WOERA's contribution over that design. A focused same-contract
-comparison and active-load evidence would address those research gaps. Neither
-is included in the finalized five-graph protocol or completed measurements.
+is also a relevant engineering comparator. The completed activity follow-up
+holds PMCP, retries, ownership, and acknowledgement rules constant while giving
+each event a separate immediate intent. For quick, spaced, distributed, and
+mixed bursts of 20 operations, RTMSF used 1/2/20/11 storage checks versus 20 each
+for that control. The control reached first visibility sooner. This is one
+repetition of a coalescing ablation, not an independently optimized competitor.
+Continuous-load and two-repeat buffer validation additionally measure progress,
+backlog, catch-up, and exact final state. They supply bounded operating evidence,
+not maximum throughput or proof of research significance; see the [evidence index][evidence].
 
 ## Short manuscript positioning
 
