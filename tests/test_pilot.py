@@ -55,6 +55,40 @@ def test_main_layout_rejects_dimension_mismatch():
         pilot.path(('p001000',))
 
 
+def test_seed_upload_recovers_lost_response_only_after_verifying_bytes(monkeypatch):
+    from io import BytesIO
+    from types import SimpleNamespace
+    import pytest
+    from botocore.exceptions import ClientError, ConnectionClosedError
+    import experiments.aws.workloads as module
+
+    pilot = module.Pilot.__new__(module.Pilot)
+    pilot.changes, records, calls = [], [], []
+    pilot.record = lambda event, **data: records.append(dict(event=event, **data))
+    monkeypatch.setattr(module, 'parquet_payload', lambda record_id: b'expected parquet')
+    monkeypatch.setattr(module.time, 'sleep', lambda seconds: None)
+    def put(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise ConnectionClosedError(endpoint_url='https://example.invalid')
+        raise ClientError({'Error': {'Code': 'PreconditionFailed'}}, 'PutObject')
+    pilot.clients = {'s3': SimpleNamespace(put_object=put, get_object=lambda **kwargs: {
+        'Body': BytesIO(b'expected parquet'), 'ResponseMetadata': {'RequestId': 'verification'}})}
+    fixture = dict(name='seed', root='fixture/new/', bucket='owned', objects={})
+    pilot.upload(fixture, pilot.values(0), 0, setup=True)
+    assert len(fixture['objects']) == 1 and len(calls) == 2
+    assert records[-1]['request_id'] is None
+    assert records[-1]['verification_request_id'] == 'verification'
+    calls.clear()
+    with pytest.raises(ConnectionClosedError):
+        pilot.upload(fixture, pilot.values(1), 1)
+    assert len(calls) == 1, 'measured uploads must not gain hidden retries'
+    calls.clear()
+    pilot.clients['s3'].get_object = lambda **kwargs: {'Body': BytesIO(b'wrong bytes'), 'ResponseMetadata': {'RequestId': 'mismatch'}}
+    with pytest.raises(ValueError, match='different bytes'):
+        pilot.upload(fixture, pilot.values(2), 2, setup=True)
+
+
 def test_processing_requires_exact_file_partition_and_successful_ack(monkeypatch):
     import pytest
     import experiments.aws.workloads as module

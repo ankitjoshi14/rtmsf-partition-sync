@@ -358,6 +358,11 @@ every changed file to received notifications and ACKs, then observe the queue
 draining. Keep buckets idle until the final 10-minute delivery wait and frozen
 metric cutoff. Save final full catalog checks and query rows afterward.
 
+Fixture uploads may retry transient transport/service failures up to three times,
+before measurement. If an ambiguous PUT already created the object, recovery must
+read and match its exact bytes; retain the verification request ID and leave the
+unknown original PUT request ID blank. Measured workload uploads retain one attempt.
+
 `activity_data.csv` contains condition, method, repetition, completed operations,
 actual write duration, PMCP attempts, separate HEAD/GET/LIST counts, catalog API
 attempts, first-new-partition visibility delay, processing attempts, completed event

@@ -122,7 +122,7 @@ class Pilot(AwsRuntime):
         jobs = [(self.values(i, layout), i) for i in range(base)]
         jobs += [(self.values(0, layout), base + i) for i in range(max(0, files - 1))]
         with ThreadPoolExecutor(max_workers=12) as pool:
-            list(pool.map(lambda job: self.upload(fixture, *job), jobs))
+            list(pool.map(lambda job: self.upload(fixture, *job, setup=True), jobs))
         parts = list(fixture['partitions'].values())
         for offset in range(0, len(parts), 100):
             response = self.clients['glue'].batch_create_partition(DatabaseName=self.outputs['GlueDatabaseName'], TableName=table_name, PartitionInputList=parts[offset:offset + 100])
@@ -138,17 +138,40 @@ class Pilot(AwsRuntime):
         print(f'Fixture ready: {name} ({base} registered partitions)', flush=True)
         return fixture
 
-    def upload(self, fixture, values, record_id):
+    def upload(self, fixture, values, record_id, *, setup=False):
+        from botocore.exceptions import ClientError, ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError
+
         payload = parquet_payload(record_id)
         path = self.path(values, fixture.get('layout'))
         key = fixture['root'] + path + f'part-{record_id:06d}.parquet'
         started = utc()
-        response = self.clients['s3'].put_object(Bucket=fixture['bucket'], Key=key, Body=payload, IfNoneMatch='*')
+        verification_request_id = None
+        for attempt in range(3 if setup else 1):
+            try:
+                response = self.clients['s3'].put_object(Bucket=fixture['bucket'], Key=key, Body=payload, IfNoneMatch='*')
+                break
+            except (ClientError, ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError) as error:
+                code = error.response.get('Error', {}).get('Code') if isinstance(error, ClientError) else None
+                if setup and attempt > 0 and code == 'PreconditionFailed':
+                    existing = self.clients['s3'].get_object(Bucket=fixture['bucket'], Key=key)
+                    with existing['Body'] as stream:
+                        if stream.read() != payload:
+                            raise ValueError('recovered seed object contains different bytes') from error
+                    verification_request_id = existing['ResponseMetadata']['RequestId']
+                    response = {'ResponseMetadata': {'RequestId': None}}
+                    break
+                if (not setup or attempt == 2 or (code is not None and code not in
+                        {'SlowDown', 'RequestTimeout', 'InternalError', 'ServiceUnavailable', '500', '503'})):
+                    raise
+                self.record('fixture_upload_retry', fixture=fixture['name'], key=key,
+                            attempt=attempt + 1, error=type(error).__name__)
+                time.sleep(0.25 * 2 ** attempt)
         completed, mono = utc(), time.monotonic()
         fixture['objects'][key] = [str(record_id), str(record_id * 10), *values]
         self.changes.append(dict(fixture=fixture['name'], at=completed, key_sha256=hashlib.sha256(key.encode()).hexdigest(), operation='CREATE', partition=path.rstrip('/')))
         self.record('upload', fixture=fixture['name'], key=key, started_at=started, completed_at=completed,
-                    request_id=response['ResponseMetadata']['RequestId'], sha256=hashlib.sha256(payload).hexdigest())
+                    request_id=response['ResponseMetadata']['RequestId'], verification_request_id=verification_request_id,
+                    sha256=hashlib.sha256(payload).hexdigest())
         return key, completed, mono
 
     def remove(self, fixture, key):
