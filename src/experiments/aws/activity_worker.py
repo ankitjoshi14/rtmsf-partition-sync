@@ -1,5 +1,9 @@
 """Experiment control: the real worker, with one pending intent per event."""
 import signal
+import os
+import resource
+import sys
+import time
 from threading import Event
 
 from rtmsf.aws_app import AppConfig, build_worker
@@ -29,8 +33,25 @@ def main():
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
     signal.signal(signal.SIGINT, lambda *_: stop.set())
     worker = build_worker(AppConfig.from_environment())
-    worker._buffer = ImmediateBuffer()
-    worker.run_forever(stop.is_set)
+    if os.environ.get('RTMSF_EXPERIMENT_HANDLER', 'immediate') == 'immediate':
+        worker._buffer = ImmediateBuffer()
+    sampled = 0
+    try:
+        while not stop.is_set():
+            worker.run_once()
+            if time.monotonic() - sampled >= 5:
+                sampled = time.monotonic()
+                report_memory(worker)
+    finally:
+        report_memory(worker, final=stop.is_set())
+
+
+def report_memory(worker, *, final=False):
+    # RSS is the process lifetime high-water mark; each buffer trial starts fresh.
+    worker._telemetry.emit(dict(component='experiment', action='memory_sample', final=final,
+        peak_rss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * (1 if sys.platform == 'darwin' else 1024),
+        pending_messages=len(worker._pending),
+        pending_body_bytes=worker._source._pending_body_bytes))
 
 
 if __name__ == '__main__':

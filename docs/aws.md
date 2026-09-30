@@ -391,6 +391,19 @@ uv run --frozen --extra experiment python -m experiments.activity_reports \
   --results "$RTMSF_RUN/report_inputs.json" --output-dir "${RTMSF_RUN}-regenerated"
 ```
 
+For the focused single-worker buffer comparison, use the same activity command
+above with these additional options (allow up to 150 minutes for setup, eight
+conditions, measurement delivery and cleanup):
+
+```text
+--conditions load_20ps_10p load_20ps_1000p --buffer-sizes 100 1000
+--buffer-bytes 16777216 --queue-visibility-seconds 1000
+--repetitions 2 --max-minutes 150
+```
+
+Each condition has a fresh worker process. Buffer settings and sampled memory
+are included in the activity CSV/report; the five graph outputs do not change.
+
 ## Shutdown and retained resources
 
 The pilot attempts worker, crawler, and CloudTrail shutdown in `finally` and

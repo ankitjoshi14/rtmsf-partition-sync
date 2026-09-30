@@ -117,6 +117,27 @@ def test_normal_application_ignores_fault_settings(monkeypatch):
     assert not s3.calls["put_object"]
 
 
+def test_larger_buffer_requires_matching_queue_lease_and_reaches_worker(monkeypatch):
+    with pytest.raises(ValueError, match="lease"):
+        app.AppConfig.from_environment(environment(MAX_PENDING_DELIVERIES="1000"))
+    config = app.AppConfig.from_environment(environment(
+        MAX_PENDING_DELIVERIES="1000", MAX_BUFFER_BYTES=str(16 * 1024 ** 2),
+        QUEUE_VISIBILITY_SECONDS="1000"))
+    result, _, _, _ = build(monkeypatch, config)
+    assert result["max_pending_deliveries"] == 1000
+    assert result["source_call_budget_ms"] == 300000
+    assert result["source"]._max_buffer_bytes == 16 * 1024 ** 2
+
+
+@pytest.mark.parametrize("setting", [
+    {"MAX_PENDING_DELIVERIES": "0"}, {"MAX_PENDING_DELIVERIES": "10001"},
+    {"MAX_BUFFER_BYTES": "1048575"},
+])
+def test_invalid_buffer_settings_fail_before_polling(setting):
+    with pytest.raises(ValueError):
+        app.AppConfig.from_environment(environment(**setting))
+
+
 def test_pmcp_factory_composes_with_real_adapters_and_shared_telemetry(monkeypatch):
     from rtmsf.adapters.aws import GluePartitionCatalog, S3ObjectStore
     from rtmsf.pmcp import PartitionMutationCommitProtocol

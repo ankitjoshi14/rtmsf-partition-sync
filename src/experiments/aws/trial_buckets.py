@@ -17,6 +17,8 @@ def bucket_name(trial, run_id):
     if trial.get('condition'):
         suffix = hashlib.sha256(run_id.encode()).hexdigest()[:10]
         name = f'rtmsf-{trial["condition"].replace("_", "-")}-{trial["handler"]}-p{trial["base"]}-r{trial["repetition"]}-{suffix}'
+        if 'buffer_size' in trial:
+            name = f'rtmsf-{trial["condition"].replace("_", "-")}-b{trial["buffer_size"]}-r{trial["repetition"]}-{suffix}'
     if len(name) > 63 or not re.fullmatch(r'[a-z0-9][a-z0-9-]+[a-z0-9]', name):
         raise ValueError('invalid trial bucket name')
     return name

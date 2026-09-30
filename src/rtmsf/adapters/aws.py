@@ -168,6 +168,7 @@ class _QueueMessage:
     receipt: str
     body: str
     message_id: str
+    body_bytes: int
     acknowledged: bool = False
     dead_lettered: bool = False
 
@@ -183,7 +184,10 @@ class SqsEventSource(EventSource):
         sources: Mapping[str, str],
         telemetry: TelemetrySink | None = None,
         polling_client: object | None = None,
+        max_buffer_bytes: int = 16 * 1024 ** 2,
     ) -> None:
+        if type(max_buffer_bytes) is not int or max_buffer_bytes < SQS_MAX_MESSAGE_BYTES:
+            raise ValueError("buffer must hold at least one maximum-size SQS message")
         self._client = client
         self._polling_client = polling_client if polling_client is not None else client
         self._queue_url = queue_url
@@ -191,14 +195,21 @@ class SqsEventSource(EventSource):
         self._source_by_bucket = {bucket: source for source, bucket in _sources(sources).items()}
         self._telemetry = telemetry
         self._messages: dict[str, _QueueMessage] = {}
+        self._max_buffer_bytes = max_buffer_bytes
+        self._pending_body_bytes = 0
 
     def receive(self, max_messages: int, wait_seconds: int, lease_seconds: int) -> Sequence[Delivery]:
         if max_messages < 1 or not 0 <= wait_seconds <= 20 or not 1 <= lease_seconds <= 43_200:
             raise ValueError("invalid receive limits")
+        # Reserve worst-case bodies before receiving; parsed objects need extra RAM.
+        capacity = min(10, max_messages, (self._max_buffer_bytes - self._pending_body_bytes) // SQS_MAX_MESSAGE_BYTES)
+        if capacity == 0:
+            time.sleep(wait_seconds)
+            return ()
         response = _invoke(
             self._telemetry, "SQS.ReceiveMessage", self._polling_client.receive_message,
             QueueUrl=self._queue_url,
-            MaxNumberOfMessages=min(10, max_messages),
+            MaxNumberOfMessages=capacity,
             WaitTimeSeconds=wait_seconds,
             VisibilityTimeout=lease_seconds,
             MessageSystemAttributeNames=["ApproximateReceiveCount"],
@@ -210,7 +221,11 @@ class SqsEventSource(EventSource):
             for message in response.get("Messages", []):
                 handle = uuid4().hex
                 body = message.get("Body", "")
-                self._messages[handle] = _QueueMessage(message["ReceiptHandle"], body, message.get("MessageId", ""))
+                body_bytes = len(body.encode('utf-8'))
+                if body_bytes > SQS_MAX_MESSAGE_BYTES or self._pending_body_bytes + body_bytes > self._max_buffer_bytes:
+                    raise FatalExternalError("source_exceeded_payload_budget")
+                self._messages[handle] = _QueueMessage(message["ReceiptHandle"], body, message.get("MessageId", ""), body_bytes)
+                self._pending_body_bytes += body_bytes
                 admitted_handles.append(handle)
                 if self._telemetry is not None:
                     self._telemetry.emit({
@@ -248,9 +263,14 @@ class SqsEventSource(EventSource):
             # Unreturned valid siblings remain in SQS for replay. Do not retain
             # their inaccessible handles after a malformed-message operation fails.
             for handle in admitted_handles:
-                self._messages.pop(handle, None)
+                self._forget(handle)
             raise
         return tuple(deliveries)
+
+    def _forget(self, handle: str) -> None:
+        message = self._messages.pop(handle, None)
+        if message is not None:
+            self._pending_body_bytes -= message.body_bytes
 
     def _entries(self, deliveries: Sequence[Delivery]) -> list[tuple[str, _QueueMessage]]:
         entries = []
@@ -307,7 +327,7 @@ class SqsEventSource(EventSource):
             terminal_state="acknowledged",
         )
         for handle, _ in entries:
-            self._messages.pop(handle, None)
+            self._forget(handle)
 
     def renew(self, deliveries: Sequence[Delivery], lease_seconds: int) -> None:
         if not 1 <= lease_seconds <= 43_200:

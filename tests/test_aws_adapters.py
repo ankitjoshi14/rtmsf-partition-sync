@@ -60,6 +60,35 @@ def receive(client, telemetry=None):
     return adapter, adapter.receive(10, 20, 180)
 
 
+def test_payload_budget_pauses_receives_and_acknowledgement_releases_capacity(monkeypatch):
+    body = json.dumps({"Records": [record()]})
+    body += ' ' * (aws.SQS_MAX_MESSAGE_BYTES - len(body))
+    client = Client(receive_message=[{"Messages": [message(body)]},
+                                     {"Messages": [message({"Records": [record()]}, 1)]}])
+    waits = []
+    monkeypatch.setattr(aws.time, 'sleep', waits.append)
+    adapter = source(client, max_buffer_bytes=aws.SQS_MAX_MESSAGE_BYTES)
+    first = adapter.receive(10, 0, 180)
+    assert client.calls['receive_message'][0]['MaxNumberOfMessages'] == 1
+    assert adapter._pending_body_bytes == aws.SQS_MAX_MESSAGE_BYTES
+    assert adapter.receive(10, 3, 180) == ()
+    assert waits == [3] and len(client.calls['receive_message']) == 1
+    assert not client.calls['delete_message_batch']
+    adapter.acknowledge(first)
+    assert adapter._pending_body_bytes == 0
+    assert len(adapter.receive(10, 0, 180)) == 1
+
+
+def test_failed_receive_releases_local_byte_accounting_without_acknowledging_input():
+    client = Client(receive_message=[{'Messages': [message({'Records': [record()]}), message('invalid', 1)]}],
+                    send_message_batch=[failure('ServiceUnavailable', 503)])
+    adapter = source(client)
+    with pytest.raises(RetryableExternalError):
+        adapter.receive(10, 0, 180)
+    assert adapter._pending_body_bytes == 0 and not adapter._messages
+    assert not client.calls['delete_message_batch']
+
+
 def test_receive_preserves_once_decoded_key_and_emits_only_canonical_fields():
     telemetry = Telemetry()
     client = Client(receive_message=[{"Messages": [message({"Records": [record(key="%2Froot//dt%3D2026-09-10/a%2Bb+%252F.parquet")]})]}])

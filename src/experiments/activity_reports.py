@@ -12,6 +12,8 @@ DATA_COLUMNS = ('condition', 'method', 'repetition', 'completed_operations', 'wr
 TIME_COLUMNS = ('condition', 'method', 'repetition', 'elapsed_s', 'completed_operations',
     'first_partition_present', 'observed_elapsed_s', 'queue_visible', 'queue_inflight',
     'acknowledged_operations', 'unacknowledged_operations', 'oldest_unacknowledged_s', 'error')
+BUFFER_COLUMNS = ('max_pending_deliveries', 'max_buffer_bytes', 'queue_visibility_seconds',
+                  'peak_rss_bytes', 'peak_pending_messages', 'peak_pending_body_bytes')
 
 
 def write_activity_reports(root, rows, timeline, errors):
@@ -19,7 +21,9 @@ def write_activity_reports(root, rows, timeline, errors):
     root.mkdir(parents=True, exist_ok=True)
     payload = dict(kind='bounded_activity_validation', rows=rows, timeline=timeline, errors=errors)
     (root / 'report_inputs.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
-    for name, fields, records in (('activity_data.csv', DATA_COLUMNS, rows), ('activity_timeline.csv', TIME_COLUMNS, timeline)):
+    buffered = any('max_pending_deliveries' in row for row in rows)
+    for name, fields, records in (('activity_data.csv', DATA_COLUMNS + (BUFFER_COLUMNS if buffered else ()), rows),
+                                 ('activity_timeline.csv', TIME_COLUMNS + (('max_pending_deliveries',) if buffered else ()), timeline)):
         with (root / name).open('w', newline='') as stream:
             writer = csv.DictWriter(stream, fieldnames=fields, extrasaction='ignore', lineterminator='\n')
             writer.writeheader()
@@ -31,9 +35,11 @@ def write_activity_reports(root, rows, timeline, errors):
         '|---|---|---:|---:|---|---:|---:|---|']
     def number(value):
         return 'unknown' if value is None else f'{value:.3f}' if isinstance(value, float) else str(value)
+    def label(row):
+        return row['condition'] + (f' (buffer {row["max_pending_deliveries"]})' if 'max_pending_deliveries' in row else '')
     for row in rows:
         requests = ' / '.join(number(row.get(k)) for k in ('s3_head_requests', 's3_get_requests', 's3_list_requests'))
-        lines.append(f'| {row["condition"]} | {row["method"]} | {row["repetition"]} | {number(row.get("pmcp_attempts"))} | {requests} | {number(row.get("first_partition_visibility_s"))} | {number(row.get("drain_s"))} | {row["status"]} |')
+        lines.append(f'| {label(row)} | {row["method"]} | {row["repetition"]} | {number(row.get("pmcp_attempts"))} | {requests} | {number(row.get("first_partition_visibility_s"))} | {number(row.get("drain_s"))} | {row["status"]} |')
     lines += ['', 'Visibility covers the first new partition, polled independently. Queue counts are approximate.',
               'Drain includes observation/telemetry waits and eight seconds of observed queue emptiness.',
               'S3 counts require agreement between CloudWatch, CloudTrail and worker API records.', '']
@@ -50,8 +56,20 @@ def write_activity_reports(root, rows, timeline, errors):
         for row in loads:
             keys = ('achieved_operations_per_s', 'max_schedule_delay_s', 'unacknowledged_at_write_end',
                     'oldest_unacknowledged_at_write_end_s', 'drain_s')
-            lines.append(f'| {row["condition"]} | {row["repetition"]} | ' + ' | '.join(number(row.get(k)) for k in keys) + ' |')
+            lines.append(f'| {label(row)} | {row["repetition"]} | ' + ' | '.join(number(row.get(k)) for k in keys) + ' |')
     lines += [f'- {row["condition"]}/{row["method"]}: {row["error"]}' for row in rows if row.get('error')]
+    if buffered:
+        lines += ['', 'Buffer comparison: fresh process per condition. RSS is the observed process high-water mark;',
+                  'pending counts/bytes are sampled. Raw payload bytes exclude parsed objects and SDK/table memory.', '',
+                  '| Condition | Buffer messages | Repeat | Peak RSS (MiB) | Sampled pending messages | Sampled payload (MiB) | Unacknowledged at write end | Drain (s) | Outcome |',
+                  '|---|---:|---:|---:|---:|---:|---:|---:|---|']
+        for row in rows:
+            values = [row['condition'], row.get('max_pending_deliveries'), row['repetition'],
+                      row['peak_rss_bytes'] / 1024 ** 2 if row.get('peak_rss_bytes') is not None else None,
+                      row.get('peak_pending_messages'),
+                      row['peak_pending_body_bytes'] / 1024 ** 2 if row.get('peak_pending_body_bytes') is not None else None,
+                      row.get('unacknowledged_at_write_end'), row.get('drain_s'), row['status']]
+            lines.append('| ' + ' | '.join(number(value) for value in values) + ' |')
     lines += [f'- {error}' for error in errors]
     (root / 'SUMMARY.md').write_text('\n'.join(lines) + '\n')
 

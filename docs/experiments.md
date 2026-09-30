@@ -421,3 +421,23 @@ report validation; one-command graph/activity execution; local tests and immutab
 image verification; AWS quick run; audit outputs before longer runs. Preserve
 failed attempts. Export source, instructions and selected evidence in one archive
 for offline report regeneration; publishing is a separate action.
+
+### Focused buffer validation
+
+Compare 100 and 1,000 pending notifications on one worker, with a 16 MiB
+raw-payload ceiling, Q=10 seconds and T_max=31 seconds. Use the same safe queue
+visibility timeout for both sizes. Run `load_20ps_10p` and `load_20ps_1000p`
+twice per size, reversing size order in the second repetition. Each condition
+uses fresh fixtures and a fresh worker process; writes last 120 seconds.
+Retain peak process RSS, sampled pending messages/payload bytes, backlog over
+time, PMCP attempts, drain, retries and exact final catalog/query checks.
+This is configuration validation, not a sixth paper graph or a multi-worker test.
+Raw payload bytes do not include parsed objects, schemas or SDK memory.
+
+Implementation checklist (existing modules only):
+- [x] Add regression checks for byte backpressure, released capacity and safe
+  count/visibility settings; implement in `adapters/aws.py` and `aws_app.py`.
+- [x] Extend the activity runner/launcher/report with buffer settings and memory
+  observations; keep WOERA, PMCP and the five graph definitions unchanged.
+- [ ] Run local checks, rebuild/identify the image, run the focused AWS matrix,
+  verify retained observations and clean up owned cloud resources.

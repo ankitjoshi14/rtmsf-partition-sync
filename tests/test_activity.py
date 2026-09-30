@@ -80,6 +80,36 @@ def test_activity_outputs_keep_missing_counts_and_regenerate(tmp_path):
     assert 'unknown / unknown / unknown' in (original / 'SUMMARY.md').read_text()
 
 
+def test_buffer_comparison_keeps_resource_identity_and_output_settings(tmp_path):
+    from experiments.activity_reports import write_activity_reports
+    from experiments.aws.trial_buckets import bucket_name
+
+    trial = dict(condition='load_20ps_1000p', handler='rtmsf', method='rtmsf',
+                 graph='activity', base=1000, x=100, repetition=1, buffer_size=100)
+    assert bucket_name(trial, 'same-run') != bucket_name(trial | {'buffer_size': 1000}, 'same-run')
+    assert len(bucket_name(trial | {'buffer_size': 1000}, 'same-run')) <= 63
+    row = dict(condition=trial['condition'], method='rtmsf', repetition=1, status='passed',
+               max_pending_deliveries=1000, max_buffer_bytes=16 * 1024 ** 2,
+               queue_visibility_seconds=1000, peak_rss_bytes=80 * 1024 ** 2,
+               peak_pending_messages=650, peak_pending_body_bytes=800000)
+    write_activity_reports(tmp_path, [row], [], [])
+    assert 'max_pending_deliveries' in (tmp_path / 'activity_data.csv').read_text().splitlines()[0]
+    assert '80.000' in (tmp_path / 'SUMMARY.md').read_text()
+
+
+def test_memory_summary_requires_final_sample_from_the_exact_worker():
+    from experiments.aws.activity import memory_summary
+
+    def sample(task, rss, final=False):
+        return dict(log_stream='worker/main/' + task, record=dict(action='memory_sample',
+                    final=final, peak_rss_bytes=rss, pending_messages=10, pending_body_bytes=2000))
+    records = [sample('first', 100), sample('second', 999, True)]
+    with pytest.raises(ValueError, match='final'):
+        memory_summary(records, 'first')
+    records.append(sample('first', 150, True))
+    assert memory_summary(records, 'first')['peak_rss_bytes'] == 150
+
+
 def test_load_schedule_keeps_seed_files_and_deletes_only_completed_prior_creates():
     from experiments.aws.activity import LOADS, schedule
 

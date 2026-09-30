@@ -27,6 +27,16 @@ QUICK_LOADS = ('load_1ps_1000p', 'load_5ps_1000p', 'load_20ps_1000p', 'load_20ps
 CONDITIONS = BURSTS + tuple(f'continuous_{rate}ps_{active}p' for rate in (1, 3) for active in (10, 20)) + LOADS
 
 
+def memory_summary(records, task_id):
+    memory = [item['record'] for item in records if item['log_stream'].endswith('/' + task_id)
+              and item['record'].get('action') == 'memory_sample']
+    if not any(r.get('final') for r in memory):
+        raise ValueError('final worker memory observation missing')
+    return dict(peak_rss_bytes=max(r['peak_rss_bytes'] for r in memory),
+                peak_pending_messages=max(r['pending_messages'] for r in memory),
+                peak_pending_body_bytes=max(r['pending_body_bytes'] for r in memory))
+
+
 def schedule(condition, base=100):
     if condition not in CONDITIONS or base < 100:
         raise ValueError('unknown condition or insufficient starting partitions')
@@ -195,7 +205,22 @@ def run_trial(pilot, trial, timeline):
             visibility, visibility_note = None, 'first upload retried; original completion unknown'
         elif visibility is not None and visibility < 0:
             visibility, visibility_note = None, 'observed visible before upload confirmation'
+        resources = {}
+        if 'buffer_size' in trial:
+            running = pilot.clients['ecs'].list_tasks(cluster=pilot.outputs['ClusterName'],
+                serviceName=pilot.outputs['ServiceName'], desiredStatus='RUNNING')['taskArns']
+            if [arn.rsplit('/', 1)[-1] for arn in running] != [trial['worker_task_id']]:
+                raise RuntimeError('buffer trial worker was replaced; memory comparison is incomplete')
+            memory = [r for r in records if r.get('action') == 'memory_sample']
+            if not memory:
+                raise RuntimeError('worker memory observations are missing')
+            resources = dict(max_pending_deliveries=trial['buffer_size'],
+                max_buffer_bytes=pilot.args.buffer_bytes, queue_visibility_seconds=pilot.args.queue_visibility_seconds,
+                peak_rss_bytes=max(r['peak_rss_bytes'] for r in memory),
+                peak_pending_messages=max(r['pending_messages'] for r in memory),
+                peak_pending_body_bytes=max(r['pending_body_bytes'] for r in memory))
         return dict(condition=trial['condition'], method=trial['handler'], repetition=trial['repetition'],
+                    **resources,
                     completed_operations=len(operations), write_duration_s=writes_done - start,
                     achieved_operations_per_s=len(operations) / (writes_done - start),
                     max_schedule_delay_s=max(r['started_s'] - r['scheduled_s'] for r in operations),
@@ -218,7 +243,8 @@ def run_trial(pilot, trial, timeline):
         stop.set()
         observer.join(timeout=45)
         window['ended_at'] = utc()
-        timeline.extend(dict(condition=trial['condition'], method=trial['handler'], repetition=trial['repetition'], **s) for s in samples)
+        timeline.extend(dict(condition=trial['condition'], method=trial['handler'], repetition=trial['repetition'],
+                             **({'max_pending_deliveries': trial['buffer_size']} if 'buffer_size' in trial else {}), **s) for s in samples)
         if observer.is_alive():
             raise RuntimeError('activity observer did not stop')
 
@@ -237,6 +263,9 @@ def main():
     parser.add_argument('--repetitions', type=int, choices=range(1, 6), default=1)
     parser.add_argument('--burst-repetitions', type=int, choices=range(1, 6))
     parser.add_argument('--quick', action='store_true', help='use four representative load points')
+    parser.add_argument('--buffer-sizes', nargs='+', type=int, help='focused load-only comparison; one fresh worker per condition')
+    parser.add_argument('--buffer-bytes', type=int, default=16 * 1024 ** 2)
+    parser.add_argument('--queue-visibility-seconds', type=int, default=180)
     parser.add_argument('--output-dir', type=Path, default=Path('runs'))
     parser.add_argument('--max-minutes', type=int, default=65)
     args = parser.parse_args()
@@ -247,6 +276,14 @@ def main():
     args.burst_repetitions = args.burst_repetitions or args.repetitions
     if args.quick:
         args.conditions = [c for c in args.conditions if c not in LOADS or c in QUICK_LOADS]
+    if args.buffer_sizes:
+        from rtmsf.aws_app import AppConfig
+        if len(set(args.buffer_sizes)) != len(args.buffer_sizes) or any(c not in LOADS for c in args.conditions):
+            parser.error('buffer comparison requires distinct buffer sizes and load conditions only')
+        for size in args.buffer_sizes:
+            AppConfig('q', 'd', {'fixture': 'bucket'}, ('db.table',),
+                      max_pending_deliveries=size, max_buffer_bytes=args.buffer_bytes,
+                      queue_visibility_seconds=args.queue_visibility_seconds)
     args.correctness_repetitions, args.graph4_partitions = args.repetitions, 100
     session = boto3.Session(profile_name=args.profile, region_name=args.region)
     validate_target(session.client('sts').get_caller_identity()['Account'], args.expected_account, args.stack, args.region)
@@ -289,7 +326,11 @@ def main():
               for handler in (('rtmsf', 'immediate') if repetition % 2 else ('immediate', 'rtmsf'))
               for condition in args.conditions if (handler == 'rtmsf' or condition in BURSTS)
               and repetition <= (args.burst_repetitions if condition in BURSTS else args.repetitions)]
-    rows = {t['id']: dict(condition=t['condition'], method=t['handler'], repetition=t['repetition'], status='not_attempted') for t in matrix}
+    if args.buffer_sizes:
+        matrix = [dict(t, id=f'{t["id"]}_b{size}', buffer_size=size) for t in matrix
+                  for size in (args.buffer_sizes if t['repetition'] % 2 else list(reversed(args.buffer_sizes)))]
+    rows = {t['id']: dict(condition=t['condition'], method=t['handler'], repetition=t['repetition'], status='not_attempted',
+                         **({'max_pending_deliveries': t['buffer_size']} if 'buffer_size' in t else {})) for t in matrix}
     timeline, errors, stopped, current_handler = [], [], False, None
     print(f'Activity evidence: {root.resolve()} ({len(matrix)} conditions)', flush=True)
     try:
@@ -310,10 +351,14 @@ def main():
         for trial in matrix:
             if time.monotonic() >= pilot.deadline:
                 raise TimeoutError('no further conditions started after activity budget')
-            if trial['handler'] != current_handler:
+            if trial['handler'] != current_handler or 'buffer_size' in trial:
                 pilot.stop_worker()
-                pilot.configure()
-                if trial['handler'] == 'immediate':
+                settings = (dict(MAX_PENDING_DELIVERIES=str(trial['buffer_size']),
+                                 MAX_BUFFER_BYTES=str(args.buffer_bytes),
+                                 QUEUE_VISIBILITY_SECONDS=str(args.queue_visibility_seconds),
+                                 RTMSF_EXPERIMENT_HANDLER=trial['handler']) if 'buffer_size' in trial else {})
+                pilot.configure(worker_settings=settings)
+                if trial['handler'] == 'immediate' or 'buffer_size' in trial:
                     task = pilot.clients['ecs'].describe_task_definition(taskDefinition=pilot.task_definition)['taskDefinition']
                     for field in ('taskDefinitionArn', 'revision', 'status', 'requiresAttributes', 'compatibilities', 'registeredAt', 'registeredBy', 'deregisteredAt'):
                         task.pop(field, None)
@@ -323,6 +368,8 @@ def main():
                                                        taskDefinition=pilot.task_definition, desiredCount=0)
                 pilot.start_worker()
                 current_handler = trial['handler']
+                if 'buffer_size' in trial:
+                    trial['worker_task_id'] = pilot.lifecycle[-1]['tasks'][0]['taskArn'].rsplit('/', 1)[-1]
             print(f'Running {trial["id"]}', flush=True)
             try:
                 rows[trial['id']] = run_trial(pilot, trial, timeline)
@@ -373,6 +420,19 @@ def main():
             errors.append(f'collection: {type(error).__name__}: {error}')
         try:
             pilot.collect_runtime()
+            if args.buffer_sizes:
+                retained = json.loads((root / 'app-telemetry.json').read_text())
+                for trial in matrix:
+                    if 'worker_task_id' not in trial:
+                        continue
+                    row = rows[trial['id']]
+                    row['worker_task_id'] = trial['worker_task_id']
+                    try:
+                        row.update(memory_summary(retained, trial['worker_task_id']))
+                    except ValueError as error:
+                        if row['status'] in ('passed', 'workload_passed'):
+                            row['status'] = 'incomplete'
+                        row.setdefault('error', str(error))
         except Exception as error:
             errors.append(f'runtime evidence: {error}')
         if stopped:

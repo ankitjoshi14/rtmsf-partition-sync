@@ -233,7 +233,7 @@ class Pilot(AwsRuntime):
             raise AssertionError(f'{label}: exact query rows differ')
         self.record('verified', fixture=fixture['name'], label=label, partitions=len(parts), rows=len(rows) - 1)
 
-    def configure(self, fault=None):
+    def configure(self, fault=None, *, worker_settings=None):
         self.require_worker_stopped()
         ecs = self.clients['ecs']
         original = ecs.describe_task_definition(taskDefinition=self.service()['taskDefinition'])['taskDefinition']
@@ -244,6 +244,7 @@ class Pilot(AwsRuntime):
             raise ValueError('pilot requires an immutable image from this stack')
         env = {item['name']: item['value'] for item in container['environment'] if not item['name'].startswith('RTMSF_EXPERIMENT')}
         env.update(SETTLING_MS='10000', MAXIMUM_MS='31000', QUEUE_VISIBILITY_SECONDS='180')
+        env.update(worker_settings or {})
         env['RTMSF_TABLE_IDS'] = json.dumps([self.outputs['GlueDatabaseName'] + '.' + f['table']['Name'] for f in self.fixtures.values() if f['method'] == 'rtmsf'])
         sources = {'fixture': self.outputs['DataBucketName']}
         sources.update({name: f['bucket'] for name, f in self.fixtures.items()

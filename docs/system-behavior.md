@@ -91,6 +91,18 @@ backstop for omitted events.
 | `SETTLING_MS` | Q; current pilot uses 10000 (10 seconds) |
 | `MAXIMUM_MS` | Maximum buffering residence; experiment uses 31000 |
 | `QUEUE_VISIBILITY_SECONDS` | Initial/renewed delivery lease; experiment uses 180 |
+| `MAX_PENDING_DELIVERIES` | Shared unfinished-message cap across all configured tables; default 100 |
+| `MAX_BUFFER_BYTES` | Retained raw SQS body budget; default 16777216 (16 MiB), minimum 1 MiB |
+
+The AWS adapter reserves room for maximum-size messages before each receive.
+When byte capacity is unavailable it waits; input remains in SQS. This budget
+excludes parsed events, table definitions, temporary response/decoding memory
+and SDK state, so reserve additional process memory. Existing limits also bound
+active partitions (1,000) and decoded events (10,000). Increasing the message
+cap changes worst-case queue renewal time; startup rejects an insufficient
+visibility timeout. The focused 100/1,000 comparison uses 1,000 seconds for both
+settings, leaving Q=10 and T_max=31 unchanged. This longer lease can delay crash
+replay; it is not a universal deployment recommendation or a freshness bound.
 
 S3/Glue and queue mutation calls use explicit SDK timeout/retry settings. Runtime
 budgets include the supported SQS batch shapes; startup configuration is checked

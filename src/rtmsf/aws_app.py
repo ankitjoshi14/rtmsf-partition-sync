@@ -10,7 +10,7 @@ from typing import Callable, Mapping
 import boto3
 from botocore.config import Config
 
-from rtmsf.adapters.aws import GluePartitionCatalog, JsonTelemetry, S3ObjectStore, SqsEventSource, _sources
+from rtmsf.adapters.aws import GluePartitionCatalog, JsonTelemetry, S3ObjectStore, SqsEventSource, SQS_MAX_MESSAGE_BYTES, _sources
 from rtmsf.pmcp import MAX_CALLS_PER_INTENT, PartitionMutationCommitProtocol
 from rtmsf.interfaces import ObjectStore, PartitionCatalog, TelemetrySink
 from rtmsf.routing import RoutingIndex
@@ -20,17 +20,9 @@ from rtmsf.worker import RTMSFWorker
 SDK_CONNECT_TIMEOUT_SECONDS = 1
 SDK_READ_TIMEOUT_SECONDS = 2
 SQS_POLL_READ_TIMEOUT_SECONDS = 22
-MAX_PENDING_DELIVERIES = 100
 SDK_CALL_BUDGET_MS = (SDK_CONNECT_TIMEOUT_SECONDS + SDK_READ_TIMEOUT_SECONDS) * 1000
 # One catalog lookup, up to three HEADs, one prefix LIST, one mutation.
 PMCP_BUDGET_MS = MAX_CALLS_PER_INTENT * SDK_CALL_BUDGET_MS
-# Renew/ack cover at most 100 deliveries in ten batches; worker terminal calls
-# handle one delivery. A receive can send ten full-size poison bodies and one
-# ack batch. Its fixed 22-second read timeout also applies to zero-wait polls.
-SOURCE_CALL_BUDGET_MS = max(
-    ((MAX_PENDING_DELIVERIES + 9) // 10) * SDK_CALL_BUDGET_MS,
-    (SDK_CONNECT_TIMEOUT_SECONDS + SQS_POLL_READ_TIMEOUT_SECONDS) * 1000 + 11 * SDK_CALL_BUDGET_MS,
-)
 LEASE_MARGIN_MS = 5000
 
 
@@ -43,6 +35,25 @@ class AppConfig:
     settling_ms: int = 10000
     maximum_ms: int = 31000
     queue_visibility_seconds: int = 180
+    max_pending_deliveries: int = 100
+    max_buffer_bytes: int = 16 * 1024 ** 2
+
+    @property
+    def source_call_budget_ms(self) -> int:
+        # Renewal covers every pending receipt; a poll can also DLQ ten large bodies.
+        return max(
+            ((self.max_pending_deliveries + 9) // 10) * SDK_CALL_BUDGET_MS,
+            (SDK_CONNECT_TIMEOUT_SECONDS + SQS_POLL_READ_TIMEOUT_SECONDS) * 1000 + 11 * SDK_CALL_BUDGET_MS,
+        )
+
+    def __post_init__(self) -> None:
+        if type(self.max_pending_deliveries) is not int or not 1 <= self.max_pending_deliveries <= 10_000:
+            raise ValueError("MAX_PENDING_DELIVERIES must be 1..10000")
+        if type(self.max_buffer_bytes) is not int or self.max_buffer_bytes < SQS_MAX_MESSAGE_BYTES:
+            raise ValueError("MAX_BUFFER_BYTES must hold at least one maximum-size SQS message")
+        reserve = max(PMCP_BUDGET_MS, self.source_call_budget_ms) + 2 * self.source_call_budget_ms + LEASE_MARGIN_MS
+        if not reserve < self.queue_visibility_seconds * 1000 <= 43_200_000:
+            raise ValueError("queue lease cannot cover bounded operations and renewal")
 
     @classmethod
     def from_environment(cls, environ: Mapping[str, str] = os.environ) -> "AppConfig":
@@ -67,9 +78,6 @@ class AppConfig:
         lease_seconds = int(environ.get("QUEUE_VISIBILITY_SECONDS", "180"))
         if settling_ms <= 0 or maximum_ms < settling_ms:
             raise ValueError("require 0 < SETTLING_MS <= MAXIMUM_MS")
-        lease_reserve_ms = max(PMCP_BUDGET_MS, SOURCE_CALL_BUDGET_MS) + 2 * SOURCE_CALL_BUDGET_MS + LEASE_MARGIN_MS
-        if not lease_reserve_ms < lease_seconds * 1000 <= 43_200_000:
-            raise ValueError("QUEUE_VISIBILITY_SECONDS cannot cover bounded operations and renewal")
         return cls(
             event_queue_url=environ["EVENT_QUEUE_URL"],
             dead_letter_queue_url=environ["DEAD_LETTER_QUEUE_URL"],
@@ -78,6 +86,8 @@ class AppConfig:
             settling_ms=settling_ms,
             maximum_ms=maximum_ms,
             queue_visibility_seconds=lease_seconds,
+            max_pending_deliveries=int(environ.get("MAX_PENDING_DELIVERIES", "100")),
+            max_buffer_bytes=int(environ.get("MAX_BUFFER_BYTES", str(16 * 1024 ** 2))),
         )
 
 
@@ -100,6 +110,7 @@ def build_worker(
         sources=config.sources,
         telemetry=telemetry,
         polling_client=boto3.client("sqs", config=_sdk_config(SQS_POLL_READ_TIMEOUT_SECONDS)),
+        max_buffer_bytes=config.max_buffer_bytes,
     )
     storage_client = boto3.client("s3", config=_sdk_config())
     storage = S3ObjectStore(storage_client, sources=config.sources, telemetry=telemetry)
@@ -114,8 +125,8 @@ def build_worker(
         maximum_ms=config.maximum_ms,
         queue_lease_seconds=config.queue_visibility_seconds,
         pmcp_budget_ms=pmcp_budget_ms,
-        source_call_budget_ms=SOURCE_CALL_BUDGET_MS,
-        max_pending_deliveries=MAX_PENDING_DELIVERIES,
+        source_call_budget_ms=config.source_call_budget_ms,
+        max_pending_deliveries=config.max_pending_deliveries,
         lease_safety_margin_ms=LEASE_MARGIN_MS,
     )
 
