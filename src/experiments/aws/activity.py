@@ -82,12 +82,37 @@ def annotate_backlog(samples, operations, records, started_at):
                       oldest_unacknowledged_s=max((at - op['completed_s'] for op in pending), default=0))
 
 
+def write_operation(pilot, fixture, operation, partition, record_id):
+    """Retry an identical, trial-owned write; retain retries and any duplicate events."""
+    from botocore.exceptions import ClientError, ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError
+
+    for attempt in range(3):
+        try:
+            if operation == 'CREATE':
+                key, _, done = pilot.upload(fixture, pilot.values(partition), record_id, retry_write=attempt > 0)
+            elif operation == 'DELETE':
+                key = fixture['root'] + pilot.path(pilot.values(partition)) + f'part-{record_id:06d}.parquet'
+                pilot.remove(fixture, key)
+                done = time.monotonic()
+            else:
+                raise ValueError('unknown activity operation')
+            return key, done, attempt + 1
+        except (ClientError, ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError) as error:
+            code = error.response.get('Error', {}).get('Code') if isinstance(error, ClientError) else None
+            if attempt == 2 or (code is not None and code not in {'SlowDown', 'RequestTimeout', 'InternalError', 'ServiceUnavailable', '500', '503'}):
+                raise
+            pilot.record('activity_write_retry', fixture=fixture['name'], operation=operation,
+                         partition=partition, record_id=record_id, attempt=attempt + 1, error=type(error).__name__)
+            time.sleep(0.25 * 2 ** attempt)
+
+
 def run_trial(pilot, trial, timeline):
     fixture = pilot.fixtures[trial['id']]
     window = dict(id=trial['id'], bucket=fixture['bucket'], started_at=utc(), requester_arn=pilot.outputs['TaskRoleArn'])
     pilot.windows.append(window)
     start, stop = time.monotonic(), Event()
     samples, operations, first_upload = [], [], None
+    first_upload_attempts = 0
     load = trial['condition'] in LOADS
 
     def observe():
@@ -110,20 +135,18 @@ def run_trial(pilot, trial, timeline):
     observer = Thread(target=observe, daemon=True)
     observer.start()
     def perform(at, operation, partition, record_id, predecessor=None):
-        nonlocal first_upload
+        nonlocal first_upload, first_upload_attempts
         if predecessor is not None:
             predecessor.result()
         began = time.monotonic()
+        key, done, attempts = write_operation(pilot, fixture, operation, partition, record_id)
         if operation == 'CREATE':
-            key, _, done = pilot.upload(fixture, pilot.values(partition), record_id)
             if first_upload is None:
                 first_upload = done
-        else:
-            key = fixture['root'] + pilot.path(pilot.values(partition)) + f'part-{record_id:06d}.parquet'
-            pilot.remove(fixture, key)
-            done = time.monotonic()
+                first_upload_attempts = attempts
         record = dict(operation=operation, partition=partition, scheduled_s=at,
                       started_s=began - start, completed_s=done - start,
+                      producer_attempts=attempts,
                       key_sha256=hashlib.sha256(key.encode()).hexdigest())
         operations.append(record)
         pilot.record('activity_operation', trial=trial['id'], **record)
@@ -166,6 +189,12 @@ def run_trial(pilot, trial, timeline):
             raise AssertionError('immediate control combined events')
         end = dict(elapsed_s=writes_done - start)
         annotate_backlog(samples + [end], operations, records, window['started_at'])
+        visibility = None if load else first_present - (first_upload - start)
+        visibility_note = 'already registered targets' if load else ''
+        if not load and first_upload_attempts > 1:
+            visibility, visibility_note = None, 'first upload retried; original completion unknown'
+        elif visibility is not None and visibility < 0:
+            visibility, visibility_note = None, 'observed visible before upload confirmation'
         return dict(condition=trial['condition'], method=trial['handler'], repetition=trial['repetition'],
                     completed_operations=len(operations), write_duration_s=writes_done - start,
                     achieved_operations_per_s=len(operations) / (writes_done - start),
@@ -173,7 +202,7 @@ def run_trial(pilot, trial, timeline):
                     unacknowledged_at_write_end=end['unacknowledged_operations'],
                     oldest_unacknowledged_at_write_end_s=end['oldest_unacknowledged_s'],
                     pmcp_attempts=len(attempts), catalog_api_attempts=sum(n for op, n in calls.items() if op.startswith('Glue.')),
-                    first_partition_visibility_s=None if load else first_present - (first_upload - start),
+                    first_partition_visibility_s=visibility, first_partition_visibility_note=visibility_note,
                     attempts_during_writes=sum(r['timestamp'] < writes_done_at for r in attempts),
                     processed_events_during_writes=sum(r['observation_count'] for r in attempts
                         if r['timestamp'] < writes_done_at and r['status'] in ('APPLIED', 'NOOP')),
@@ -183,6 +212,7 @@ def run_trial(pilot, trial, timeline):
                     peak_queue_inflight=max(s.get('queue_inflight', 0) for s in samples),
                     drain_s=drained - writes_done, status='workload_passed', adapter_calls=dict(calls),
                     retry_attempts=sum(r['status'] == 'RETRY' for r in attempts),
+                    producer_retry_attempts=sum(r['producer_attempts'] - 1 for r in operations),
                     terminal_observations=sum(r['observation_count'] for r in attempts if r['status'] in ('APPLIED', 'NOOP')))
     finally:
         stop.set()

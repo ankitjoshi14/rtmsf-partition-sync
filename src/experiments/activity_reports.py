@@ -8,7 +8,7 @@ DATA_COLUMNS = ('condition', 'method', 'repetition', 'completed_operations', 'wr
     'first_partition_visibility_s', 'attempts_during_writes', 'processed_events_during_writes',
     'partitions_processed_during_writes', 'peak_queue_visible', 'peak_queue_inflight', 'drain_s',
     'achieved_operations_per_s', 'max_schedule_delay_s', 'unacknowledged_at_write_end',
-    'oldest_unacknowledged_at_write_end_s', 'retry_attempts')
+    'oldest_unacknowledged_at_write_end_s', 'retry_attempts', 'producer_retry_attempts')
 TIME_COLUMNS = ('condition', 'method', 'repetition', 'elapsed_s', 'completed_operations',
     'first_partition_present', 'observed_elapsed_s', 'queue_visible', 'queue_inflight',
     'acknowledged_operations', 'unacknowledged_operations', 'oldest_unacknowledged_s', 'error')
@@ -37,6 +37,9 @@ def write_activity_reports(root, rows, timeline, errors):
     lines += ['', 'Visibility covers the first new partition, polled independently. Queue counts are approximate.',
               'Drain includes observation/telemetry waits and eight seconds of observed queue emptiness.',
               'S3 counts require agreement between CloudWatch, CloudTrail and worker API records.', '']
+    lines += ['Producer retries are separate from worker retries; write timing and delivered duplicate notifications include their effects.', '']
+    lines += [f'- {row["condition"]}/{row["method"]} repeat {row["repetition"]}: visibility unknown — {row["first_partition_visibility_note"]}.'
+              for row in rows if row.get('first_partition_visibility_note') and not row['condition'].startswith('load_')]
     loads = [row for row in rows if row['condition'].startswith('load_')]
     if loads:
         lines += ['Load tests retain the seed file in each partition; visibility is not measured for these already registered targets.',

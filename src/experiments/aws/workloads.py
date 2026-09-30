@@ -138,17 +138,22 @@ class Pilot(AwsRuntime):
         print(f'Fixture ready: {name} ({base} registered partitions)', flush=True)
         return fixture
 
-    def upload(self, fixture, values, record_id, *, setup=False):
+    def upload(self, fixture, values, record_id, *, setup=False, retry_write=False):
         from botocore.exceptions import ClientError, ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError
 
         payload = parquet_payload(record_id)
         path = self.path(values, fixture.get('layout'))
         key = fixture['root'] + path + f'part-{record_id:06d}.parquet'
+        if retry_write and (setup or key in fixture['objects']):
+            raise ValueError('cannot retry an already recorded object or setup upload')
         started = utc()
         verification_request_id = None
         for attempt in range(3 if setup else 1):
             try:
-                response = self.clients['s3'].put_object(Bucket=fixture['bucket'], Key=key, Body=payload, IfNoneMatch='*')
+                # Activity retries repeat the same owned key and payload after an
+                # uncertain response, without a measurement-contaminating GET.
+                response = self.clients['s3'].put_object(Bucket=fixture['bucket'], Key=key, Body=payload,
+                                                        **({} if retry_write else {'IfNoneMatch': '*'}))
                 break
             except (ClientError, ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError) as error:
                 code = error.response.get('Error', {}).get('Code') if isinstance(error, ClientError) else None

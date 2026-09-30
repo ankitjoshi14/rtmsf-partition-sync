@@ -114,3 +114,86 @@ def test_activity_backlog_includes_operations_without_delivered_notifications():
     assert [s['unacknowledged_operations'] for s in samples] == [1, 1, 1]
     assert samples[-1]['acknowledged_operations'] == 1
     assert samples[-1]['oldest_unacknowledged_s'] == 3.5
+
+
+def test_activity_retries_uncertain_writes_without_reading_or_changing_payload(monkeypatch):
+    from botocore.exceptions import ConnectionClosedError
+    import experiments.aws.activity as activity
+    import experiments.aws.workloads as workloads
+
+    pilot = Pilot.__new__(Pilot)
+    pilot.changes, records, puts, deletes = [], [], [], []
+    pilot.record = lambda event, **data: records.append(dict(event=event, **data))
+    monkeypatch.setattr(workloads, 'parquet_payload', lambda record_id: b'fixed parquet')
+    monkeypatch.setattr(activity.time, 'sleep', lambda seconds: None)
+    objects = {}
+    def put(**kw):
+        puts.append(kw)
+        if kw['Key'] in objects:
+            assert 'IfNoneMatch' not in kw, 'retry must tolerate an already accepted identical PUT'
+        objects[kw['Key']] = kw['Body']
+        if len(puts) == 1:
+            raise ConnectionClosedError(endpoint_url='https://example.invalid')
+        return {'ResponseMetadata': {'RequestId': 'put'}}
+    def delete(**kw):
+        deletes.append(kw)
+        objects.pop(kw['Key'], None)
+        if len(deletes) == 1:
+            raise ConnectionClosedError(endpoint_url='https://example.invalid')
+    pilot.clients = {'s3': SimpleNamespace(put_object=put, delete_object=delete)}
+    fixture = dict(name='owned_trial', root='fixture/new/', bucket='owned', objects={})
+    key, _, attempts = activity.write_operation(pilot, fixture, 'CREATE', 0, 1000000)
+    assert attempts == 2 and len(objects) == len(fixture['objects']) == 1
+    assert puts[0]['IfNoneMatch'] == '*' and puts[0]['Body'] == puts[1]['Body']
+    with pytest.raises(ValueError, match='already recorded'):
+        pilot.upload(fixture, pilot.values(0), 1000000, retry_write=True)
+    assert activity.write_operation(pilot, fixture, 'DELETE', 0, 1000000)[2] == 2
+    assert not objects and not fixture['objects'] and deletes[0] == deletes[1]
+    assert len([r for r in records if r['event'] == 'activity_write_retry']) == 2
+    def disconnected(**kw):
+        raise ConnectionClosedError(endpoint_url='https://example.invalid')
+    pilot.clients['s3'].put_object = disconnected
+    with pytest.raises(ConnectionClosedError):
+        activity.write_operation(pilot, fixture, 'CREATE', 1, 1000001)
+    assert len([r for r in records if r['event'] == 'activity_write_retry']) == 4
+
+
+def test_activity_visibility_is_unknown_when_first_upload_retried(monkeypatch):
+    from threading import Event
+    from botocore.exceptions import ConnectionClosedError
+    import experiments.aws.activity as activity
+    import experiments.aws.workloads as workloads
+
+    accepted, observed = Event(), Event()
+    records, timeline = [], []
+    def record(event, **data):
+        records.append(dict(event=event, **data))
+        if event == 'activity_sample' and data.get('first_partition_present'):
+            observed.set()
+    def put(**kwargs):
+        if not accepted.is_set():
+            accepted.set()
+            assert observed.wait(2), 'the accepted PUT must become visible before its response fails'
+            raise ConnectionClosedError(endpoint_url='https://example.invalid')
+        return {'ResponseMetadata': {'RequestId': 'retry'}}
+    pilot = Pilot.__new__(Pilot)
+    fixture = dict(name='trial', root='fixture/trial/', bucket='owned', objects={}, table={'Name': 'trial'})
+    pilot.fixtures, pilot.windows, pilot.changes = {'trial': fixture}, [], []
+    pilot.outputs = dict(TaskRoleArn='task-role', GlueDatabaseName='db', EventQueueUrl='queue')
+    pilot.deadline = activity.time.monotonic() + 10
+    pilot.record = record
+    pilot.presence = lambda *args: accepted.wait(2)
+    pilot.wait_processed = pilot.drain = lambda *args: None
+    pilot.clients = dict(s3=SimpleNamespace(put_object=put), sqs=SimpleNamespace(
+        get_queue_attributes=lambda **kwargs: {'Attributes': {
+            'ApproximateNumberOfMessages': '0', 'ApproximateNumberOfMessagesNotVisible': '0'}}))
+    pilot.telemetry = lambda: [{'record': dict(action='pmcp_result', table_id='db.trial',
+        timestamp=activity.utc(), status='APPLIED', observation_count=2, partition='p')}]
+    monkeypatch.setattr(workloads, 'parquet_payload', lambda record_id: b'fixed parquet')
+    monkeypatch.setattr(activity, 'schedule', lambda condition: [(0, 'CREATE', 100, 1000000)])
+    row = activity.run_trial(pilot, dict(id='trial', condition='quick', handler='rtmsf', repetition=1), timeline)
+    assert row['first_partition_visibility_s'] is None
+    assert row['first_partition_visibility_note'] == 'first upload retried; original completion unknown'
+    assert row['producer_retry_attempts'] == 1
+    operation = next(r for r in records if r['event'] == 'activity_operation')
+    assert operation['completed_s'] > timeline[0]['observed_elapsed_s']

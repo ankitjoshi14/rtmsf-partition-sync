@@ -361,7 +361,18 @@ metric cutoff. Save final full catalog checks and query rows afterward.
 Fixture uploads may retry transient transport/service failures up to three times,
 before measurement. If an ambiguous PUT already created the object, recovery must
 read and match its exact bytes; retain the verification request ID and leave the
-unknown original PUT request ID blank. Measured workload uploads retain one attempt.
+unknown original PUT request ID blank. Graph workloads retain one write attempt.
+Activity producers allow three attempts for transient write failures, retaining
+each retry and including its delay in the achieved operation rate. An uncertain
+PUT repeats identical bytes at the same trial-owned key; DELETE repeats the same
+owned key. No verification read is added during measurement. Duplicate S3 events
+from accepted retries remain in worker evidence and request counts. The CSV keeps
+`producer_retry_attempts` separate from worker `retry_attempts`; three failed
+attempts still fail the condition. Earlier single-attempt failures remain recorded.
+If the first upload retries, its original completion time is unknown: leave
+first-partition visibility blank, retain timestamps/samples and explain the reason
+in the report. Also leave it blank if visibility precedes upload confirmation;
+do not clamp a negative interval to zero.
 
 `activity_data.csv` contains condition, method, repetition, completed operations,
 actual write duration, PMCP attempts, separate HEAD/GET/LIST counts, catalog API
