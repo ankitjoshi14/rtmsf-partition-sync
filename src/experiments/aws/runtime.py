@@ -115,6 +115,7 @@ class AwsRuntime:
 
     def start_worker(self) -> None:
         self.require_worker_stopped()
+        self.wait_worker(False, configured=True)
         self.clients["ecs"].update_service(cluster=self.outputs["ClusterName"], service=self.outputs["ServiceName"], desiredCount=1)
         self.wait_worker(True)
         listed = self.clients["ecs"].list_tasks(cluster=self.outputs["ClusterName"], serviceName=self.outputs["ServiceName"], desiredStatus="RUNNING")["taskArns"]

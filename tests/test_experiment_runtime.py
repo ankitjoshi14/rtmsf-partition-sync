@@ -46,6 +46,7 @@ def test_api_counting_deduplicates_log_records_but_preserves_real_attempts():
 
 
 def test_stopped_worker_waits_for_new_configuration_before_scaling(monkeypatch):
+    from types import SimpleNamespace
     from experiments.aws import runtime
 
     run = object.__new__(runtime.AwsRuntime)
@@ -56,10 +57,20 @@ def test_stopped_worker_waits_for_new_configuration_before_scaling(monkeypatch):
         {**stopped, "taskDefinition": "new", "deployments": [{"taskDefinition": "new"}, {"taskDefinition": "old"}]},
         {**stopped, "taskDefinition": "new", "deployments": [{"taskDefinition": "new"}]},
     ]
-    run.service = lambda: states.pop(0)
+    run.service = lambda: states.pop(0) if states else {**stopped, 'runningCount': 1}
+    run.require_worker_stopped = lambda: None
+    def scale(**request):
+        assert not states, 'must not scale while the old deployment remains'
+        assert request['desiredCount'] == 1
+    run.clients = {'ecs': SimpleNamespace(update_service=scale,
+        list_tasks=lambda **kw: {'taskArns': ['task']},
+        describe_tasks=lambda **kw: {'tasks': [{'taskDefinitionArn': 'new'}]})}
+    run.outputs = {'ClusterName': 'cluster', 'ServiceName': 'service'}
+    run.lifecycle = []
+    run.bundle = SimpleNamespace(write=lambda *args: None)
     monkeypatch.setattr(runtime.time, "sleep", lambda seconds: None)
-    assert run.wait_worker(False, configured=True)["taskDefinition"] == "new"
-    assert not states
+    run.start_worker()
+    assert not states and len(run.lifecycle) == 1
 
 
 def test_query_verification_reads_beyond_one_hundred_pages():

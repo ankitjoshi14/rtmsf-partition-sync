@@ -306,7 +306,7 @@ stays intact. The bounded activity pilot is implemented and has run; the
 | To-do | Purpose and completion evidence |
 |---|---|
 | Save full catalog checks | **Implemented and validated.** `Pilot.verify()` saves expected and observed values, locations and columns before assertions, including failed checks. No extra AWS requests. Historical missing snapshots remain missing. |
-| Settle marker handling | Routing now covers all objects below a fully matched partition path, matching PMCP storage checks. Local regression covers marker-only creation and marker-last deletion; AWS validation is pending. |
+| Settle marker handling | **Implemented and AWS-validated in the lean run.** Routing covers all objects below a fully matched partition path, matching PMCP storage checks. Local regression and the AWS marker lifecycle check cover marker-only creation and marker-last deletion. |
 | Compare with an immediate handler | **Bounded pilot complete; repetitions pending.** The same worker/PMCP processes separate per-event intents, preserving verification, ownership, retries and ACK rules. Quick, spaced, distributed and mixed bursts have recorded calls, delay and final correctness. This is a controlled comparison, not a new independent production implementation. |
 | Exercise continuous updates | **Bounded pilot complete; stronger repetition/capacity evidence pending.** At stated rates, retain actual arrivals, processing during writes, approximate queue counts, visibility, retries/DLQ outcomes, observed drain and final correctness. The pilot demonstrates progress at its tested loads, not maximum sustainable throughput. |
 | Repeat representative conditions | Apply the existing three correctness/fault repetitions and five comparison repetitions to a bounded representative matrix first. Retain failures and variation; these counts do not establish failure rates or tail latency. Larger historical tables are separate scaling evidence. |
@@ -405,6 +405,9 @@ Record actual achieved rates, scheduling delay, progress, queue counts, observed
 unacknowledged work/age, terminal outcomes and drain. Correct final state alone is
 insufficient. If 20/s does not overload the worker, report a tested lower bound on
 capacity; do not claim that its maximum was found.
+The AWS worker admits at most 100 pending notifications (`aws_app.py`); retain
+this implementation limit when reporting backlog and throughput. Queue growth
+at an offered rate does not establish sustainable capacity at that rate.
 
 Quick validation: all five graphs at N=100/1,000 where N is the axis, file counts
 1/100/1,000 for Graph 4, one correctness/recovery/comparison repetition, and one
