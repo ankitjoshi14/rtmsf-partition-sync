@@ -4,6 +4,50 @@ This folder contains selected results from the finalized five-graph experiment
 runner. [docs/experiments.md](../docs/experiments.md) defines the experiments;
 this index records what has actually been measured.
 
+## Latest lean validation — September 30, 2026
+
+[Five graphs and checks](../runs/run_20260930_113402_14ae/SUMMARY.md) ·
+[Activity results](../runs/run_20260930_113402_14ae/activity/run_20260930_151218_2a18/SUMMARY.md) ·
+[Local reproduction archive](../runs/lean-validation-20260930.tar.gz)
+
+The graph phase passed all 20 comparison workloads, the lifecycle trace, four
+crash cases and eight supporting checks, including marker-last deletion. It uses
+100/1,000 starting partitions and 1/100/1,000 existing files for Graph 4, with
+one repetition. All 60 request components and 140 calibration requests agree.
+
+The fresh activity follow-up passed all **16 conditions and 6,640 operations**.
+All 48 request components agree across CloudWatch, CloudTrail and worker records;
+112/112 calibration requests matched. CloudWatch directly observed 25 components
+and inferred 23 observed zeros through accounting. All 32 catalog snapshots and
+32 independently reconstructed query results match. No measured producer or
+worker retries occurred; one fixture upload recovered before measurement.
+
+The burst comparison used 1/2/20/11 RTMSF storage requests versus 20 each for the
+immediate handler (quick/spaced/distributed/mixed). Immediate processing had lower
+first-partition delay. At 20 operations/s, the worker reached its 100-pending-
+notification limit: 1,400/1,544 operations remained unacknowledged when writing
+ended, and observed drain took 180/246 seconds for the 10/1,000-target pools.
+Both finished correctly. This is overload evidence, not sustained 20/s capacity.
+At the lower rates, the 1,000-target pool is not fully exercised.
+
+The parent execution remains **incomplete_or_failed**: its first activity child,
+`run_20260930_141608_ea3f`, stopped on a producer connection failure. Ten conditions
+passed, one failed and five were unattempted. The follow-up used fresh fixtures;
+neither that outcome nor its CSV was rewritten. An earlier seeding-only failure,
+`run_20260930_112636_03cf`, also remains recorded locally.
+
+All 2,430 parent artifact hashes and 1,300 follow-up hashes verified. Live checks
+confirmed removal of all 52 owned buckets/tables across the parent and its two
+activity children, empty queues, restored policies/task definition, worker stopped
+and trail logging off. Shared stack resources remain. Local fixes include marker
+routing, transparent producer retries, uncertain-timing reporting and an ECS
+deployment wait; 285 local tests and a separate AWS startup check pass.
+
+The archive contains selected observations, exact source snapshots and instructions;
+credential identity fields are excluded from exported records. It is local and
+Git-ignored, not a public release. The manuscript still uses the older bundle below;
+integration, larger repeated runs and scientific reassessment remain pending.
+
 ## Local activity validation — September 30, 2026
 
 `runs/run_20260930_094050_1f83/` passed all **12 conditions**, with 100 starting
