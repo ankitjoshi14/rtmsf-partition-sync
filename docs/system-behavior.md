@@ -90,7 +90,7 @@ backstop for omitted events.
 | `RTMSF_TABLE_IDS` | JSON list of configured `database.table` identifiers |
 | `SETTLING_MS` | Q; current pilot uses 10000 (10 seconds) |
 | `MAXIMUM_MS` | Maximum buffering residence; experiment uses 31000 |
-| `QUEUE_VISIBILITY_SECONDS` | Initial/renewed delivery lease; experiment uses 180 |
+| `QUEUE_VISIBILITY_SECONDS` | Initial/renewed delivery lease; default 180 |
 | `MAX_PENDING_DELIVERIES` | Shared unfinished-message cap across all configured tables; default 100 |
 | `MAX_BUFFER_BYTES` | Retained raw SQS body budget; default 16777216 (16 MiB), minimum 1 MiB |
 

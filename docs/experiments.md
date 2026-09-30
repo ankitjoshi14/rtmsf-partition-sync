@@ -386,7 +386,7 @@ CloudTrail and worker API records; failures and incomplete conditions stay visib
 Stop the worker, restore its previous task definition, and clean only owned trial
 buckets/tables and temporary policies after retaining evidence.
 
-### Next validation: marker coverage and active load
+### Marker coverage and active load
 
 The approved follow-up fixes routing before collecting new evidence. Every
 CREATE/DELETE below a fully matched configured partition path, including markers
@@ -405,9 +405,10 @@ Record actual achieved rates, scheduling delay, progress, queue counts, observed
 unacknowledged work/age, terminal outcomes and drain. Correct final state alone is
 insufficient. If 20/s does not overload the worker, report a tested lower bound on
 capacity; do not claim that its maximum was found.
-The AWS worker admits at most 100 pending notifications (`aws_app.py`); retain
-this implementation limit when reporting backlog and throughput. Queue growth
-at an offered rate does not establish sustainable capacity at that rate.
+The AWS worker defaults to 100 pending notifications; `MAX_PENDING_DELIVERIES`
+and `MAX_BUFFER_BYTES` configure its message and raw-payload limits. Retain the
+tested settings when reporting backlog and throughput. Queue growth at an
+offered rate does not establish sustainable capacity at that rate.
 
 Quick validation: all five graphs at N=100/1,000 where N is the axis, file counts
 1/100/1,000 for Graph 4, one correctness/recovery/comparison repetition, and one
@@ -426,9 +427,14 @@ for offline report regeneration; publishing is a separate action.
 
 Compare 100 and 1,000 pending notifications on one worker, with a 16 MiB
 raw-payload ceiling, Q=10 seconds and T_max=31 seconds. Use the same safe queue
-visibility timeout for both sizes. Run `load_20ps_10p` and `load_20ps_1000p`
+visibility timeout of 1,000 seconds for both sizes. This covers the larger
+buffer's conservative renewal budget; a longer lease can delay crash replay.
+The production defaults remain 100 messages and a 180-second lease.
+Run `load_20ps_10p` and `load_20ps_1000p`
 twice per size, reversing size order in the second repetition. Each condition
 uses fresh fixtures and a fresh worker process; writes last 120 seconds.
+All eight table definitions are loaded in each 0.25-vCPU/512-MiB worker;
+one table receives workload traffic per condition.
 Retain peak process RSS, sampled pending messages/payload bytes, backlog over
 time, PMCP attempts, drain, retries and exact final catalog/query checks.
 This is configuration validation, not a sixth paper graph or a multi-worker test.
@@ -439,5 +445,11 @@ Implementation checklist (existing modules only):
   count/visibility settings; implement in `adapters/aws.py` and `aws_app.py`.
 - [x] Extend the activity runner/launcher/report with buffer settings and memory
   observations; keep WOERA, PMCP and the five graph definitions unchanged.
-- [ ] Run local checks, rebuild/identify the image, run the focused AWS matrix,
+- [x] Run local checks, rebuild/identify the image, run the focused AWS matrix,
   verify retained observations and clean up owned cloud resources.
+
+Completed September 30, 2026: eight conditions, two repetitions per configuration,
+19,200 operations and exact final catalog/query checks passed. The larger buffer
+improved grouping and observed drain; the 1,000-target workload still accumulated
+backlog at 20 operations/s. Peak worker RSS stayed below 65 MiB. See the
+[recorded results and limits](../evidence/README.md#focused-buffer-validation--september-30-2026).
