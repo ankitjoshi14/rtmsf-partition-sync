@@ -3,7 +3,8 @@
 Run from the repository root. Results are separate from the five-graph matrix.
 """
 import argparse
-from collections import Counter
+from collections import Counter, deque
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -21,12 +22,28 @@ from experiments.aws.workloads import Pilot
 from experiments.evidence import EvidenceBundle, source_snapshot, utc
 
 BURSTS = ('quick', 'spaced', 'distributed', 'mixed')
-CONDITIONS = BURSTS + tuple(f'continuous_{rate}ps_{active}p' for rate in (1, 3) for active in (10, 20))
+LOADS = tuple(f'load_{rate}ps_{active}p' for rate in (1, 5, 20) for active in (10, 100, 1000))
+QUICK_LOADS = ('load_1ps_1000p', 'load_5ps_1000p', 'load_20ps_1000p', 'load_20ps_10p')
+CONDITIONS = BURSTS + tuple(f'continuous_{rate}ps_{active}p' for rate in (1, 3) for active in (10, 20)) + LOADS
 
 
 def schedule(condition, base=100):
     if condition not in CONDITIONS or base < 100:
         raise ValueError('unknown condition or insufficient starting partitions')
+    if condition in LOADS:
+        rate, active = int(condition.split('_')[1][:-2]), int(condition.split('_')[2][:-1])
+        changes, live, created = [], deque(), 0
+        for index in range(120 * rate):
+            if index % 4 == 3:
+                partition, record_id = live.popleft()
+                operation = 'DELETE'
+            else:
+                partition, record_id = created % active, 1000000 + index
+                created += 1
+                live.append((partition, record_id))
+                operation = 'CREATE'
+            changes.append((index / rate, operation, partition, record_id))
+        return changes
     continuous = condition.startswith('continuous_')
     rate, active = (int(condition.split('_')[1][:-2]), int(condition.split('_')[2][:-1])) if continuous else (0, 1)
     changes, created, deleted = [], 0, 0
@@ -42,18 +59,43 @@ def schedule(condition, base=100):
     return changes
 
 
+def annotate_backlog(samples, operations, records, started_at):
+    origin = datetime.fromisoformat(started_at)
+    acknowledgements = {}
+    for record in records:
+        if record.get('action') == 'message_acknowledged':
+            at = (datetime.fromisoformat(record['timestamp']) - origin).total_seconds()
+            acknowledgements[record['message_id']] = min(at, acknowledgements.get(record['message_id'], at))
+    completed = {}
+    for record in records:
+        if record.get('action') == 'message_decoded' and record['message_id'] in acknowledgements:
+            at = acknowledgements[record['message_id']]
+            for event in record['events']:
+                key = (event['key_sha256'], event['operation'])
+                completed[key] = min(at, completed.get(key, at))
+    for sample in samples:
+        at = sample['elapsed_s']
+        issued = [op for op in operations if op['completed_s'] <= at]
+        pending = [op for op in issued if completed.get((op['key_sha256'], op['operation']), float('inf')) > at]
+        sample.update(acknowledged_operations=len(issued) - len(pending),
+                      unacknowledged_operations=len(pending),
+                      oldest_unacknowledged_s=max((at - op['completed_s'] for op in pending), default=0))
+
+
 def run_trial(pilot, trial, timeline):
     fixture = pilot.fixtures[trial['id']]
     window = dict(id=trial['id'], bucket=fixture['bucket'], started_at=utc(), requester_arn=pilot.outputs['TaskRoleArn'])
     pilot.windows.append(window)
     start, stop = time.monotonic(), Event()
-    samples, first_upload, completed = [], None, 0
+    samples, operations, first_upload = [], [], None
+    load = trial['condition'] in LOADS
 
     def observe():
         while not stop.is_set():
-            sample = {'elapsed_s': time.monotonic() - start, 'completed_operations': completed}
+            sample = {'elapsed_s': time.monotonic() - start, 'completed_operations': len(operations), 'at': utc()}
             try:
-                sample['first_partition_present'] = pilot.presence(fixture, pilot.values(100))
+                if not load:
+                    sample['first_partition_present'] = pilot.presence(fixture, pilot.values(100))
                 sample['observed_elapsed_s'] = time.monotonic() - start
                 attrs = pilot.clients['sqs'].get_queue_attributes(QueueUrl=pilot.outputs['EventQueueUrl'],
                     AttributeNames=['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible'])['Attributes']
@@ -67,27 +109,48 @@ def run_trial(pilot, trial, timeline):
 
     observer = Thread(target=observe, daemon=True)
     observer.start()
+    def perform(at, operation, partition, record_id, predecessor=None):
+        nonlocal first_upload
+        if predecessor is not None:
+            predecessor.result()
+        began = time.monotonic()
+        if operation == 'CREATE':
+            key, _, done = pilot.upload(fixture, pilot.values(partition), record_id)
+            if first_upload is None:
+                first_upload = done
+        else:
+            key = fixture['root'] + pilot.path(pilot.values(partition)) + f'part-{record_id:06d}.parquet'
+            pilot.remove(fixture, key)
+            done = time.monotonic()
+        record = dict(operation=operation, partition=partition, scheduled_s=at,
+                      started_s=began - start, completed_s=done - start,
+                      key_sha256=hashlib.sha256(key.encode()).hexdigest())
+        operations.append(record)
+        pilot.record('activity_operation', trial=trial['id'], **record)
     try:
-        for at, operation, partition, record_id in schedule(trial['condition']):
-            if time.monotonic() >= pilot.deadline:
-                raise TimeoutError('activity run deadline reached')
-            time.sleep(max(0, start + at - time.monotonic()))
-            began = time.monotonic()
-            if operation == 'CREATE':
-                _, _, done = pilot.upload(fixture, pilot.values(partition), record_id)
-                if first_upload is None:
-                    first_upload = done
-            else:
-                key = fixture['root'] + pilot.path(pilot.values(partition)) + f'part-{record_id:06d}.parquet'
-                pilot.remove(fixture, key)
-                done = time.monotonic()
-            completed += 1
-            pilot.record('activity_operation', trial=trial['id'], operation=operation, partition=partition,
-                         scheduled_s=at, started_s=began - start, completed_s=done - start)
+        # Eight producer threads keep the offered rate independent of PUT latency.
+        # A DELETE waits for its exact earlier PUT; every future is inspected.
+        with ThreadPoolExecutor(max_workers=8 if load else 1) as pool:
+            creates, futures = {}, []
+            for at, operation, partition, record_id in schedule(trial['condition']):
+                if time.monotonic() >= pilot.deadline:
+                    raise TimeoutError('activity run deadline reached')
+                time.sleep(max(0, start + at - time.monotonic()))
+                future = pool.submit(perform, at, operation, partition, record_id,
+                                     creates.get(record_id) if operation == 'DELETE' else None)
+                futures.append(future)
+                if operation == 'CREATE':
+                    creates[record_id] = future
+                if not load:
+                    future.result()
+            for future in futures:
+                future.result()
         writes_done, writes_done_at = time.monotonic(), utc()
         pilot.wait_processed(fixture, window['started_at'])
         pilot.drain(trial['id'] + '_after')
         drained = time.monotonic()
+        stop.set()
+        observer.join(timeout=45)
         records = [item['record'] for item in pilot.telemetry()
                    if window['started_at'] <= item['record'].get('timestamp', '')]
         table_id = pilot.outputs['GlueDatabaseName'] + '.' + fixture['table']['Name']
@@ -97,14 +160,20 @@ def run_trial(pilot, trial, timeline):
             if record.get('action') == 'api_call' and record.get('phase') == 'maintenance':
                 calls[record['operation']] += record.get('attempts', 1)
         first_present = next((s['observed_elapsed_s'] for s in samples if s.get('first_partition_present') is True), None)
-        if first_upload is None or first_present is None or not attempts or any(s.get('error') for s in samples):
+        if first_upload is None or (not load and first_present is None) or not attempts or any(s.get('error') for s in samples):
             raise RuntimeError('activity observation evidence is incomplete')
         if trial['handler'] == 'immediate' and any(r['observation_count'] != 1 for r in attempts):
             raise AssertionError('immediate control combined events')
+        end = dict(elapsed_s=writes_done - start)
+        annotate_backlog(samples + [end], operations, records, window['started_at'])
         return dict(condition=trial['condition'], method=trial['handler'], repetition=trial['repetition'],
-                    completed_operations=completed, write_duration_s=writes_done - start,
+                    completed_operations=len(operations), write_duration_s=writes_done - start,
+                    achieved_operations_per_s=len(operations) / (writes_done - start),
+                    max_schedule_delay_s=max(r['started_s'] - r['scheduled_s'] for r in operations),
+                    unacknowledged_at_write_end=end['unacknowledged_operations'],
+                    oldest_unacknowledged_at_write_end_s=end['oldest_unacknowledged_s'],
                     pmcp_attempts=len(attempts), catalog_api_attempts=sum(n for op, n in calls.items() if op.startswith('Glue.')),
-                    first_partition_visibility_s=first_present - (first_upload - start),
+                    first_partition_visibility_s=None if load else first_present - (first_upload - start),
                     attempts_during_writes=sum(r['timestamp'] < writes_done_at for r in attempts),
                     processed_events_during_writes=sum(r['observation_count'] for r in attempts
                         if r['timestamp'] < writes_done_at and r['status'] in ('APPLIED', 'NOOP')),
@@ -136,12 +205,18 @@ def main():
     parser.add_argument('--build-manifest', type=Path, required=True)
     parser.add_argument('--conditions', nargs='+', choices=CONDITIONS, default=list(CONDITIONS))
     parser.add_argument('--repetitions', type=int, choices=range(1, 6), default=1)
+    parser.add_argument('--burst-repetitions', type=int, choices=range(1, 6))
+    parser.add_argument('--quick', action='store_true', help='use four representative load points')
+    parser.add_argument('--output-dir', type=Path, default=Path('runs'))
     parser.add_argument('--max-minutes', type=int, default=65)
     args = parser.parse_args()
     if args.max_minutes < 1 or len(set(args.conditions)) != len(args.conditions):
         parser.error('positive time budget and distinct conditions required')
     # Existing fixture/runtime helpers expect these shared settings.
-    args.output_dir, args.timeout_seconds = Path('runs'), 240
+    args.timeout_seconds = 600
+    args.burst_repetitions = args.burst_repetitions or args.repetitions
+    if args.quick:
+        args.conditions = [c for c in args.conditions if c not in LOADS or c in QUICK_LOADS]
     args.correctness_repetitions, args.graph4_partitions = args.repetitions, 100
     session = boto3.Session(profile_name=args.profile, region_name=args.region)
     validate_target(session.client('sts').get_caller_identity()['Account'], args.expected_account, args.stack, args.region)
@@ -179,10 +254,11 @@ def main():
     trail = session.client('cloudtrail')
     was_logging = trail.get_trail_status(Name=outputs['TrailName'])['IsLogging']
     matrix = [dict(id=f'{condition}_{handler}_r{repetition}', condition=condition, handler=handler,
-                   method='rtmsf', graph='activity', base=100, x=100, repetition=repetition)
-              for repetition in range(1, args.repetitions + 1)
+                   method='rtmsf', graph='activity', base=1000 if condition in LOADS else 100, x=100, repetition=repetition)
+              for repetition in range(1, max(args.repetitions, args.burst_repetitions) + 1)
               for handler in (('rtmsf', 'immediate') if repetition % 2 else ('immediate', 'rtmsf'))
-              for condition in args.conditions if handler == 'rtmsf' or condition in BURSTS]
+              for condition in args.conditions if (handler == 'rtmsf' or condition in BURSTS)
+              and repetition <= (args.burst_repetitions if condition in BURSTS else args.repetitions)]
     rows = {t['id']: dict(condition=t['condition'], method=t['handler'], repetition=t['repetition'], status='not_attempted') for t in matrix}
     timeline, errors, stopped, current_handler = [], [], False, None
     print(f'Activity evidence: {root.resolve()} ({len(matrix)} conditions)', flush=True)
@@ -191,7 +267,7 @@ def main():
         audit.buckets = list(buckets.buckets.values())
         trail.start_logging(Name=outputs['TrailName'])
         for trial in matrix:
-            fixture = pilot.fixture(trial['id'], 'rtmsf', base=100)
+            fixture = pilot.fixture(trial['id'], 'rtmsf', base=trial['base'])
             pilot.verify(fixture, trial['id'] + '_baseline')
         pilot.drain('before_activity')
         buckets.enable_notifications()
@@ -247,14 +323,16 @@ def main():
                     expected = dict(zip(METRICS, (row.get('adapter_calls', {}).get('S3.HeadObject', 0),
                                                   row.get('adapter_calls', {}).get('S3.GetObject', 0),
                                                   row.get('adapter_calls', {}).get('S3.ListObjectsV2', 0))))
-                    row['request_counts_agree'] = all(value is not None and value == corroboration.get(key, {}).get(metric) == expected[metric]
-                                                    for metric, value in metrics.items())
+                    row['request_counts_agree'] = all(metrics.get(metric) is not None
+                        and metrics[metric] == corroboration.get(key, {}).get(metric) == expected[metric] for metric in METRICS)
                     if row['status'] == 'workload_passed' and not row['request_counts_agree']:
                         row.update(status='incomplete', error='S3 accounting sources do not agree')
             for trial in matrix:
                 row = rows[trial['id']]
                 if row['status'] == 'not_attempted':
                     continue
+                if row['status'] == 'workload_passed' and not row.get('request_counts_agree'):
+                    row.update(status='incomplete', error='S3 accounting sources are missing or disagree')
                 try:
                     pilot.verify(pilot.fixtures[trial['id']], trial['id'] + '_final')
                     if row['status'] == 'workload_passed':

@@ -3,7 +3,7 @@
 Ankit Joshi · existing protocol, review follow-ups updated September 30, 2026
 
 **This is the authoritative design for five graphs, one recovery table, and
-seven supporting checks.** The experiment runner collects the data specified
+eight supporting checks.** The experiment runner collects the data specified
 here; the plotting utility turns that data into these outputs. Change this
 specification first if an experiment decision changes.
 
@@ -187,7 +187,7 @@ A pass requires all of the evidence above. Missing evidence is incomplete.
 The runner records individual outcomes in `report_inputs.json`; no hand-filled
 table, cumulative mutation graph, or second graph CSV is needed.
 
-## Seven supporting checks
+## Eight supporting checks
 
 Run three fresh repetitions per check. Generate `checks_table.md` from individual
 recorded outcomes; include failed, incomplete and unattempted conditions.
@@ -198,6 +198,7 @@ recorded outcomes; include failed, incomplete and unattempted conditions.
 | `long_burst` | Upload 9 files at 0, 5, …, 40 seconds; record actual arrivals, progress at the buffering cap, and 9 final rows. |
 | `two_tables` | Alternate 30 uploads: 5 files × 3 partitions × 2 tables (`orders`, `returns`, same schema); verify routing and rows. |
 | `duplicate_old_events` | Replay a captured notification three times after settling; also replay old CREATE after deletion and old DELETE after recreation; check final state. |
+| `marker_lifecycle` | Create `_SUCCESS` alone, add then delete a Parquet file, delete the marker last; verify registration followed by removal and retain each notification/ACK. |
 | `rapid_changes` | Stop the worker; create/delete, then separately delete/recreate; restart and check final state and any retries/dead letters. |
 | `retryable_failures` | Inject two retryable catalog-call failures, then permit real calls and verify success. |
 | `retry_exhaustion` | Fail the initial attempt plus five retries; verify durable dead-letter storage before ACK, then successful replay with healthy calls. |
@@ -305,7 +306,7 @@ stays intact. The bounded activity pilot is implemented and has run; the
 | To-do | Purpose and completion evidence |
 |---|---|
 | Save full catalog checks | **Implemented and validated.** `Pilot.verify()` saves expected and observed values, locations and columns before assertions, including failed checks. No extra AWS requests. Historical missing snapshots remain missing. |
-| Settle marker handling | Deleting `_SUCCESS` after the last Parquet file can leave an empty partition registered. The current narrow scope documents this. Choose whether to retain that restriction or implement and test broader event coverage; disclosure alone is not a fix. |
+| Settle marker handling | Routing now covers all objects below a fully matched partition path, matching PMCP storage checks. Local regression covers marker-only creation and marker-last deletion; AWS validation is pending. |
 | Compare with an immediate handler | **Bounded pilot complete; repetitions pending.** The same worker/PMCP processes separate per-event intents, preserving verification, ownership, retries and ACK rules. Quick, spaced, distributed and mixed bursts have recorded calls, delay and final correctness. This is a controlled comparison, not a new independent production implementation. |
 | Exercise continuous updates | **Bounded pilot complete; stronger repetition/capacity evidence pending.** At stated rates, retain actual arrivals, processing during writes, approximate queue counts, visibility, retries/DLQ outcomes, observed drain and final correctness. The pilot demonstrates progress at its tested loads, not maximum sustainable throughput. |
 | Repeat representative conditions | Apply the existing three correctness/fault repetitions and five comparison repetitions to a bounded representative matrix first. Retain failures and variation; these counts do not establish failure rates or tail latency. Larger historical tables are separate scaling evidence. |
@@ -322,8 +323,8 @@ Snowflake/projection performance baselines are outside this follow-up scope.
 
 ### Bounded activity validation
 
-Checkpoint: `f1af80f`. Keep `src/rtmsf` unchanged and retain the documented marker
-restriction. Save catalog snapshots in the existing verifier. Add the per-event
+Historical pilot at checkpoint `f1af80f`: this run kept `src/rtmsf` unchanged and
+retained the then-documented marker restriction. Catalog snapshots were added to the verifier. Add the per-event
 launcher and activity runner under `src/experiments/aws`; extend only experiment
 image/measurement plumbing. Check batching, retry/ACK ownership, snapshot retention,
 and workload schedules locally before running AWS.
@@ -368,3 +369,36 @@ is the readable table. Missing values stay blank. Reconcile S3 counters with raw
 CloudTrail and worker API records; failures and incomplete conditions stay visible.
 Stop the worker, restore its previous task definition, and clean only owned trial
 buckets/tables and temporary policies after retaining evidence.
+
+### Next validation: marker coverage and active load
+
+The approved follow-up fixes routing before collecting new evidence. Every
+CREATE/DELETE below a fully matched configured partition path, including markers
+and nested objects, must trigger reconciliation: PMCP already counts these objects.
+Markers continue to count as nonempty storage; this does not validate file formats.
+WOERA, PMCP, acknowledgement and retry policy remain unchanged. Add a regression
+through the real router/worker and an AWS marker-last deletion check.
+
+Keep the existing burst comparison and continuous mixed schedules. Add a separate
+load family with 1,000 registered, one-file partitions and 10, 100 or 1,000 upload
+targets. Run for 120 seconds at 1, 5 or 20 operations/second. Three of every four
+operations append a unique file; the fourth deletes the oldest such appended file.
+The original files remain, so this family isolates processing/backlog under mixed
+activity; the existing mixed and lifecycle tests cover membership transitions.
+Record actual achieved rates, scheduling delay, progress, queue counts, observed
+unacknowledged work/age, terminal outcomes and drain. Correct final state alone is
+insufficient. If 20/s does not overload the worker, report a tested lower bound on
+capacity; do not claim that its maximum was found.
+
+Quick validation: all five graphs at N=100/1,000 where N is the axis, file counts
+1/100/1,000 for Graph 4, one correctness/recovery/comparison repetition, and one
+activity repetition. The quick load subset is (1/s,1,000), (5/s,1,000),
+(20/s,1,000), (20/s,10). Full evaluation extends N to 5,000/10,000 with five
+comparison and three correctness/load repetitions. A 100K scaling extension is
+separate and follows successful validation. Keep Q=10 and T_max=31 throughout.
+
+Implementation order: regression then routing fix; marker check; load schedule and
+report validation; one-command graph/activity execution; local tests and immutable
+image verification; AWS quick run; audit outputs before longer runs. Preserve
+failed attempts. Export source, instructions and selected evidence in one archive
+for offline report regeneration; publishing is a separate action.

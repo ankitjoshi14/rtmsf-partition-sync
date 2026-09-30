@@ -396,6 +396,8 @@ def _summary(rows, recovery, checks, metadata, recovery_table, checks_table):
         for columns, count, prefixes in sorted(layouts):
             lines.append(f"| {' / '.join(columns)} | {count} | {' / '.join(map(str, prefixes))} |")
         lines.extend(['', 'Partition count and prefix structure vary together; compare layouts in separate runs.', ''])
+    if metadata.get('activity_status'):
+        lines.extend(['', f"Activity validation: **{metadata['activity_status']}**. Tables, CSVs and supporting records are under [activity/](activity/).", ''])
     lines.extend(["## Graph outcomes", "", "| Graph | Trial outcomes | Figures |", "|---|---|---|"])
     for graph in metadata.get("graphs", MEASUREMENTS):
         lines.append(f"| {graph} | {_graph_outcome(graph, metadata)} | [PNG](graph_{graph}.png) · [PDF](graph_{graph}.pdf) |")

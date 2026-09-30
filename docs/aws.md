@@ -129,14 +129,18 @@ uv run --frozen --extra dev python -m experiments.aws.deploy \
 uv run --frozen --extra experiment python -m experiments.aws.run \
   --stack "$RTMSF_STACK" --expected-account "$RTMSF_ACCOUNT" \
   --profile "$RTMSF_PROFILE" --region "$RTMSF_REGION" \
-  --sizes 100 1000 --files 1 10 100 1000 --graph4-partitions 1000 \
-  --layout-sizes 100 --repetitions 1 --timeout-seconds 600 --max-minutes 180 \
+  --sizes 100 1000 --files 1 100 1000 --graph4-partitions 1000 \
+  --layout-sizes 100 1000 --repetitions 1 --timeout-seconds 600 --max-minutes 240 --activity quick \
   --request-source cloudwatch --audit-wait-seconds 600 \
   --build-manifest "$RTMSF_BUILD_MANIFEST" --output-dir runs
 ```
 
 This validation selects all five graphs, fresh fixtures, Q=10 seconds, and one
-repetition per condition. A smaller Graph 5-only check uses
+repetition per condition. After the graph/correctness checks pass, the same command
+runs the activity comparisons and load tests under `activity/` in the printed bundle.
+The full run uses `--sizes 100 1000 5000 10000 --layout-sizes 100 1000 5000 10000
+--repetitions 5 --correctness-repetitions 3 --activity full --max-minutes 900`.
+The 100K scaling extension is separate. Each run is independent; no CSV assembly is needed. A smaller Graph 5-only check uses
 `--graph5-only --layout-sizes 100 --repetitions 1 --max-minutes 60`
 with the same account, stack, image-manifest and collection options: four trials.
 Each measured trial gets its own bucket, for example
@@ -158,7 +162,7 @@ restore permissions. This writes a separate receipt and preserves original evide
 It targets the lifecycle trace, RTMSF/crawler/MSCK partition-size comparisons,
 RTMSF/crawler file-count comparisons, RTMSF/Athena key-order comparisons,
 and four ADD/DROP crash boundaries.
-It also runs the seven supporting burst, routing, replay, rapid-change, and
+It also runs the eight supporting burst, routing, replay, rapid-change, and
 retry checks. Any check that does not run stays explicitly **not attempted**.
 Use `--repetitions 5 --correctness-repetitions 3` for the planned repeat run:
 five per comparison condition, three per lifecycle/crash/supporting case.

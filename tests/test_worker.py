@@ -439,6 +439,28 @@ class Catalog:
         return self._mutated("DROP", partition)
 
 
+@pytest.mark.parametrize("marker", ["_SUCCESS", "_temporary/marker", ""])
+def test_marker_events_keep_membership_aligned_through_last_object_deletion(marker):
+    from rtmsf.pmcp import PartitionMutationCommitProtocol
+
+    clock = Clock()
+    source = Source(clock)
+    router = RoutingIndex((TableDefinition("db.table", "logical-source", "root/", ("p",)),))
+    partition = router.route(event()).partition
+    store, catalog = Storage([]), Catalog(partition, False)
+    runner = worker(source, pmcp=PartitionMutationCommitProtocol(store, catalog),
+                    settling_ms=0, routing=router)
+    data_key, marker_key = "root/p=a/file.parquet", "root/p=a/" + marker
+    steps = [(marker_key, "CREATE", True), (data_key, "CREATE", True),
+             (data_key, "DELETE", True), (marker_key, "DELETE", False)]
+    for index, (key, operation, present) in enumerate(steps):
+        (store.keys.add if operation == "CREATE" else store.keys.remove)(key)
+        source.queue.append(delivery(str(index), event(object_key=key, operation=operation)))
+        runner.run_once()
+        assert bool(catalog.partitions) is present
+        assert str(index) in source.acknowledged
+
+
 @pytest.mark.parametrize("operation", ["CREATE", "DELETE"])
 @pytest.mark.parametrize("crash_point", ["buffered", "unknown_outcome", "before_ack"])
 def test_add_and_drop_replay_after_crashes_with_a_fresh_quiet_period(operation, crash_point):

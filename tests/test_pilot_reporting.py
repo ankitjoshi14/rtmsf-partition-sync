@@ -103,10 +103,11 @@ def test_attempt_cleans_up_failed_crawler_initialization_and_retains_errors(clea
         assert all("delete failed" in record["error"] for record in pilot.graph_results)
 
 
-@pytest.mark.parametrize("audit_mode", ["exception", "empty", "partial", "setup_failure", "recovery_only", "cloudwatch", "graph4_only", "graph5_only", "comparisons_only", "clean", "mixed", "budget_exhausted", "stale_build", "partial_build"])
+@pytest.mark.parametrize("audit_mode", ["exception", "empty", "partial", "setup_failure", "recovery_only", "cloudwatch", "graph4_only", "graph5_only", "comparisons_only", "clean", "mixed", "budget_exhausted", "stale_build", "partial_build", "activity_launch_error", "activity_interrupt", "activity_killed"])
 def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch, tmp_path, audit_mode):
     captured, calls = {}, []
-    outputs = {"TrailName": "trail", "EventQueueUrl": "queue", "CrawlerEventQueueUrl": "crawler_queue"}
+    activity_mode = audit_mode.startswith("activity_")
+    outputs = {"TrailName": "trail", "EventQueueUrl": "queue", "CrawlerEventQueueUrl": "crawler_queue", "ClusterName": "cluster", "ServiceName": "worker"}
     client = SimpleNamespace(
         get_caller_identity=lambda: {"Account": "123456789012"},
         describe_stacks=lambda **kwargs: {"Stacks": [{"StackStatus": "CREATE_COMPLETE", "Outputs": [
@@ -114,6 +115,8 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
         start_logging=lambda **kwargs: calls.append("start_logging"),
         stop_logging=lambda **kwargs: calls.append("stop_logging"),
         purge_queue=lambda **kwargs: None,
+        update_service=lambda **kwargs: captured.setdefault("restored_tasks", []).append(kwargs["taskDefinition"]),
+        describe_task_definition=lambda **kwargs: {"taskDefinition": {"containerDefinitions": [{"name": "worker", "image": "repo@sha256:" + "a" * 64}]}},
     )
     session = SimpleNamespace(client=lambda *args, **kwargs: client)
 
@@ -125,7 +128,7 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
             self.graph_rows, self.graph_results, self.recovery_results, self.checks = [], [], [], []
             self.windows, self.lifecycle, self.fixtures = [], [], {}
             self.metadata = {"graph_results": self.graph_results}
-            self.clients = {"sqs": client}
+            self.clients = {"sqs": client, "ecs": client}
             self.deadline = 0 if audit_mode == "budget_exhausted" else math.inf
             self.crawler = None
             self.trial_buckets = None
@@ -134,6 +137,9 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
         def fixture(self, name, *args, **kwargs):
             self.fixtures[name] = {}
             captured.setdefault("fixture_names", []).append(name)
+
+        def service(self):
+            return {'taskDefinition': 'original-task'}
 
         def recovery(self, case, fixture, repetition):
             captured.setdefault("recovery_cases", []).append(case)
@@ -144,7 +150,7 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
                 self.graph_rows.append(graph_row(3, trial["method"], "visibility_delay_s", trial["x"], 1, trial["repetition"]))
 
         def collect_runtime(self):
-            if audit_mode not in ("clean", "mixed", "budget_exhausted", "graph5_only"):
+            if not activity_mode and audit_mode not in ("clean", "mixed", "budget_exhausted", "graph5_only"):
                 raise RuntimeError("runtime logs unavailable")
 
         def __getattr__(self, name):
@@ -205,7 +211,7 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
         dict(name=name, repetition=repetition, status="passed")
         for repetition in range(1, pilot.args.correctness_repetitions + 1)
         for name in run.CHECK_NAMES
-    ] if audit_mode in ("clean", "mixed") else [])
+    ] if activity_mode or audit_mode in ("clean", "mixed") else [])
     monkeypatch.setattr(run.time, "sleep", lambda seconds: None)
     monkeypatch.setattr(run, "write_reports", lambda root, rows, recovery, checks, metadata:
                         captured.update(rows=rows, recovery=recovery, checks=checks, metadata=metadata))
@@ -231,6 +237,25 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
         manifest = tmp_path / 'build.json'
         manifest.write_text(json.dumps(build))
         argv += ['--build-manifest', str(manifest)]
+    if activity_mode:
+        import hashlib, json
+        from pathlib import Path
+        names = list(Path('src/rtmsf').rglob('*.py')) + [Path(name) for name in (
+            'src/experiments/__init__.py', 'src/experiments/aws/__init__.py',
+            'src/experiments/aws/crash_worker.py', 'src/experiments/aws/activity_worker.py')]
+        manifest = tmp_path / 'build.json'
+        manifest.write_text(json.dumps({'files': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in names},
+                                       'image': 'repo@sha256:' + 'a' * 64}))
+        argv += ['--activity', 'quick', '--build-manifest', str(manifest)]
+        def launch(command):
+            assert captured['metadata']['run_status'] == 'incomplete_or_failed'
+            assert captured['metadata']['activity_status'] == 'running'
+            if audit_mode == 'activity_launch_error':
+                raise OSError('launch failed')
+            if audit_mode == 'activity_interrupt':
+                raise KeyboardInterrupt()
+            return SimpleNamespace(returncode=-9)
+        monkeypatch.setattr(run.subprocess, 'run', launch)
     monkeypatch.setattr(sys, "argv", argv)
     if audit_mode in ('stale_build', 'partial_build'):
         with pytest.raises(ValueError, match='build manifest needs|runtime files differ'):
@@ -240,11 +265,16 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
     status = run.main()
     assert status == (0 if audit_mode in ("clean", "mixed", "graph5_only") else 1)
     assert captured["metadata"]["run_status"] == ("passed" if status == 0 else "incomplete_or_failed")
+    if activity_mode:
+        assert status == 1
+        assert captured['metadata']['activity_status'] == 'incomplete_or_failed'
+        assert captured['restored_tasks'] == ['original-task', 'original-task']
+        return
     if audit_mode in ("clean", "mixed"):
         repeats = 3 if audit_mode == "mixed" else 1
         assert len(captured["matrix"]) == (45 if audit_mode == "mixed" else 9)
         assert len(captured["recovery"]) == 4 * repeats
-        assert len(captured["checks"]) == 7 * repeats
+        assert len(captured["checks"]) == 8 * repeats
         assert sum(name.startswith("lifecycle_") for name in captured["fixture_names"]) == repeats
         assert len([r for r in captured["rows"] if r["graph"] == 3]) == (15 if audit_mode == "mixed" else 3)
         return

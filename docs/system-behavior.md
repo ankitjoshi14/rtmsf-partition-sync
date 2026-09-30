@@ -26,8 +26,9 @@ maps source/key to one table and validates the configured layout. Duplicate IDs
 and overlapping roots in the same source are rejected. Changing targets requires
 configuration and a controlled restart. RTMSF does not create or discover tables.
 
-Object keys and partition values are preserved exactly. This reference filters
-for `.parquet` files and ignores hidden/control files. The AWS adapter decodes
+Object keys and partition values are preserved exactly. All objects below the
+configured partition path, including markers and nested files, trigger processing.
+The AWS adapter decodes
 S3 event keys once. No filesystem normalization, trimming, lowercasing, or second
 URL decoding rewrites the resulting key.
 
@@ -42,11 +43,11 @@ checks actual storage. A DELETE observation can repair an absent catalog entry
 when surviving data proves that the partition should exist. Empty-partition
 checks consider any object under the partition prefix, including marker files.
 
-**Known event-coverage gap:** delete the last Parquet file while `_SUCCESS`
-remains, then delete `_SUCCESS`. The first deletion keeps the registration
-because storage is nonempty; the marker deletion is ignored by routing, so the
-now-empty prefix can remain registered. Another eligible event or external repair
-is needed. The marker-free AWS fixtures do not test or resolve this case.
+Deleting the last Parquet file while `_SUCCESS` remains keeps the registration;
+deleting `_SUCCESS` then triggers removal. A marker alone can also cause registration,
+because membership means any stored object, not queryable data. This does not inspect
+schemas or validate file formats. Events outside a fully matched configured partition
+path remain ignored; initial alignment and delivery of relevant events are required.
 
 An ADD whose observed data is absent is retried with a bounded policy. If the
 objects were created and then deleted before reconciliation, this can end in a

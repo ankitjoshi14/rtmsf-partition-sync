@@ -30,9 +30,7 @@ class RoutingIndex:
             if event.source_id != table.source_id or not event.object_key.startswith(table.root_prefix):
                 continue
             parts = event.object_key[len(table.root_prefix):].split("/")
-            if len(parts) != len(table.partition_columns) + 1:
-                return None
-            if not parts[-1].endswith(".parquet") or parts[-1].startswith(("_", ".")):
+            if len(parts) < len(table.partition_columns) + 1:
                 return None
             values = []
             for segment, column in zip(parts[:-1], table.partition_columns):
@@ -40,7 +38,8 @@ class RoutingIndex:
                 if not separator or name != column or not value:
                     return None
                 values.append(value)
-            path = "/".join(parts[:-1])
+            # Match PMCP's nonempty-prefix test: markers and descendants count.
+            path = "/".join(parts[:len(table.partition_columns)])
             partition = PartitionRef(
                 event.source_id, table.table_id, path, tuple(values),
                 table.root_prefix + path + "/",

@@ -85,7 +85,7 @@ The AWS adapter declares its interfaces explicitly, for example
 ## Generate results
 
 The [specification](docs/experiments.md) defines five graphs, a recovery table,
-and seven supporting checks. The [runbook](docs/aws.md) starts with a small AWS
+and eight supporting checks. The [runbook](docs/aws.md) starts with a small AWS
 validation, then explains configurable sizes and repetitions. Those runs require an AWS
 account and incur charges. Larger planned sizes are not completed measurements.
 

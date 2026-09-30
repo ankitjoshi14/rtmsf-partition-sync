@@ -9,8 +9,8 @@ from urllib.parse import unquote_plus
 from experiments.evidence import utc
 
 
-CHECK_NAMES = ('short_burst', 'long_burst', 'two_tables', 'retryable_failures', 'retry_exhaustion', 'duplicate_old_events', 'rapid_changes')
-CHECK_FIXTURES = ('short_burst', 'long_burst', 'two_tables_a', 'two_tables_b', 'retryable_failures', 'retry_exhaustion', 'duplicate_old_events', 'rapid_changes')
+CHECK_NAMES = ('short_burst', 'long_burst', 'two_tables', 'retryable_failures', 'retry_exhaustion', 'duplicate_old_events', 'rapid_changes', 'marker_lifecycle')
+CHECK_FIXTURES = ('short_burst', 'long_burst', 'two_tables_a', 'two_tables_b', 'retryable_failures', 'retry_exhaustion', 'duplicate_old_events', 'rapid_changes', 'marker_lifecycle')
 
 
 def _selected_names(names):
@@ -467,6 +467,39 @@ def retry_failures(pilot, count, repetition=1):
             'normal_worker_restored': True, 'replayed_bodies_are_captured_native_notifications': bool(bodies)}
 
 
+def marker_lifecycle(pilot, repetition=1):
+    fixture = pilot.fixtures[f'check_marker_lifecycle_r{repetition}']
+    values = pilot.values(0)
+    key = fixture['root'] + pilot.path(values) + '_SUCCESS'
+    phases = []
+    for operation, present in (('CREATE', True), ('DELETE', False)):
+        since = utc()
+        if operation == 'CREATE':
+            response = pilot.clients['s3'].put_object(Bucket=fixture['bucket'], Key=key, Body=b'', IfNoneMatch='*')
+        else:
+            response = pilot.clients['s3'].delete_object(Bucket=fixture['bucket'], Key=key)
+        change = dict(fixture=fixture['name'], at=utc(), key_sha256=hashlib.sha256(key.encode()).hexdigest(),
+                      operation=operation, partition=pilot.path(values).rstrip('/'))
+        pilot.changes.append(change)
+        pilot.record('marker_change', key=key, request_id=response['ResponseMetadata']['RequestId'], **change)
+        pilot.wait_processed(fixture, since, expected_changes=[change])
+        pilot.wait_presence(fixture, values, present)
+        phases.append(dict(operation=operation, expected_present=present))
+        if operation == 'CREATE':
+            since = utc()
+            data_key, _, _ = pilot.upload(fixture, values, 0)
+            pilot.wait_processed(fixture, since)
+            pilot.verify(fixture, fixture['name'] + '_data_and_marker')
+            since = utc()
+            pilot.remove(fixture, data_key)
+            pilot.wait_processed(fixture, since)
+            pilot.wait_presence(fixture, values, True)
+            phases.append(dict(operation='DELETE_PARQUET_KEEP_MARKER', expected_present=True))
+    pilot.drain(fixture['name'])
+    pilot.verify(fixture, fixture['name'] + '_empty')
+    return dict(phases=phases, partitions=1)
+
+
 def run_checks(pilot, names=None):
     results = []
     repetitions = getattr(getattr(pilot, 'args', None), 'repetitions', 1)
@@ -475,7 +508,8 @@ def run_checks(pilot, names=None):
                'retryable_failures': lambda pilot, rep: retry_failures(pilot, 2, rep),
                'retry_exhaustion': lambda pilot, rep: retry_failures(pilot, 6, rep),
                'duplicate_old_events': lambda pilot, rep: duplicate_old_events(pilot, rep),
-               'rapid_changes': lambda pilot, rep: rapid_changes(pilot, rep)}
+               'rapid_changes': lambda pilot, rep: rapid_changes(pilot, rep),
+               'marker_lifecycle': marker_lifecycle}
     selected = _selected_names(names)
     for repetition in range(1, repetitions + 1):
         for name in selected:

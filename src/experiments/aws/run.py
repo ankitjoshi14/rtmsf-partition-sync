@@ -11,6 +11,8 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import subprocess
+import sys
 import time
 import tarfile
 import uuid
@@ -64,6 +66,8 @@ def main() -> int:
     parser.add_argument('--repetitions', type=int, default=1, help='repetitions per comparison condition (default: 1)')
     parser.add_argument('--correctness-repetitions', type=int,
                         help='Graph 1, recovery and supporting check repetitions (default: --repetitions)')
+    parser.add_argument('--activity', choices=('quick', 'full'),
+                        help='after successful graph checks, run activity tables inside the same evidence folder')
     parser.add_argument('--timeout-seconds', type=int, default=600)
     parser.add_argument('--max-minutes', type=int, default=85,
                         help='stop starting trials after this many minutes; collection and cleanup can finish later (default: 85)')
@@ -87,10 +91,12 @@ def main() -> int:
     if not args.cleanup_run and (full_pilot or args.graph5_only) and args.request_source != 'cloudwatch':
         parser.error('Graph 5 requires isolated CloudWatch buckets; use cloudtrail only with an earlier-graph mode')
     recovery_cases = args.recovery_only or tuple(RECOVERY_CASES)
-    if (any(not 1 <= x <= 100000 for x in args.sizes + [args.graph4_partitions])
-            or any(not 1 <= x <= 10000 for x in args.files + args.layout_sizes)
+    if args.activity and (not full_pilot or not args.build_manifest):
+        parser.error('--activity needs the full graph run and --build-manifest')
+    if (any(not 1 <= x <= 100000 for x in args.sizes + args.layout_sizes + [args.graph4_partitions])
+            or any(not 1 <= x <= 10000 for x in args.files)
             or any(not 1 <= count <= 5 for count in (args.repetitions, args.correctness_repetitions))):
-        parser.error('partition counts must be 1..100000; files/layout sizes 1..10000; repetitions 1..5')
+        parser.error('partition/layout counts must be 1..100000; files 1..10000; repetitions 1..5')
     if any(len(set(values)) != len(values) for values in (args.sizes, args.files, args.layout_sizes)):
         parser.error('sizes, files and layout sizes must not repeat the same condition')
     if args.max_minutes < 1 or not 30 <= args.timeout_seconds <= 900 or not 0 <= args.audit_wait_seconds <= 1200:
@@ -174,8 +180,10 @@ def main() -> int:
         matrix = []
     audit = RequestAudit(session, outputs, args.region, root / 'request_audit')
     owned = False
+    original_task_definition = None
     try:
         pilot.require_worker_stopped()
+        original_task_definition = pilot.service()['taskDefinition']
         owned = True
         if matrix and args.request_source == 'cloudwatch':
             pilot.trial_buckets = TrialBuckets(session, outputs, args.expected_account, args.region, run_id, root)
@@ -243,6 +251,9 @@ def main() -> int:
             try:
                 pilot.stop_worker()
                 pilot.metadata['worker_stopped'] = True
+                pilot.clients['ecs'].update_service(cluster=outputs['ClusterName'], service=outputs['ServiceName'],
+                                                     taskDefinition=original_task_definition, desiredCount=0)
+                pilot.metadata['task_definition_restored'] = original_task_definition
             except Exception as error:
                 pilot.metadata['worker_stopped'] = False
                 pilot.metadata['shutdown_error'] = str(error)
@@ -336,8 +347,43 @@ def main() -> int:
         complete = (bool(outcomes)
                     and all(result.get('status') == 'passed' and result.get('attempted', True) for result in outcomes)
                     and not any(key.endswith('_error') for key in pilot.metadata))
-        pilot.metadata['run_status'] = 'passed' if complete else 'incomplete_or_failed'
+        pilot.metadata['run_status'] = 'passed' if complete and not args.activity else 'incomplete_or_failed'
+        if args.activity:
+            pilot.metadata['activity_status'] = 'not_attempted'
         write_reports(root, pilot.graph_rows, pilot.recovery_results, pilot.checks, pilot.metadata)
+        if args.activity:
+            if complete:
+                command = [sys.executable, '-u', '-m', 'experiments.aws.activity',
+                           '--stack', args.stack, '--expected-account', args.expected_account,
+                           '--profile', args.profile, '--region', args.region,
+                           '--build-manifest', str(args.build_manifest), '--output-dir', str(root / 'activity'),
+                           '--repetitions', str(args.correctness_repetitions),
+                           '--burst-repetitions', str(args.repetitions), '--max-minutes', str(args.max_minutes)]
+                if args.activity == 'quick':
+                    command.append('--quick')
+                pilot.metadata['activity_command'] = command
+                pilot.metadata['activity_status'] = 'running'
+                write_reports(root, pilot.graph_rows, pilot.recovery_results, pilot.checks, pilot.metadata)
+                try:
+                    pilot.metadata['activity_status'] = 'passed' if subprocess.run(command).returncode == 0 else 'incomplete_or_failed'
+                except (Exception, KeyboardInterrupt) as error:
+                    pilot.metadata['activity_status'] = 'incomplete_or_failed'
+                    pilot.metadata['activity_error'] = f'{type(error).__name__}: {error}'
+                if pilot.metadata['activity_status'] != 'passed':
+                    # A killed child may not reach its own finally block.
+                    try:
+                        pilot.stop_worker()
+                        pilot.clients['ecs'].update_service(cluster=outputs['ClusterName'], service=outputs['ServiceName'],
+                                                             taskDefinition=original_task_definition, desiredCount=0)
+                        for manifest in (root / 'activity').glob('*/trial-buckets.json'):
+                            TrialBuckets(session, outputs, args.expected_account, args.region,
+                                         manifest.parent.name, manifest.parent).cleanup()
+                        session.client('cloudtrail').stop_logging(Name=outputs['TrailName'])
+                    except Exception as cleanup_error:
+                        pilot.metadata['activity_cleanup_error'] = str(cleanup_error)
+                complete = pilot.metadata['activity_status'] == 'passed'
+            pilot.metadata['run_status'] = 'passed' if complete else 'incomplete_or_failed'
+            write_reports(root, pilot.graph_rows, pilot.recovery_results, pilot.checks, pilot.metadata)
         hashes = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file()}
         bundle.write('artifact-hashes.json', hashes)
         print(f'{pilot.metadata["run_status"]}: {root.resolve()}', flush=True)

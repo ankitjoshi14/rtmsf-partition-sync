@@ -242,6 +242,7 @@ class Pilot(AwsRuntime):
             changes = [dict(key_sha256=hashlib.sha256(key.encode()).hexdigest(), operation='CREATE', partition=self.path(row[2:], fixture.get('layout')).rstrip('/')) for key, row in fixture['objects'].items()]
         expected = {(change['key_sha256'], change['operation']) for change in changes}
         partitions = {change['partition'] for change in changes}
+        partition_by_change = {(change['key_sha256'], change['operation']): change['partition'] for change in changes}
         if not expected:
             raise ValueError('processing check requires exact changed files')
         while time.monotonic() < deadline:
@@ -255,12 +256,12 @@ class Pilot(AwsRuntime):
             dead = {r.get('message_id') for r in records if r.get('action') == 'message_dead_lettered'}
             if received & dead:
                 raise AssertionError('a measured file event was dead-lettered')
-            latest_receipt = {
-                partition: max((r['timestamp'] for r in decoded if any(
-                    event.get('key_sha256') == change['key_sha256'] and event.get('operation') == change['operation']
-                    for event in r['events'] for change in changes if change['partition'] == partition)), default=since)
-                for partition in partitions
-            }
+            latest_receipt = dict.fromkeys(partitions, since)
+            for record in decoded:
+                for event in record['events']:
+                    partition = partition_by_change.get((event.get('key_sha256'), event.get('operation')))
+                    if partition is not None:
+                        latest_receipt[partition] = max(latest_receipt[partition], record['timestamp'])
             processed = {r.get('partition') for r in records if r.get('action') == 'pmcp_result'
                          and r.get('table_id') == table_id and r.get('status') in ('APPLIED', 'NOOP')
                          and r.get('timestamp', '') >= latest_receipt.get(r.get('partition'), since)}

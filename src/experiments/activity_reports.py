@@ -6,9 +6,12 @@ from pathlib import Path
 DATA_COLUMNS = ('condition', 'method', 'repetition', 'completed_operations', 'write_duration_s',
     'pmcp_attempts', 's3_head_requests', 's3_get_requests', 's3_list_requests', 'catalog_api_attempts',
     'first_partition_visibility_s', 'attempts_during_writes', 'processed_events_during_writes',
-    'partitions_processed_during_writes', 'peak_queue_visible', 'peak_queue_inflight', 'drain_s')
+    'partitions_processed_during_writes', 'peak_queue_visible', 'peak_queue_inflight', 'drain_s',
+    'achieved_operations_per_s', 'max_schedule_delay_s', 'unacknowledged_at_write_end',
+    'oldest_unacknowledged_at_write_end_s', 'retry_attempts')
 TIME_COLUMNS = ('condition', 'method', 'repetition', 'elapsed_s', 'completed_operations',
-    'first_partition_present', 'observed_elapsed_s', 'queue_visible', 'queue_inflight', 'error')
+    'first_partition_present', 'observed_elapsed_s', 'queue_visible', 'queue_inflight',
+    'acknowledged_operations', 'unacknowledged_operations', 'oldest_unacknowledged_s', 'error')
 
 
 def write_activity_reports(root, rows, timeline, errors):
@@ -34,6 +37,17 @@ def write_activity_reports(root, rows, timeline, errors):
     lines += ['', 'Visibility covers the first new partition, polled independently. Queue counts are approximate.',
               'Drain includes observation/telemetry waits and eight seconds of observed queue emptiness.',
               'S3 counts require agreement between CloudWatch, CloudTrail and worker API records.', '']
+    loads = [row for row in rows if row['condition'].startswith('load_')]
+    if loads:
+        lines += ['Load tests retain the seed file in each partition; visibility is not measured for these already registered targets.',
+                  'Backlog matches completed producer operations to observed ACKs, including operations whose notifications have not arrived.',
+                  'ACK timing uses worker UTC timestamps and assumes synchronized clocks; these are observed bounds, not exact queue internals.', '',
+                  '| Load | Repeat | Achieved ops/s | Maximum start delay (s) | Unacknowledged at write end | Oldest age (s) | Drain (s) |',
+                  '|---|---:|---:|---:|---:|---:|---:|']
+        for row in loads:
+            keys = ('achieved_operations_per_s', 'max_schedule_delay_s', 'unacknowledged_at_write_end',
+                    'oldest_unacknowledged_at_write_end_s', 'drain_s')
+            lines.append(f'| {row["condition"]} | {row["repetition"]} | ' + ' | '.join(number(row.get(k)) for k in keys) + ' |')
     lines += [f'- {row["condition"]}/{row["method"]}: {row["error"]}' for row in rows if row.get('error')]
     lines += [f'- {error}' for error in errors]
     (root / 'SUMMARY.md').write_text('\n'.join(lines) + '\n')

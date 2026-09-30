@@ -78,3 +78,39 @@ def test_activity_outputs_keep_missing_counts_and_regenerate(tmp_path):
     for file in original.iterdir():
         assert file.read_bytes() == (regenerated / file.name).read_bytes()
     assert 'unknown / unknown / unknown' in (original / 'SUMMARY.md').read_text()
+
+
+def test_load_schedule_keeps_seed_files_and_deletes_only_completed_prior_creates():
+    from experiments.aws.activity import LOADS, schedule
+
+    for condition in LOADS:
+        rate, active = (int(part[:-2]) if part.endswith('ps') else int(part[:-1])
+                        for part in condition.split('_')[1:])
+        changes = schedule(condition)
+        assert len(changes) == rate * 120
+        live = set()
+        for at, operation, partition, record_id in changes:
+            assert 0 <= partition < active <= 1000 and 0 <= at < 120
+            assert record_id >= 1000000
+            identity = (partition, record_id)
+            if operation == 'CREATE':
+                assert identity not in live
+                live.add(identity)
+            else:
+                live.remove(identity)
+        assert len(live) == len(changes) // 2
+
+
+def test_activity_backlog_includes_operations_without_delivered_notifications():
+    from experiments.aws.activity import annotate_backlog
+
+    operations = [dict(key_sha256='a', operation='CREATE', completed_s=0.5),
+                  dict(key_sha256='b', operation='DELETE', completed_s=1.5)]
+    records = [dict(action='message_decoded', message_id='m', events=[dict(key_sha256='a', operation='CREATE')]),
+               dict(action='message_acknowledged', message_id='m', timestamp='2026-01-01T00:00:02+00:00'),
+               dict(action='message_acknowledged', message_id='m', timestamp='2026-01-01T00:00:10+00:00')]
+    samples = [dict(elapsed_s=s) for s in (1, 3, 5)]
+    annotate_backlog(samples, operations, records, '2026-01-01T00:00:00+00:00')
+    assert [s['unacknowledged_operations'] for s in samples] == [1, 1, 1]
+    assert samples[-1]['acknowledged_operations'] == 1
+    assert samples[-1]['oldest_unacknowledged_s'] == 3.5

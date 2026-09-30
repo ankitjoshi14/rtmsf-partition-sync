@@ -43,10 +43,8 @@ def test_routes_custom_roots_and_multiple_sources_without_namespace_collision():
     "custom/dt=/site=x/a.parquet",
     "custom/site=x/dt=2026/a.parquet",
     "custom/DT=2026/site=x/a.parquet",
-    "custom/dt=2026/site=x/_SUCCESS",
-    "custom/dt=2026/site=x/a.parquet.crc",
-    "custom/dt=2026/site=x/_temporary/a.parquet",
-    "custom/dt=2026/site=x/",
+    "custom/dt=2026/site=x",
+    "custom/_temporary/dt=2026/site=x/a.parquet",
 ])
 def test_unmatched_or_invalid_layouts_are_not_guessed(bad_key):
     assert index().route(event(bad_key)) is None
