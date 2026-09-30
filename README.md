@@ -1,109 +1,115 @@
-# RTMSF — Real-Time Metadata Synchronization Framework
+# RTMSF
 
-Reference prototype for the paper:
+[![CI](https://github.com/ankitjoshi14/rtmsf-partition-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/ankitjoshi14/rtmsf-partition-sync/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](pyproject.toml)
+[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-> **A Real-Time, Event-Driven Architecture for Continuous Metadata Synchronization in Cloud Data Lakes: A Cloud-Native Alternative to MSCK Repair**
-> Ankit Joshi, Independent Researcher, USA
+**Real-Time Metadata Synchronization Framework**, by **Ankit Joshi**.
 
----
+RTMSF keeps partition membership in configured Hive-style tables aligned with
+object storage. It groups upload/delete notifications by partition, checks
+current storage, and adds or removes catalog entries as needed.
 
-## What this is
-
-RTMSF is a cloud-agnostic, event-driven control plane that converts at-least-once object-store notifications (S3, GCS, OCI, Azure Blob) into idempotent partition catalog mutations — without full directory scans.
-
-It replaces scan-based repair (`MSCK REPAIR TABLE`) for Hive-style directory-partitioned tables. At 1% daily partition churn over a 438,000-partition hierarchy, the measured reduction is **104×** in storage request count ($2.28 → $0.022/day at S3 pricing).
-
-Two correctness components:
-
-- **WOERA** (Weakly Ordered Event Reconciliation Algorithm) — bounded event-time deduplication per `(tenant, table, partition)` key using a quiet window W, grace interval G, and optional maximum buffering deadline T_max.
-- **PMCP** (Partition Mutation Commit Protocol) — storage-verified, idempotent ADD/DROP: ADD requires a HEAD existence proof; DROP requires a LIST emptiness proof.
-
----
-
-## Repository structure
-
-```
-woera_buffer.py      — WOERABuffer: min-heap flush scheduler, reconcile (Algorithm 4)
-pmcp.py              — PMCP: apply_add and apply_drop (Algorithms 5 & 6)
-rtmsf_worker.py      — RTMSFWorker: worker loop, flush/commit, intent reduction (Algorithms 1–3)
-event_generator.py   — Synthetic workload generator (§3.8.2 parameters)
-mock_storage.py      — In-memory object store; counts HEAD and LIST requests
-mock_catalog.py      — In-memory partition catalog; raises AlreadyExistsException / NotFoundException
-benchmark.py         — Three-experiment benchmark harness (§3.11)
-sample_output.txt            — Sample benchmark output for reference
+```text
+Object event → routing → WOERA (group events) → PMCP (check storage and reconcile)
 ```
 
-All modules use the Python standard library only — no external dependencies.
+The Python core is provider-neutral. The included AWS implementation uses
+S3, SQS, Glue, and one ECS/Fargate worker. Unfinished work remains replayable;
+terminal failures are durably recorded before acknowledgement.
+[System behavior](docs/system-behavior.md) explains guarantees, configuration,
+and limits. Other cloud implementations and multi-worker operation are not validated.
 
----
+## Start here
 
-## Running the benchmark
+| What you need | Where to look |
+|---|---|
+| Understand the algorithm and its guarantees | [System behavior](docs/system-behavior.md) |
+| Understand each graph, workload and measurement | [Experiment specification](docs/experiments.md) — authoritative design |
+| Deploy, run experiments, regenerate graphs and clean up | [AWS runbook](docs/aws.md) |
+| See the latest verified sample results and limitations | [Evidence index](evidence/README.md) |
+| Read the research positioning | [Related work](docs/related-work.md) |
+
+## Run locally
+
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
-python benchmark.py
+git clone https://github.com/ankitjoshi14/rtmsf-partition-sync.git
+cd rtmsf-partition-sync
+uv sync --frozen --extra dev
+uv run --frozen --extra dev pytest -q
 ```
 
-Runs three experiments and writes a timestamped results file alongside the live output:
+Local tests use fakes and SDK stubs; no AWS account is needed. For the worker
+alone, install `.[aws]` and run `python -m rtmsf.aws_app` with the configuration
+in [system behavior](docs/system-behavior.md). Importing the core needs no AWS SDK.
 
-**Experiment 1 — Request-count reduction vs change fraction f**
+## Repository responsibilities
 
-Confirms O(ΔP) vs O(P) behavior across f = 0.001 to 1.0 over a
-c₁=365 × c₂=50 × c₃=24 = 438,000-partition hierarchy.
-
-**Experiment 2 — Convergence latency vs quiet-window W**
-
-Uses a simulated clock. Confirms latency = W + G + ε (< 1 ms overhead)
-across W = 1 s to 120 s at f = 0.01, G = 1 s.
-
-**Experiment 3 — Worker throughput**
-
-Single-threaded, in-memory, W = G = 0. Reports events/sec and partitions/sec
-across f = 0.001 to 1.0.
-
-Expected output (matches `sample_output.txt`):
-
-```
-Experiment 1 (f=0.01):  4,380 committed,  4,380 requests,  104× reduction,  $0.022/day
-Experiment 2 (W=5, G=1): median latency 6.001 s  (= W + G + ε)
-Experiment 3 (f=0.01):  ~212,000 events/sec,  ~38,500 partitions/sec
-```
-
-**Requirements:** Python 3.8+, no external packages needed.
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate      # macOS/Linux
-# .venv\Scripts\activate       # Windows
-pip install -r requirements.txt  # no-op; zero dependencies
-python3 benchmark.py
+```text
+src/
+  rtmsf/                  Core models, routing, WOERA, PMCP and worker
+    adapters/aws.py       S3, SQS and Glue implementations of core interfaces
+    aws_app.py            Start the normal AWS worker
+  experiments/
+    figures.py            Graph CSV, plots and outcome tables; works offline
+    evidence.py           Save run files and identify their source
+    aws/                  AWS experiment runner and its helpers
+      run.py              Settings, execution order, final reports and cleanup
+      workloads.py        Fixtures, five-graph workloads and crash recovery
+      checks.py           Supporting burst, routing and retry checks
+      runtime.py          Worker control, query checks and observations
+      crash_worker.py     Experiment-only fault injection around the real worker
+      crawler.py          Glue event-based baseline
+      trial_buckets.py    Isolate measurements in separate buckets
+      request_metrics.py  CloudWatch request counts
+      request_audit.py    CloudTrail corroboration and calibration
+      check_request_metrics.py  Standalone known-request calibration
+      deploy.py / template.yaml AWS fixture provisioning
+tests/                    Local verification
+docs/                     System behavior, experiment specification and runbook
+evidence/                 Selected, verified sample results
+runs/                     Generated local bundles (created on use, Git-ignored)
 ```
 
----
+There are three responsibilities: **core system**, **experiment execution**, and
+**report generation**. Another cloud would implement the core interfaces and add
+a sibling to `src/experiments/aws/`, producing the same graph CSV format.
+The AWS adapter declares its interfaces explicitly, for example
+`class S3ObjectStore(ObjectStore)`; related AWS classes share one file.
 
-## Key parameters
+## Generate results
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `W` | Quiet-window seconds; flush_at[k] = now() + W, extended on each new intent | 5.0 s |
-| `G` | Grace interval; wm_worker = now() − G | 1.0 s |
-| `T_max` | Optional max buffering deadline; flush_at[k] capped at first_seen[k] + T_max; key eligible when now() ≥ first_seen[k] + T_max + G | None |
-| `f` | Change fraction ΔP/P | — |
-| `α` | Verification ops per changed partition (analytical model) | 2 |
+The [specification](docs/experiments.md) defines five graphs, a recovery table,
+and seven supporting checks. The [runbook](docs/aws.md) starts with a small AWS
+validation, then explains configurable sizes and repetitions. Those runs require an AWS
+account and incur charges. Larger planned sizes are not completed measurements.
 
----
+```text
+Specification → experiments.aws.run → runs/<execution>/
+                                      ├── graph_data.csv → experiments.figures → graphs
+                                      ├── report_inputs.json → outcome tables and summary
+                                      └── logs, configuration, source and measurement records
+```
 
-## Correspondence to paper sections
+Every execution saves its CSV and generates its reports. You can regenerate
+reports offline from the CSV and recorded outcomes. Separate buckets isolate
+measurements; they do not create separate figures. Missing measurements remain
+unknown. The production image contains `rtmsf`; the experiment image additionally
+contains the fault launcher.
 
-| Module | Paper section |
-|--------|---------------|
-| `woera_buffer.py` | §3.4, Algorithm 4, Appendix A.5 |
-| `pmcp.py` | §3.5, Algorithms 5 & 6 |
-| `rtmsf_worker.py` | §3.2–3.3, Algorithms 1–3 |
-| `event_generator.py` | §3.8.2 workload parameters |
-| `benchmark.py` | §3.11 (Experiments 1–3) |
+Use the [verified AWS sample](evidence/README.md) to try graph generation;
+the command is in the [experiment specification](docs/experiments.md#data-files-and-plotting-rules).
+`evidence/` contains selected exports, not scripts or a history of exploratory
+runs. Source archives inside results identify the code used for that measurement.
 
----
+## Contributing and citation
 
-## License
+Report bugs or propose focused changes through
+[GitHub issues](https://github.com/ankitjoshi14/rtmsf-partition-sync/issues).
+Include a minimal reproduction and expected versus observed behavior; run the
+local tests and describe any changes to system behavior or experiment claims.
 
-MIT License — see [LICENSE](LICENSE).
+Use [CITATION.cff](CITATION.cff) to cite the software. RTMSF is authored by
+Ankit Joshi and released under the [MIT License](LICENSE).

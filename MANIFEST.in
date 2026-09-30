@@ -1,0 +1,4 @@
+include Dockerfile uv.lock .dockerignore CITATION.cff
+recursive-include src *.py *.yaml
+recursive-include docs *.md
+include tests/__init__.py

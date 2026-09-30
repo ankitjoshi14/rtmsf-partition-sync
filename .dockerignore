@@ -1,0 +1,10 @@
+.git
+.venv
+__pycache__
+**/__pycache__
+.pytest_cache
+*.egg-info
+evidence
+runs
+graphify-out
+.DS_Store

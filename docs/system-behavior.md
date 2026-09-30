@@ -1,0 +1,103 @@
+# System behavior
+
+What RTMSF guarantees, what it assumes, and how the AWS worker is configured.
+The [experiment specification](experiments.md) defines how we test this behavior.
+
+The public flow is `ObjectEvent → PartitionEvent → PartitionIntent`.
+
+- `ObjectEvent` contains a configured logical `source_id`, exact decoded
+  `object_key`, `CREATE | DELETE`, UTC `ingested_at`, and optional UTC
+  `source_event_time`. Source time is telemetry only. Missing or malformed
+  provider timestamps do not prevent normalization.
+- `PartitionEvent` pairs that immutable event with its resolved partition.
+- `PartitionIntent` contains the partition, candidate `ADD | DROP`, a bounded
+  tuple of observed CREATE keys, and an observation count.
+- `MutationResult(status, reason)` is an immediate result: `APPLIED`, `NOOP`,
+  `RETRY`, or `ERROR`. WOERA activity stays private and in memory.
+- `Delivery(handle, events)` belongs to the event-source interface. The handle
+  is opaque to the worker. Raw bodies and provider delivery metadata stay in the
+  adapter; they do not determine partition ordering or mutation decisions.
+
+## Routing and processing
+
+An operator selects existing table IDs. The catalog adapter resolves their
+locations and partition columns once at startup. An immutable routing index
+maps source/key to one table and validates the configured layout. Duplicate IDs
+and overlapping roots in the same source are rejected. Changing targets requires
+configuration and a controlled restart. RTMSF does not create or discover tables.
+
+Object keys and partition values are preserved exactly. This reference filters
+for `.parquet` files and ignores hidden/control files. The AWS adapter decodes
+S3 event keys once. No filesystem normalization, trimming, lowercasing, or second
+URL decoding rewrites the resulting key.
+
+`Q` is a processing-time settling interval reset by observed arrivals. `T_max`
+bounds initial buffering from the first arrival. Both use the worker's local
+monotonic clock. Source timestamps never drive deadlines. Retries have their own
+backoff; new arrivals cannot bypass an already scheduled retry. After completion,
+a later notification can open another window for the same partition.
+
+WOERA uses ADD dominance within a window; the intent remains a candidate. PMCP
+checks actual storage. A DELETE observation can repair an absent catalog entry
+when surviving data proves that the partition should exist. Empty-partition
+checks consider any object under the partition prefix, including marker files.
+
+**Known event-coverage gap:** delete the last Parquet file while `_SUCCESS`
+remains, then delete `_SUCCESS`. The first deletion keeps the registration
+because storage is nonempty; the marker deletion is ignored by routing, so the
+now-empty prefix can remain registered. Another eligible event or external repair
+is needed. The marker-free AWS fixtures do not test or resolve this case.
+
+An ADD whose observed data is absent is retried with a bounded policy. If the
+objects were created and then deleted before reconciliation, this can end in a
+DLQ record even when the final catalog is already correctly empty. This policy
+is observable; it must not be described as error-free handling of all churn.
+
+## Ownership and recovery
+
+The supplied AWS deployment has one active worker. It leaves input unacknowledged
+until every derived intent finishes or terminal input has been durably copied to
+the DLQ. Lease renewal covers pending work and bounded provider calls; a detected
+budget overrun or unsafe lease causes process failure and replay. SDK timeout
+settings are not a hard deadline for every OS/network failure.
+
+A crash discards WOERA state. Durable unacknowledged messages replay into fresh
+`Q` intervals. An uncertain or completed catalog mutation may be attempted again;
+PMCP reconciles current state idempotently. No checkpoint database is used.
+
+Deployment and experiment tools wait for old task ARNs to reach `STOPPED` before
+replacement. Service running-count zero alone is insufficient. Full multi-worker
+ADD/DROP would require an exclusive keyed event source and quiesce/replay; this
+Standard-SQS deployment does not validate that configuration or zombie fencing.
+
+Affected-partition convergence assumes notification admission and retention,
+valid routing, and enough worker/provider availability for retries to progress.
+It also requires an eligible notification after the relevant final storage-state
+change. Initial catalog alignment is assumed or supplied separately; drift in
+partitions with no eligible events is not repaired by the worker alone.
+Permanent notification omission, queue expiry/purge, invalid routing and permanent
+provider failure are outside that guarantee. Storage verification is not atomic
+with arbitrary writers. An independent native repair can be an operational
+backstop for omitted events.
+
+## AWS configuration
+
+| Variable | Meaning |
+|---|---|
+| `EVENT_QUEUE_URL`, `DEAD_LETTER_QUEUE_URL` | Durable input and terminal failure queues |
+| `RTMSF_SOURCES` | JSON map of logical source IDs to S3 bucket names |
+| `RTMSF_TABLE_IDS` | JSON list of configured `database.table` identifiers |
+| `SETTLING_MS` | Q; current pilot uses 10000 (10 seconds) |
+| `MAXIMUM_MS` | Maximum buffering residence; experiment uses 31000 |
+| `QUEUE_VISIBILITY_SECONDS` | Initial/renewed delivery lease; experiment uses 180 |
+
+S3/Glue and queue mutation calls use explicit SDK timeout/retry settings. Runtime
+budgets include the supported SQS batch shapes; startup configuration is checked
+before polling. Provider integrations implement the four interfaces in `interfaces.py`:
+`EventSource`, `ObjectStore`, `PartitionCatalog`, and `TelemetrySink`.
+
+Crash tests use the separate `experiments.aws.crash_worker` launcher and its
+`RTMSF_EXPERIMENT_FAULT` configuration. It records one durable marker outside
+table data, then exits at the selected boundary: before PMCP processing or after
+a successful catalog change, before acknowledgement. The marker prevents an
+endless crash loop. Normal `rtmsf.aws_app` startup does not read these fault settings.

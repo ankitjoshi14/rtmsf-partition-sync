@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use RTMSF in your research, please cite this software."
+type: software
+title: "RTMSF: Real-Time Metadata Synchronization Framework"
+authors:
+  - family-names: Joshi
+    given-names: Ankit
+repository-code: "https://github.com/ankitjoshi14/rtmsf-partition-sync"
+license: MIT

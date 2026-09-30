@@ -1,0 +1,86 @@
+{
+  "checks": [
+    {
+      "attempted": true,
+      "duplicate_replays": 3,
+      "name": "duplicate_old_events",
+      "native_bodies_captured": 2,
+      "normal_worker_restored": true,
+      "old_create_outcome": "not_visible_retry_exhaustion",
+      "old_delete_outcome": "still_non_empty",
+      "repetition": 1,
+      "replay_classification": "exact_captured_native_s3_notifications",
+      "status": "passed"
+    },
+    {
+      "attempted": true,
+      "cases": [
+        {
+          "case": "create_delete",
+          "handling": "not_visible_retry_exhaustion",
+          "present": false
+        },
+        {
+          "case": "delete_recreate",
+          "handling": "ordinary_completion",
+          "present": true
+        }
+      ],
+      "name": "rapid_changes",
+      "native_bodies_captured": 4,
+      "normal_worker_restored": true,
+      "repetition": 1,
+      "replayed_messages": 0,
+      "status": "passed",
+      "worker_stopped_during_mutation_pairs": true
+    }
+  ],
+  "metadata": {
+    "config": {
+      "audit_wait_seconds": 600,
+      "build_manifest": "evidence/runs/build-structure-09d8fcbb728b/image-build.json",
+      "checks_only": [
+        "duplicate_old_events",
+        "rapid_changes"
+      ],
+      "cleanup_run": null,
+      "comparisons_only": false,
+      "correctness_repetitions": 1,
+      "expected_account": "236680608737",
+      "files": [
+        1,
+        100
+      ],
+      "graph4_only": false,
+      "graph4_partitions": 100,
+      "graph5_only": false,
+      "layout": "hierarchical",
+      "layout_sizes": [
+        100
+      ],
+      "max_minutes": 45,
+      "output_dir": "evidence/runs",
+      "profile": "dev-user-user1",
+      "recovery_only": null,
+      "region": "us-west-2",
+      "repetitions": 1,
+      "request_source": "cloudwatch",
+      "sizes": [
+        100
+      ],
+      "stack": "testfanda-rtmsf-pilot-v2",
+      "timeout_seconds": 600
+    },
+    "correctness_repetitions": 1,
+    "data_kind": "aws_pilot",
+    "graph4_partitions": 100,
+    "graph_results": [],
+    "graphs": [],
+    "repetitions": 1,
+    "request_count_semantics": "Observed request counts; delivery completeness is not guaranteed.",
+    "run_status": "passed",
+    "trail_stopped": true,
+    "worker_stopped": true
+  },
+  "recovery_results": []
+}

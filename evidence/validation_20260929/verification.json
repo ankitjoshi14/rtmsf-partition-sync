@@ -1,0 +1,388 @@
+{
+  "artifact_hashes_verified": 264,
+  "assembly": {
+    "artifact_hashes_verified": 280,
+    "bundle": "validation_20260929_complete",
+    "reports_reproduced_byte_for_byte": [
+      "graph_data.csv",
+      "report_inputs.json",
+      "SUMMARY.md",
+      "recovery_table.md",
+      "checks_table.md",
+      "graph_1.png",
+      "graph_1.pdf",
+      "graph_2.png",
+      "graph_2.pdf",
+      "graph_3.png",
+      "graph_3.pdf",
+      "graph_4.png",
+      "graph_4.pdf",
+      "graph_5.png",
+      "graph_5.pdf"
+    ]
+  },
+  "author": "Ankit Joshi",
+  "cleanup_record": "aws-cleanup-verification.json",
+  "cloudtrail_calibration": {
+    "rtmsf-g2-athena-p100-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g2-glue-p100-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g2-rtmsf-p100-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g4-glue-p100-f1-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g4-glue-p100-f100-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g4-rtmsf-p100-f1-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g4-rtmsf-p100-f100-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g5-athena-p100-day-tenant-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g5-athena-p100-tenant-day-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g5-rtmsf-p100-day-tenant-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    },
+    "rtmsf-g5-rtmsf-p100-tenant-day-r1-run-20260929-175143-ae6b": {
+      "covered": true,
+      "expected_requests": 7,
+      "matched_requests": 7
+    }
+  },
+  "csv_columns": [
+    "graph",
+    "method",
+    "layout",
+    "measurement",
+    "x_axis_label",
+    "x_value",
+    "x_unit",
+    "y_axis_label",
+    "y_value",
+    "y_unit",
+    "repetition",
+    "action_label"
+  ],
+  "csv_rows": 146,
+  "errors": {},
+  "export_note": "CloudTrail credential-bearing event envelopes omitted; request names/times/IDs, counts, calibration and bounds retained. Original raw evidence remains local.",
+  "export_reports_reproduced_byte_for_byte": [
+    "graph_data.csv",
+    "report_inputs.json",
+    "SUMMARY.md",
+    "recovery_table.md",
+    "checks_table.md",
+    "graph_1.png",
+    "graph_1.pdf",
+    "graph_2.png",
+    "graph_2.pdf",
+    "graph_3.png",
+    "graph_3.pdf",
+    "graph_4.png",
+    "graph_4.pdf",
+    "graph_5.png",
+    "graph_5.pdf"
+  ],
+  "graph_outcomes": {
+    "passed": 15
+  },
+  "image": "236680608737.dkr.ecr.us-west-2.amazonaws.com/rtmsf-paper-v1-repository-ivdjq0nlptt1@sha256:5fa328e598ad810b1ae5ed44add8e4038588da5df32e0d2dcf890b1bd8ac8b7c",
+  "limitation": "Small validation: 100 initial partitions, Graph 4 with 1 and 100 existing files, one repetition. Does not complete the repeated paper matrix. Counts are best-effort observations, not billing-grade accounting.",
+  "observation_files_retained": 136,
+  "original_report_inputs_sha256": "eb0cf12d577934b675a45649045a70d5adb3bad9ec57d79f4b3e18f31fd13bd6",
+  "original_reports_preserved": [
+    "graph_data.csv",
+    "SUMMARY.md",
+    "recovery_table.md",
+    "checks_table.md",
+    "graph_1.png",
+    "graph_1.pdf",
+    "graph_2.png",
+    "graph_2.pdf",
+    "graph_3.png",
+    "graph_3.pdf",
+    "graph_4.png",
+    "graph_4.pdf",
+    "graph_5.png",
+    "graph_5.pdf"
+  ],
+  "raw_artifact_manifest_sha256": "68bbcfcd8d8a14396f5136e52180f44d828bbd52ed40e9a747c9e020a4972acc",
+  "raw_run": "run_20260929_175143_ae6b",
+  "recovery_outcomes": {
+    "passed": 4
+  },
+  "request_count_corroboration": [
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g2_athena_msck_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 9,
+      "cloudwatch": 9,
+      "measurement": "s3_head_requests",
+      "trial": "g2_athena_msck_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 8,
+      "cloudwatch": 8,
+      "measurement": "s3_list_requests",
+      "trial": "g2_athena_msck_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_get_requests",
+      "trial": "g2_glue_event_crawler_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_head_requests",
+      "trial": "g2_glue_event_crawler_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_list_requests",
+      "trial": "g2_glue_event_crawler_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g2_rtmsf_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_head_requests",
+      "trial": "g2_rtmsf_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_list_requests",
+      "trial": "g2_rtmsf_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 101,
+      "cloudwatch": 101,
+      "measurement": "s3_get_requests",
+      "trial": "g4_glue_event_crawler_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_head_requests",
+      "trial": "g4_glue_event_crawler_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_list_requests",
+      "trial": "g4_glue_event_crawler_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 2,
+      "cloudwatch": 2,
+      "measurement": "s3_get_requests",
+      "trial": "g4_glue_event_crawler_1_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 3,
+      "cloudwatch": 3,
+      "measurement": "s3_head_requests",
+      "trial": "g4_glue_event_crawler_1_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_list_requests",
+      "trial": "g4_glue_event_crawler_1_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g4_rtmsf_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_head_requests",
+      "trial": "g4_rtmsf_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_list_requests",
+      "trial": "g4_rtmsf_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g4_rtmsf_1_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_head_requests",
+      "trial": "g4_rtmsf_1_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_list_requests",
+      "trial": "g4_rtmsf_1_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g5_athena_msck_day_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 4,
+      "cloudwatch": 4,
+      "measurement": "s3_head_requests",
+      "trial": "g5_athena_msck_day_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 3,
+      "cloudwatch": 3,
+      "measurement": "s3_list_requests",
+      "trial": "g5_athena_msck_day_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g5_athena_msck_tenant_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 104,
+      "cloudwatch": 104,
+      "measurement": "s3_head_requests",
+      "trial": "g5_athena_msck_tenant_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 103,
+      "cloudwatch": 103,
+      "measurement": "s3_list_requests",
+      "trial": "g5_athena_msck_tenant_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g5_rtmsf_day_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_head_requests",
+      "trial": "g5_rtmsf_day_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_list_requests",
+      "trial": "g5_rtmsf_day_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_get_requests",
+      "trial": "g5_rtmsf_tenant_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 1,
+      "cloudwatch": 1,
+      "measurement": "s3_head_requests",
+      "trial": "g5_rtmsf_tenant_first_100_r1"
+    },
+    {
+      "agrees": true,
+      "cloudtrail": 0,
+      "cloudwatch": 0,
+      "measurement": "s3_list_requests",
+      "trial": "g5_rtmsf_tenant_first_100_r1"
+    }
+  ],
+  "request_values_available": 33,
+  "request_values_expected": 33,
+  "source_files_verified": 60,
+  "source_sha256": "638726c982cff33ef83d68232cbf75d89acc4e8224048bbee11f4dfcb0f0c969",
+  "source_unchanged": true,
+  "status": "passed",
+  "supporting_outcomes": {
+    "passed": 7
+  },
+  "verified_at": "2026-09-29T21:26:05.054616+00:00"
+}

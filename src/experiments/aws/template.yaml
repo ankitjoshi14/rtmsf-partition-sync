@@ -1,0 +1,372 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RTMSF pilot with one stopped ARM64 worker, isolated baselines, and bounded request auditing
+Parameters:
+  ExperimentId:
+    Type: String
+    Default: paper-v1
+    AllowedPattern: '[a-z][a-z0-9-]{2,19}'
+  DatabaseName:
+    Type: String
+    Default: rtmsf_experiments
+    AllowedPattern: 'rtmsf_[a-z0-9_]{1,100}'
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  WorkerImage:
+    Type: String
+    Default: public.ecr.aws/docker/library/python:3.12-slim
+    Description: Bootstrap only while desired count is zero; replace with repository@sha256 before starting.
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+  EventQueue:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      VisibilityTimeout: 180
+      MessageRetentionPeriod: 1209600
+      ReceiveMessageWaitTimeSeconds: 20
+      SqsManagedSseEnabled: true
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 20
+  NotificationPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues: [!Ref EventQueue]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: s3.amazonaws.com}
+            Action: sqs:SendMessage
+            Resource: !GetAtt EventQueue.Arn
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref 'AWS::AccountId'}
+              ArnEquals:
+                aws:SourceArn: !Sub 'arn:${AWS::Partition}:s3:::rtmsf-${ExperimentId}-data-${AWS::AccountId}-${AWS::Region}'
+  DataBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: NotificationPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'rtmsf-${ExperimentId}-data-${AWS::AccountId}-${AWS::Region}'
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Queue: !GetAtt EventQueue.Arn
+            Filter: {S3Key: {Rules: [{Name: prefix, Value: fixture/}]}}
+          - Event: 's3:ObjectRemoved:*'
+            Queue: !GetAtt EventQueue.Arn
+            Filter: {S3Key: {Rules: [{Name: prefix, Value: fixture/}]}}
+  MsckBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+  CrawlerEventQueue:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      VisibilityTimeout: 180
+      MessageRetentionPeriod: 1209600
+      ReceiveMessageWaitTimeSeconds: 20
+      SqsManagedSseEnabled: true
+  CrawlerNotificationPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues: [!Ref CrawlerEventQueue]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: s3.amazonaws.com}
+            Action: sqs:SendMessage
+            Resource: !GetAtt CrawlerEventQueue.Arn
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref 'AWS::AccountId'}
+              ArnEquals:
+                aws:SourceArn: !Sub 'arn:${AWS::Partition}:s3:::rtmsf-${ExperimentId}-crawler-${AWS::AccountId}-${AWS::Region}'
+  CrawlerBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: CrawlerNotificationPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'rtmsf-${ExperimentId}-crawler-${AWS::AccountId}-${AWS::Region}'
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Queue: !GetAtt CrawlerEventQueue.Arn
+            Filter: {S3Key: {Rules: [{Name: prefix, Value: fixture/}]}}
+          - Event: 's3:ObjectRemoved:*'
+            Queue: !GetAtt CrawlerEventQueue.Arn
+            Filter: {S3Key: {Rules: [{Name: prefix, Value: fixture/}]}}
+  AuditBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+  AuditBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AuditBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: cloudtrail.amazonaws.com}
+            Action: s3:GetBucketAcl
+            Resource: !GetAtt AuditBucket.Arn
+            Condition:
+              StringEquals:
+                aws:SourceArn: !Sub 'arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/${AWS::StackName}-requests'
+          - Effect: Allow
+            Principal: {Service: cloudtrail.amazonaws.com}
+            Action: s3:PutObject
+            Resource: !Sub '${AuditBucket.Arn}/AWSLogs/${AWS::AccountId}/*'
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+                aws:SourceArn: !Sub 'arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/${AWS::StackName}-requests'
+  RequestTrail:
+    Type: AWS::CloudTrail::Trail
+    DependsOn: AuditBucketPolicy
+    Properties:
+      TrailName: !Sub '${AWS::StackName}-requests'
+      S3BucketName: !Ref AuditBucket
+      IsLogging: true
+      IsMultiRegionTrail: false
+      IncludeGlobalServiceEvents: false
+      EnableLogFileValidation: true
+      AdvancedEventSelectors:
+        - Name: FixtureObjectReads
+          FieldSelectors:
+            - {Field: eventCategory, Equals: [Data]}
+            - {Field: resources.type, Equals: ['AWS::S3::Object']}
+            - {Field: readOnly, Equals: ['true']}
+            - Field: resources.ARN
+              StartsWith: [!Sub '${DataBucket.Arn}/', !Sub '${MsckBucket.Arn}/', !Sub '${CrawlerBucket.Arn}/']
+        # CloudTrail rejects bare bucket ARNs for AWS::S3::Object selectors.
+        # Calibration must establish whether these valid object prefixes also
+        # cover HEAD/LIST bucket calls. Do not assume coverage from deployment.
+  AthenaResultsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+  Database:
+    Type: AWS::Glue::Database
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      CatalogId: !Ref 'AWS::AccountId'
+      DatabaseInput: {Name: !Ref DatabaseName}
+  RtmsfTable:
+    Type: AWS::Glue::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      CatalogId: !Ref 'AWS::AccountId'
+      DatabaseName: !Ref Database
+      TableInput:
+        Name: rtmsf
+        TableType: EXTERNAL_TABLE
+        Parameters: {EXTERNAL: 'TRUE', classification: parquet}
+        PartitionKeys: [{Name: dt, Type: string}, {Name: site, Type: string}, {Name: hour, Type: string}]
+        StorageDescriptor:
+          Columns: [{Name: record_id, Type: bigint}, {Name: amount, Type: bigint}]
+          Location: !Sub 's3://${DataBucket}/fixture/'
+          InputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
+          OutputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat
+          SerdeInfo: {SerializationLibrary: org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe, Parameters: {serialization.format: '1'}}
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub '${AWS::StackName}-queries'
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+        BytesScannedCutoffPerQuery: 1073741824
+        ResultConfiguration:
+          OutputLocation: !Sub 's3://${AthenaResultsBucket}/athena/'
+          EncryptionConfiguration: {EncryptionOption: SSE_S3}
+  Repository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      ImageTagMutability: IMMUTABLE
+      ImageScanningConfiguration: {ScanOnPush: true}
+  WorkerLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RetentionInDays: 30
+  Cluster:
+    Type: AWS::ECS::Cluster
+  WorkerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Outbound HTTPS only for the RTMSF fixture worker
+      VpcId: !Ref VpcId
+      SecurityGroupEgress: [{IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0}]
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: ecs-tasks.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      Policies:
+        - PolicyName: ImageAndLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - {Effect: Allow, Action: 'ecr:GetAuthorizationToken', Resource: '*'}
+              - Effect: Allow
+                Action: ['ecr:BatchCheckLayerAvailability', 'ecr:GetDownloadUrlForLayer', 'ecr:BatchGetImage']
+                Resource: !GetAtt Repository.Arn
+              - Effect: Allow
+                Action: ['logs:CreateLogStream', 'logs:PutLogEvents']
+                Resource: !GetAtt WorkerLogs.Arn
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: ecs-tasks.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      Policies:
+        - PolicyName: FixtureOnly
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ['sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueAttributes']
+                Resource: !GetAtt EventQueue.Arn
+              - {Effect: Allow, Action: 'sqs:SendMessage', Resource: !GetAtt DeadLetterQueue.Arn}
+              - {Effect: Allow, Action: 's3:GetObject', Resource: !Sub '${DataBucket.Arn}/fixture/*'}
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt DataBucket.Arn
+                Condition: {StringLike: {'s3:prefix': ['fixture/*']}}
+              - {Effect: Allow, Action: 's3:PutObject', Resource: !Sub '${DataBucket.Arn}/_experiment/crash/*.json'}
+              - Effect: Allow
+                Action: ['glue:GetTable', 'glue:GetPartition', 'glue:CreatePartition', 'glue:DeletePartition']
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${Database}'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${Database}/rtmsf*'
+  CrawlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: glue.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      Policies:
+        - PolicyName: CrawlerFixturesOnly
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ['s3:GetObject']
+                Resource: !Sub '${CrawlerBucket.Arn}/fixture/*'
+              - Effect: Allow
+                Action: ['s3:ListBucket', 's3:GetBucketLocation']
+                Resource: !GetAtt CrawlerBucket.Arn
+              - Effect: Allow
+                Action: ['sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueAttributes', 'sqs:SetQueueAttributes', 'sqs:GetQueueUrl', 'sqs:ListQueueTags']
+                Resource: !GetAtt CrawlerEventQueue.Arn
+              - Effect: Allow
+                Action: ['glue:GetDatabase', 'glue:GetTable', 'glue:GetTables', 'glue:CreateTable', 'glue:UpdateTable', 'glue:GetPartition', 'glue:GetPartitions', 'glue:BatchGetPartition', 'glue:CreatePartition', 'glue:BatchCreatePartition', 'glue:UpdatePartition', 'glue:BatchUpdatePartition', 'glue:DeletePartition', 'glue:BatchDeletePartition']
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${Database}'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${Database}/crawler*'
+              - Effect: Allow
+                Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']
+                Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers*'
+  WorkerTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      RuntimePlatform: {CpuArchitecture: ARM64, OperatingSystemFamily: LINUX}
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: worker
+          Image: !Ref WorkerImage
+          Essential: true
+          StopTimeout: 30
+          Environment:
+            - {Name: AWS_REGION, Value: !Ref 'AWS::Region'}
+            - {Name: PYTHONUNBUFFERED, Value: '1'}
+            - {Name: EVENT_QUEUE_URL, Value: !Ref EventQueue}
+            - {Name: DEAD_LETTER_QUEUE_URL, Value: !Ref DeadLetterQueue}
+            - {Name: RTMSF_SOURCES, Value: !Sub '{"fixture":"${DataBucket}"}'}
+            - {Name: RTMSF_TABLE_IDS, Value: !Sub '["${Database}.rtmsf"]'}
+            - {Name: SETTLING_MS, Value: '10000'}
+            - {Name: MAXIMUM_MS, Value: '31000'}
+            - {Name: QUEUE_VISIBILITY_SECONDS, Value: '180'}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options: {awslogs-group: !Ref WorkerLogs, awslogs-region: !Ref 'AWS::Region', awslogs-stream-prefix: worker}
+  WorkerService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref WorkerTask
+      DesiredCount: 0
+      LaunchType: FARGATE
+      DeploymentConfiguration: {MinimumHealthyPercent: 0, MaximumPercent: 100}
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups: [!Ref WorkerSecurityGroup]
+          Subnets: !Ref SubnetIds
+Outputs:
+  DataBucketName: {Value: !Ref DataBucket}
+  MsckBucketName: {Value: !Ref MsckBucket}
+  CrawlerBucketName: {Value: !Ref CrawlerBucket}
+  CrawlerEventQueueUrl: {Value: !Ref CrawlerEventQueue}
+  CrawlerRoleArn: {Value: !GetAtt CrawlerRole.Arn}
+  TaskRoleArn: {Value: !GetAtt TaskRole.Arn}
+  AuditBucketName: {Value: !Ref AuditBucket}
+  TrailName: {Value: !Ref RequestTrail}
+  AthenaResultsBucketName: {Value: !Ref AthenaResultsBucket}
+  GlueDatabaseName: {Value: !Ref Database}
+  RtmsfTableName: {Value: !Ref RtmsfTable}
+  AthenaWorkGroupName: {Value: !Ref AthenaWorkGroup}
+  EventQueueUrl: {Value: !Ref EventQueue}
+  DeadLetterQueueUrl: {Value: !Ref DeadLetterQueue}
+  ClusterName: {Value: !Ref Cluster}
+  ServiceName: {Value: !GetAtt WorkerService.Name}
+  EcrRepositoryUri: {Value: !GetAtt Repository.RepositoryUri}
+  LogGroupName: {Value: !Ref WorkerLogs}
