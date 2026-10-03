@@ -19,7 +19,7 @@ from experiments.aws.request_audit import RequestAudit
 from experiments.aws.request_metrics import METRICS, RequestMetrics, wait_until
 from experiments.aws.trial_buckets import TrialBuckets
 from experiments.aws.workloads import Pilot
-from experiments.evidence import EvidenceBundle, source_snapshot, utc
+from experiments.evidence import EvidenceBundle, source_snapshot, validate_image_manifest, utc
 
 BURSTS = ('quick', 'spaced', 'distributed', 'mixed')
 LOADS = tuple(f'load_{rate}ps_{active}p' for rate in (1, 5, 20) for active in (10, 100, 1000))
@@ -293,11 +293,7 @@ def main():
     outputs = {item['OutputKey']: item['OutputValue'] for item in stack['Outputs']}
     source = source_snapshot(Path.cwd())
     build = json.loads(args.build_manifest.read_text())
-    runtime_names = [name for name in source['files'] if name.startswith('src/rtmsf/')]
-    runtime_names += ['src/experiments/__init__.py', 'src/experiments/aws/__init__.py',
-                      'src/experiments/aws/crash_worker.py', 'src/experiments/aws/activity_worker.py']
-    if build.get('files') != {name: source['files'][name] for name in runtime_names}:
-        raise ValueError('image runtime differs from current source; rebuild the experiment image')
+    validate_image_manifest(build, source['files'])
     run_id = 'run_' + time.strftime('%Y%m%d_%H%M%S', time.gmtime()) + '_' + uuid.uuid4().hex[:4]
     root = args.output_dir / run_id
     bundle = EvidenceBundle(root, dict(config=vars(args), outputs=outputs, source=source, kind='bounded_activity_validation'))

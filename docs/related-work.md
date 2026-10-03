@@ -142,6 +142,10 @@ each event a separate immediate intent. For quick, spaced, distributed, and
 mixed bursts of 20 operations, RTMSF used 1/2/20/11 storage checks versus 20 each
 for that control. The control reached first visibility sooner. This is one
 repetition of a coalescing ablation, not an independently optimized competitor.
+An alternative that already groups events and uses equivalent storage, timing,
+ownership, retry and acknowledgement rules could provide the same central work
+bound and recovery behavior. RTMSF makes that design concrete; no fundamental
+advantage over an equally capable grouped implementation is established.
 Continuous-load and two-repeat buffer validation additionally measure progress,
 backlog, catch-up, and exact final state. They supply bounded operating evidence,
 not maximum throughput or proof of research significance; see the [evidence index][evidence].
@@ -158,8 +162,10 @@ internals, while RTMSF addresses reconciliation with external storage.
 Snowflake supplies precedent for notification-driven external-table refresh;
 Athena projection can avoid explicit registration for suitable query workloads.
 RTMSF's deployment distinction is maintaining membership in an existing catalog
-without requiring a writer-format change. That distinction alone does not prove
-the combined mechanism is a substantial new systems contribution.
+without requiring a writer-format change. The proposed contribution is the complete
+system, its processing contract, and the measured design tradeoffs. Grouping,
+existence checks and replay are established ingredients. The deployment distinction
+alone does not prove the combined system is a substantial research contribution.
 
 This distinguishes the deployment problem and the systems' responsibilities.
 It does not establish originality by excluding different architectures or by

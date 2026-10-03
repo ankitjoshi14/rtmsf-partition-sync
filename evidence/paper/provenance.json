@@ -1,0 +1,48 @@
+{
+  "account_placeholder": "000000000000",
+  "author": "Ankit Joshi",
+  "failures": "Graph-validation retains incomplete_or_failed parent status; failed-activity retains ten passed, one failed and five unattempted conditions. A fixture-seeding connection failure happened before measurement; its planned graph conditions remained unattempted.",
+  "historical_limit": "Primary figures have no full catalog snapshots; later snapshots do not replace them.",
+  "identity_fields_removed": {},
+  "nested_identity_fields_removed": {},
+  "release_date": "2026-10-02",
+  "runs": {
+    "activity": {
+      "execution": "run_20260930_151218_2a18",
+      "original_artifact_entries_verified": 1300,
+      "original_source_entries_verified": 62,
+      "source_sha256": "34236e6201b5654db12f62852c4806fe79062fabaef1d959ad7fe5982e6c1337"
+    },
+    "buffer": {
+      "execution": "run_20260930_194451_fcee",
+      "original_artifact_entries_verified": 1416,
+      "original_source_entries_verified": 62,
+      "source_sha256": "6ad2103fbb22059eef5de5f569e1abfe5d6772577a0612c5dde52c0927337c38"
+    },
+    "failed-activity": {
+      "execution": "run_20260930_141608_ea3f",
+      "original_artifact_entries_verified": 1165,
+      "original_source_entries_verified": 62,
+      "source_sha256": "2ebf4b16d6656a4724606a3d4bc89a015fe03cd35f75bc5ef5620b517ae00f1c"
+    },
+    "failed-seeding": {
+      "execution": "run_20260930_112636_03cf",
+      "original_artifact_entries_verified": 812,
+      "original_source_entries_verified": 62,
+      "source_sha256": "197912de608992cbf453e3589975f1a48b3166d81ddd4195aedd33d7e72e6fe1"
+    },
+    "figures": {
+      "execution": "run_20260930_004034_214f",
+      "original_artifact_entries_verified": 1019,
+      "original_source_entries_verified": 58,
+      "source_sha256": "b8623cf17cb6c9b2647717dc467cb05c232391cfa96d4ae5346ff724f8116efc"
+    },
+    "graph-validation": {
+      "execution": "run_20260930_113402_14ae",
+      "original_artifact_entries_verified": 2430,
+      "original_source_entries_verified": 62,
+      "source_sha256": "2ebf4b16d6656a4724606a3d4bc89a015fe03cd35f75bc5ef5620b517ae00f1c"
+    }
+  },
+  "selection": "Source, reports, scientific observations, scoped request/calibration coverage, catalog and query snapshots. Full CloudTrail downloads and duplicate collection/log files excluded."
+}

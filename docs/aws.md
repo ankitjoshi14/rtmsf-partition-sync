@@ -46,7 +46,7 @@ The command prints the stack outputs. Store its `EcrRepositoryUri` in
 
 Use Docker with ARM64 build support. Rebuild the worker image when its runtime
 code or dependency configuration changes. Host-only runner, report, test, or
-documentation changes may reuse an image whose runtime file hashes still match;
+documentation changes may reuse an image whose runtime and build-input hashes still match;
 each execution separately archives and identifies its current host source.
 The default Docker target is `production`, whose entry point is `rtmsf.aws_app`.
 Build `--target experiment` for this pilot so the same image also contains
@@ -83,7 +83,7 @@ export RTMSF_DIGEST=$(aws ecr describe-images \
 export RTMSF_IMAGE="$RTMSF_ECR@$RTMSF_DIGEST"
 
 uv run --frozen --extra dev python - <<'PY'
-import json, os, subprocess
+import hashlib, json, os, subprocess
 from pathlib import Path
 inspect_image = '''
 import hashlib, importlib.metadata, json
@@ -109,6 +109,8 @@ manifest.write_text(json.dumps({
     'source_hash': os.environ['RTMSF_SOURCE_HASH'],
     'image': os.environ['RTMSF_IMAGE'],
     'target': 'experiment',
+    'build_files': {name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
+                    for name in ('Dockerfile', 'pyproject.toml', '.dockerignore')},
     **json.loads(runtime),
 }, indent=2) + '\n')
 PY
@@ -138,8 +140,9 @@ uv run --frozen --extra experiment python -m experiments.aws.run \
 This validation selects all five graphs, fresh fixtures, Q=10 seconds, and one
 repetition per condition. After the graph/correctness checks pass, the same command
 runs the activity comparisons and load tests under `activity/` in the printed bundle.
-The full run uses `--sizes 100 1000 5000 10000 --layout-sizes 100 1000 5000 10000
---repetitions 5 --correctness-repetitions 3 --activity full --max-minutes 900`.
+An optional larger repeated run uses `--sizes 100 1000 5000 10000`,
+`--layout-sizes 100 1000 5000 10000`, `--repetitions 5`,
+`--correctness-repetitions 3`, `--activity full` and `--max-minutes 900`.
 The 100K scaling extension is separate. Each run is independent; no CSV assembly is needed. A smaller Graph 5-only check uses
 `--graph5-only --layout-sizes 100 --repetitions 1 --max-minutes 60`
 with the same account, stack, image-manifest and collection options: four trials.
@@ -170,7 +173,7 @@ Without the second option, both counts use `--repetitions` (default 1).
 Choose the time budget explicitly. `--max-minutes` stops new trials from
 starting; setup, active operations, shutdown and final collection can extend
 elapsed time beyond it. Supported inputs are up to 100K main-layout partitions,
-10K existing files and 10K Graph 5 partitions. Those limits do not establish
+10K existing files and 100K Graph 5 partitions. Those limits do not establish
 successful scale measurements. Choose sizes and repetitions as described below.
 
 Read the printed directory's `SUMMARY.md`, `graph_data.csv`, `graph_1`–`graph_5`
@@ -209,8 +212,26 @@ Legacy 11-column CSVs remain readable. Bucket names never determine the figures.
 `--update-image` keeps the deployed CloudFormation template and its resource
 names, changing only the worker image parameter. Template changes need a fresh
 deployment through this utility. Rebuild after runtime source/dependency changes. A historical manifest without
-`files`, or one with mismatched runtime hashes, cannot validate this checkout.
+`files`/`build_files`, or one with mismatched runtime/build-input hashes, cannot validate this checkout.
 Keep each verified manifest with its evidence instead of overwriting old records.
+
+### Repeat the manuscript's measured conditions
+
+For the primary figures, replace the size options in the complete command above
+with the following (omit `--activity quick` to keep the source sets separate):
+
+```text
+--sizes 10 100 500 1000 --layout-sizes 10 100 500 1000
+--files 1 100 --graph4-partitions 100 --repetitions 2
+--correctness-repetitions 1 --max-minutes 300
+```
+
+The graph-validation follow-up instead uses `--sizes 100 1000`,
+`--layout-sizes 100 1000`, `--files 1 100 1000`, `--graph4-partitions 1000`,
+and one repetition. These commands use current source and create fresh
+measurements. Exact historical source is retained in the full release archive;
+its digest is recorded in [provenance](../evidence/paper/provenance.json).
+Cloud timings need not match. Do not merge results across source versions.
 
 ### What a run and a rerun create
 
@@ -291,13 +312,11 @@ plotting utility can redraw those reports offline from the saved records.
 
 Omit the selective mode flag to run all five graphs, recovery and supporting
 checks. `--repetitions` controls comparison repeats; `--correctness-repetitions`
-separately controls lifecycle, recovery and supporting checks. The paper's
-planned sizes and repetition counts remain in [the specification](experiments.md).
+separately controls lifecycle, recovery and supporting checks. Measured and optional larger matrices remain in [the specification](experiments.md).
 
 Choose a time budget from preceding runs. `--max-minutes` stops new trials from
 starting; setup, active work, collection and cleanup may finish later. At 100K,
-three methods with five repetitions prepare 1.5 million baseline files. The
-full paper matrix has 170 comparisons and about 2.5 million baseline files;
+three methods with five repetitions prepare 1.5 million baseline files. Large repeated matrices prepare many independent copies;
 small-validation time budgets do not cover that work. Preserve failed and
 unattempted results along with successful ones.
 
@@ -381,7 +400,17 @@ uv run --frozen --extra experiment python -m experiments.aws.activity \
 ```
 
 Use `--conditions quick spaced distributed mixed` for just the comparison, or
-select continuous conditions listed by `--help`. The deadline stops new work;
+select continuous conditions listed by `--help`. The successful manuscript
+subset uses:
+
+```text
+--conditions quick spaced distributed mixed
+continuous_1ps_10p continuous_1ps_20p continuous_3ps_10p continuous_3ps_20p
+load_1ps_1000p load_5ps_1000p load_20ps_10p load_20ps_1000p
+--repetitions 1 --max-minutes 150
+```
+
+The deadline stops new work;
 measurement delivery and cleanup finish afterward. The printed `runs/<execution>`
 contains `activity_data.csv`, `activity_timeline.csv`, `SUMMARY.md` and supporting
 records. It does not replace the five-graph results. Regenerate its tables offline:

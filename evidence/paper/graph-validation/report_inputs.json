@@ -1,0 +1,810 @@
+{
+  "checks": [
+    {
+      "applied_catalog_changes": 1,
+      "attempted": true,
+      "coalescing_observed": true,
+      "distinct_files": 20,
+      "files": 20,
+      "name": "short_burst",
+      "observations_per_pmcp_attempt": [
+        20
+      ],
+      "observed_events": 20,
+      "partitions": 1,
+      "pmcp_attempts": 1,
+      "repetition": 1,
+      "status": "passed",
+      "upload_duration_s": 2.468593332916498
+    },
+    {
+      "actual_upload_gaps_s": [
+        5.021109917201102,
+        4.999418833293021,
+        5.036700332537293,
+        4.997354209423065,
+        5.0367396250367165,
+        5.006380457431078,
+        4.946503083221614,
+        5.015197291970253
+      ],
+      "attempted": true,
+      "files": 9,
+      "first_pmcp_result": {
+        "action": "pmcp_result",
+        "component": "worker",
+        "mutation": "ADD",
+        "observation_count": 7,
+        "partition": "dt=2026-01-01/site=site-000/hour=00",
+        "reason": "created",
+        "source_id": "fixture",
+        "status": "APPLIED",
+        "table_id": "rtmsf_experiments.rtmsf_check_long_burst_r1_20260930_113402_14ae",
+        "timestamp": "2026-09-30T13:33:30.897795+00:00"
+      },
+      "first_processing_from_receive_s": 32.174464,
+      "first_receive": "2026-09-30T13:32:58.723331+00:00",
+      "first_visibility_offset_s": 33.90445408318192,
+      "maximum_actual_upload_gap_s": 5.0367396250367165,
+      "maximum_observer_gap_s": 1.427562290802598,
+      "measured_provider_duration_s": 0.27206600000000003,
+      "measured_tolerance_s": 1.6996282908025981,
+      "name": "long_burst",
+      "progress_before_final_upload": true,
+      "repetition": 1,
+      "scheduled_span_s": 40,
+      "status": "passed"
+    },
+    {
+      "attempted": true,
+      "files": 30,
+      "files_per_partition": 5,
+      "name": "two_tables",
+      "partitions_per_table": 3,
+      "repetition": 1,
+      "status": "passed",
+      "tables": 2
+    },
+    {
+      "attempted": true,
+      "expected_dlq_messages": 0,
+      "injected_failures": 2,
+      "name": "retryable_failures",
+      "normal_worker_restored": true,
+      "repetition": 1,
+      "replayed_bodies_are_captured_native_notifications": false,
+      "status": "passed"
+    },
+    {
+      "attempted": true,
+      "expected_dlq_messages": 1,
+      "injected_failures": 6,
+      "name": "retry_exhaustion",
+      "normal_worker_restored": true,
+      "repetition": 1,
+      "replayed_bodies_are_captured_native_notifications": true,
+      "status": "passed"
+    },
+    {
+      "attempted": true,
+      "duplicate_replays": 3,
+      "name": "duplicate_old_events",
+      "native_bodies_captured": 2,
+      "normal_worker_restored": true,
+      "old_create_outcome": "not_visible_retry_exhaustion",
+      "old_delete_outcome": "still_non_empty",
+      "repetition": 1,
+      "replay_classification": "exact_captured_native_s3_notifications",
+      "status": "passed"
+    },
+    {
+      "attempted": true,
+      "cases": [
+        {
+          "case": "create_delete",
+          "handling": "not_visible_retry_exhaustion",
+          "present": false
+        },
+        {
+          "case": "delete_recreate",
+          "handling": "ordinary_completion",
+          "present": true
+        }
+      ],
+      "name": "rapid_changes",
+      "native_bodies_captured": 4,
+      "normal_worker_restored": true,
+      "repetition": 1,
+      "replayed_messages": 0,
+      "status": "passed",
+      "worker_stopped_during_mutation_pairs": true
+    },
+    {
+      "attempted": true,
+      "name": "marker_lifecycle",
+      "partitions": 1,
+      "phases": [
+        {
+          "expected_present": true,
+          "operation": "CREATE"
+        },
+        {
+          "expected_present": true,
+          "operation": "DELETE_PARQUET_KEEP_MARKER"
+        },
+        {
+          "expected_present": false,
+          "operation": "DELETE"
+        }
+      ],
+      "repetition": 1,
+      "status": "passed"
+    }
+  ],
+  "metadata": {
+    "activity_command": [
+      "/Users/jarvis/GA/repos/rtmsf-partition-sync/.venv/bin/python",
+      "-u",
+      "-m",
+      "experiments.aws.activity",
+      "--stack",
+      "rtmsf-paper-v1",
+      "--expected-account",
+      "000000000000",
+      "--profile",
+      "dev-user-user1",
+      "--region",
+      "us-west-2",
+      "--build-manifest",
+      "runs/build-marker-load-20260930/image-build.json",
+      "--output-dir",
+      "runs/run_20260930_113402_14ae/activity",
+      "--repetitions",
+      "1",
+      "--burst-repetitions",
+      "1",
+      "--max-minutes",
+      "240",
+      "--quick"
+    ],
+    "activity_status": "incomplete_or_failed",
+    "config": {
+      "activity": "quick",
+      "audit_wait_seconds": 600,
+      "build_manifest": "runs/build-marker-load-20260930/image-build.json",
+      "checks_only": null,
+      "cleanup_run": null,
+      "comparisons_only": false,
+      "correctness_repetitions": 1,
+      "expected_account": "000000000000",
+      "files": [
+        1,
+        100,
+        1000
+      ],
+      "graph4_only": false,
+      "graph4_partitions": 1000,
+      "graph5_only": false,
+      "layout_sizes": [
+        100,
+        1000
+      ],
+      "max_minutes": 240,
+      "output_dir": "runs",
+      "profile": "dev-user-user1",
+      "recovery_only": null,
+      "region": "us-west-2",
+      "repetitions": 1,
+      "request_source": "cloudwatch",
+      "sizes": [
+        100,
+        1000
+      ],
+      "stack": "rtmsf-paper-v1",
+      "timeout_seconds": 600
+    },
+    "correctness_repetitions": 1,
+    "data_kind": "aws_pilot",
+    "fixture_layouts": {
+      "g2_athena_msck_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g2_athena_msck_100_r1": {
+        "occupied_prefixes": [
+          1,
+          5,
+          100
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 100
+      },
+      "g2_glue_event_crawler_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g2_glue_event_crawler_100_r1": {
+        "occupied_prefixes": [
+          1,
+          5,
+          100
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 100
+      },
+      "g2_rtmsf_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g2_rtmsf_100_r1": {
+        "occupied_prefixes": [
+          1,
+          5,
+          100
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 100
+      },
+      "g4_glue_event_crawler_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g4_glue_event_crawler_100_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g4_glue_event_crawler_1_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g4_rtmsf_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g4_rtmsf_100_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g4_rtmsf_1_r1": {
+        "occupied_prefixes": [
+          1,
+          42,
+          1000
+        ],
+        "partition_columns": [
+          "dt",
+          "site",
+          "hour"
+        ],
+        "starting_partitions": 1000
+      },
+      "g5_athena_msck_day_first_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          1000
+        ],
+        "partition_columns": [
+          "day",
+          "tenant"
+        ],
+        "starting_partitions": 1000
+      },
+      "g5_athena_msck_day_first_100_r1": {
+        "occupied_prefixes": [
+          1,
+          100
+        ],
+        "partition_columns": [
+          "day",
+          "tenant"
+        ],
+        "starting_partitions": 100
+      },
+      "g5_athena_msck_tenant_first_1000_r1": {
+        "occupied_prefixes": [
+          1000,
+          1000
+        ],
+        "partition_columns": [
+          "tenant",
+          "day"
+        ],
+        "starting_partitions": 1000
+      },
+      "g5_athena_msck_tenant_first_100_r1": {
+        "occupied_prefixes": [
+          100,
+          100
+        ],
+        "partition_columns": [
+          "tenant",
+          "day"
+        ],
+        "starting_partitions": 100
+      },
+      "g5_rtmsf_day_first_1000_r1": {
+        "occupied_prefixes": [
+          1,
+          1000
+        ],
+        "partition_columns": [
+          "day",
+          "tenant"
+        ],
+        "starting_partitions": 1000
+      },
+      "g5_rtmsf_day_first_100_r1": {
+        "occupied_prefixes": [
+          1,
+          100
+        ],
+        "partition_columns": [
+          "day",
+          "tenant"
+        ],
+        "starting_partitions": 100
+      },
+      "g5_rtmsf_tenant_first_1000_r1": {
+        "occupied_prefixes": [
+          1000,
+          1000
+        ],
+        "partition_columns": [
+          "tenant",
+          "day"
+        ],
+        "starting_partitions": 1000
+      },
+      "g5_rtmsf_tenant_first_100_r1": {
+        "occupied_prefixes": [
+          100,
+          100
+        ],
+        "partition_columns": [
+          "tenant",
+          "day"
+        ],
+        "starting_partitions": 100
+      }
+    },
+    "graph4_partitions": 1000,
+    "graph_results": [
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 1,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "lifecycle_r1",
+        "x_value": null
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 2,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_rtmsf_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 3,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_rtmsf_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 2,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_glue_event_crawler_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 3,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_glue_event_crawler_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 2,
+        "layout": "",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_athena_msck_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 3,
+        "layout": "",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_athena_msck_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 2,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_rtmsf_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 3,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_rtmsf_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 2,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_glue_event_crawler_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 3,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_glue_event_crawler_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 2,
+        "layout": "",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_athena_msck_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 3,
+        "layout": "",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g2_athena_msck_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 4,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g4_rtmsf_1_r1",
+        "x_value": 1
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 4,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g4_glue_event_crawler_1_r1",
+        "x_value": 1
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 4,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g4_rtmsf_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 4,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g4_glue_event_crawler_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 4,
+        "layout": "",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g4_rtmsf_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 4,
+        "layout": "",
+        "method": "glue_event_crawler",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g4_glue_event_crawler_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "day_first",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_rtmsf_day_first_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "day_first",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_athena_msck_day_first_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "tenant_first",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_rtmsf_tenant_first_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "tenant_first",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_athena_msck_tenant_first_100_r1",
+        "x_value": 100
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "day_first",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_rtmsf_day_first_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "day_first",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_athena_msck_day_first_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "tenant_first",
+        "method": "rtmsf",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_rtmsf_tenant_first_1000_r1",
+        "x_value": 1000
+      },
+      {
+        "attempted": true,
+        "error": null,
+        "graph": 5,
+        "layout": "tenant_first",
+        "method": "athena_msck",
+        "repetition": 1,
+        "status": "passed",
+        "trial_id": "g5_athena_msck_tenant_first_1000_r1",
+        "x_value": 1000
+      }
+    ],
+    "graphs": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "repetitions": 1,
+    "request_count_semantics": "Observed request counts; delivery completeness is not guaranteed.",
+    "request_coverage": {
+      "source": "cloudwatch"
+    },
+    "run_status": "incomplete_or_failed",
+    "task_definition_restored": "arn:aws:ecs:us-west-2:000000000000:task-definition/rtmsf-paper-v1-WorkerTask-UbzeG44EvVEj:1",
+    "trail_stopped": true,
+    "trial_buckets_deleted": true,
+    "worker_stopped": true
+  },
+  "recovery_results": [
+    {
+      "case": "add_before_processing",
+      "crash_verified": true,
+      "expected_present": true,
+      "observed_present": true,
+      "repetition": 1,
+      "replay_ack_verified": true,
+      "status": "passed"
+    },
+    {
+      "case": "add_after_catalog_change",
+      "crash_verified": true,
+      "expected_present": true,
+      "observed_present": true,
+      "repetition": 1,
+      "replay_ack_verified": true,
+      "status": "passed"
+    },
+    {
+      "case": "drop_before_processing",
+      "crash_verified": true,
+      "expected_present": false,
+      "observed_present": false,
+      "repetition": 1,
+      "replay_ack_verified": true,
+      "status": "passed"
+    },
+    {
+      "case": "drop_after_catalog_change",
+      "crash_verified": true,
+      "expected_present": false,
+      "observed_present": false,
+      "repetition": 1,
+      "replay_ack_verified": true,
+      "status": "passed"
+    }
+  ]
+}

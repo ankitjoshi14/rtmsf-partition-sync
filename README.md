@@ -27,7 +27,8 @@ and limits. Other cloud implementations and multi-worker operation are not valid
 | Understand the algorithm and its guarantees | [System behavior](docs/system-behavior.md) |
 | Understand each graph, workload and measurement | [Experiment specification](docs/experiments.md) — authoritative design |
 | Deploy, run experiments, regenerate graphs and clean up | [AWS runbook](docs/aws.md) |
-| See the latest verified sample results and limitations | [Evidence index](evidence/README.md) |
+| Inspect the paper results and limitations | [Evidence index](evidence/README.md) |
+| Read the manuscript | [Paper](paper/manuscript.md) · [PDF](paper/manuscript.pdf) |
 | Read the research positioning | [Related work](docs/related-work.md) |
 
 ## Run locally
@@ -72,7 +73,8 @@ src/
       deploy.py / template.yaml AWS fixture provisioning
 tests/                    Local verification
 docs/                     System behavior, experiment specification and runbook
-evidence/                 Selected, verified sample results
+paper/                    Manuscript and readable PDF
+evidence/                 Paper CSVs, inputs, figures and source provenance
 runs/                     Generated local bundles (created on use, Git-ignored)
 ```
 
@@ -102,10 +104,11 @@ measurements; they do not create separate figures. Missing measurements remain
 unknown. The production image contains `rtmsf`; the experiment image additionally
 contains the fault launcher.
 
-Use the [verified AWS sample](evidence/README.md) to try graph generation;
-the command is in the [experiment specification](docs/experiments.md#data-files-and-plotting-rules).
+Use the [paper evidence](evidence/paper/README.md) to try graph generation;
+the regeneration commands are in its README.
 `evidence/` contains selected exports, not scripts or a history of exploratory
-runs. Source archives inside results identify the code used for that measurement.
+runs. The full release archive retains each measured source archive;
+[provenance](evidence/paper/provenance.json) identifies those versions in the repository.
 
 ## Contributing and citation
 

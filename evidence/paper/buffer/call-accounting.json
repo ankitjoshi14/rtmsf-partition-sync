@@ -1,0 +1,98 @@
+[
+  {
+    "calls": {
+      "Glue.GetPartition": {
+        "calls": 40,
+        "sdk_seconds": 2.053
+      },
+      "S3.ListObjectsV2": {
+        "calls": 40,
+        "sdk_seconds": 0.995
+      },
+      "SQS.DeleteMessageBatch": {
+        "calls": 2400,
+        "sdk_seconds": 22.569
+      },
+      "SQS.ReceiveMessage": {
+        "calls": 650,
+        "sdk_seconds": 125.364
+      }
+    },
+    "condition": "load_20ps_10p",
+    "oldest_unacknowledged_at_write_end_s": 9.885827749967575,
+    "repetition": 1,
+    "unacknowledged_at_write_end": 192
+  },
+  {
+    "calls": {
+      "Glue.GetPartition": {
+        "calls": 2081,
+        "sdk_seconds": 74.632
+      },
+      "S3.ListObjectsV2": {
+        "calls": 2081,
+        "sdk_seconds": 41.609
+      },
+      "SQS.DeleteMessageBatch": {
+        "calls": 2400,
+        "sdk_seconds": 13.315
+      },
+      "SQS.ReceiveMessage": {
+        "calls": 384,
+        "sdk_seconds": 81.317
+      }
+    },
+    "condition": "load_20ps_1000p",
+    "oldest_unacknowledged_at_write_end_s": 77.59654958266765,
+    "repetition": 1,
+    "unacknowledged_at_write_end": 1390
+  },
+  {
+    "calls": {
+      "Glue.GetPartition": {
+        "calls": 40,
+        "sdk_seconds": 1.598
+      },
+      "S3.ListObjectsV2": {
+        "calls": 40,
+        "sdk_seconds": 0.809
+      },
+      "SQS.DeleteMessageBatch": {
+        "calls": 2400,
+        "sdk_seconds": 11.621
+      },
+      "SQS.ReceiveMessage": {
+        "calls": 662,
+        "sdk_seconds": 176.69
+      }
+    },
+    "condition": "load_20ps_10p",
+    "oldest_unacknowledged_at_write_end_s": 17.857368333265185,
+    "repetition": 2,
+    "unacknowledged_at_write_end": 354
+  },
+  {
+    "calls": {
+      "Glue.GetPartition": {
+        "calls": 2020,
+        "sdk_seconds": 74.679
+      },
+      "S3.ListObjectsV2": {
+        "calls": 2018,
+        "sdk_seconds": 37.581
+      },
+      "SQS.DeleteMessageBatch": {
+        "calls": 2400,
+        "sdk_seconds": 21.085
+      },
+      "SQS.ReceiveMessage": {
+        "calls": 386,
+        "sdk_seconds": 102.748
+      }
+    },
+    "condition": "load_20ps_1000p",
+    "oldest_unacknowledged_at_write_end_s": 73.29702304117382,
+    "repetition": 2,
+    "unacknowledged_at_write_end": 1345
+  }
+]

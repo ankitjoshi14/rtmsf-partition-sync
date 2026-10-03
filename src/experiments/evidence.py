@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 import hashlib
 import json
+import re
 from pathlib import Path
 
 
@@ -37,3 +38,19 @@ def source_snapshot(root: Path) -> dict:
     files.extend(root / name for name in ("pyproject.toml", "uv.lock", "Dockerfile", ".dockerignore", "README.md", "LICENSE", "CITATION.cff", "MANIFEST.in") if (root / name).is_file())
     hashes = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(files)}
     return {"sha256": hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest(), "files": hashes}
+
+
+def validate_image_manifest(build: dict, source_files: dict) -> None:
+    """Reject stale runtime/build inputs before an experiment changes AWS resources."""
+    image = build.get('image')
+    if not isinstance(image, str) or re.fullmatch(r'.+@sha256:[0-9a-f]{64}', image) is None:
+        raise ValueError('build manifest needs an immutable image digest; rebuild using docs/aws.md')
+    runtime = {name: value for name, value in source_files.items()
+               if name.startswith('src/rtmsf/') or name in {
+                   'src/experiments/__init__.py', 'src/experiments/aws/__init__.py',
+                   'src/experiments/aws/crash_worker.py', 'src/experiments/aws/activity_worker.py'}}
+    if build.get('files') != runtime:
+        raise ValueError('runtime files differ from the recorded worker image')
+    names = ('Dockerfile', 'pyproject.toml', '.dockerignore')
+    if any(name not in source_files for name in names) or build.get('build_files') != {name: source_files[name] for name in names}:
+        raise ValueError('image build inputs differ or are missing; rebuild using docs/aws.md')

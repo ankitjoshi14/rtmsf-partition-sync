@@ -18,7 +18,7 @@ import tarfile
 import uuid
 
 from experiments.aws.deploy import validate_target, service_tasks, require_stopped, require_tasks_stopped
-from experiments.evidence import EvidenceBundle, source_snapshot, utc
+from experiments.evidence import EvidenceBundle, source_snapshot, validate_image_manifest, utc
 from experiments.aws.workloads import METHODS, Pilot
 from experiments.aws.request_audit import RequestAudit, METRICS
 from experiments.aws.request_metrics import RequestMetrics
@@ -153,17 +153,7 @@ def main() -> int:
         pilot.metadata['graphs'] = [5]
     if args.build_manifest:
         build = json.loads(args.build_manifest.read_text())
-        project = Path.cwd()
-        runtime_files = sorted((project / 'src/rtmsf').rglob('*.py')) + [
-            project / name for name in ('src/experiments/__init__.py',
-                                       'src/experiments/aws/__init__.py',
-                                       'src/experiments/aws/crash_worker.py',
-                                       'src/experiments/aws/activity_worker.py')]
-        expected = {str(path.relative_to(project)): hashlib.sha256(path.read_bytes()).hexdigest() for path in runtime_files}
-        if not isinstance(build.get('files'), dict) or not isinstance(build.get('image'), str) or '@sha256:' not in build['image']:
-            raise ValueError('build manifest needs files and an immutable image digest; rebuild using docs/aws.md')
-        if build['files'] != expected:
-            raise ValueError('runtime files differ from the recorded worker image')
+        validate_image_manifest(build, source['files'])
         definition = pilot.clients['ecs'].describe_task_definition(taskDefinition=pilot.service()['taskDefinition'])['taskDefinition']
         container = next(item for item in definition['containerDefinitions'] if item['name'] == 'worker')
         if container['image'] != build['image']:

@@ -205,7 +205,8 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
     monkeypatch.setattr(run, "TrialBuckets", FakeBuckets)
     monkeypatch.setattr(run, "RequestMetrics", FakeMetrics)
     monkeypatch.setattr(run, "wait_until", lambda *args: captured.update(activation_waited=True))
-    monkeypatch.setattr(run, "source_snapshot", lambda root: {"files": {}})
+    if not activity_mode:
+        monkeypatch.setattr(run, "source_snapshot", lambda root: {"files": {}})
     monkeypatch.setattr(run, "prepare_checks", lambda pilot: None)
     monkeypatch.setattr(run, "run_checks", lambda pilot: [
         dict(name=name, repetition=repetition, status="passed")
@@ -245,7 +246,8 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
             'src/experiments/aws/crash_worker.py', 'src/experiments/aws/activity_worker.py')]
         manifest = tmp_path / 'build.json'
         manifest.write_text(json.dumps({'files': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in names},
-                                       'image': 'repo@sha256:' + 'a' * 64}))
+                                       'image': 'repo@sha256:' + 'a' * 64,
+                                       'build_files': {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in ('Dockerfile', 'pyproject.toml', '.dockerignore')}}))
         argv += ['--activity', 'quick', '--build-manifest', str(manifest)]
         def launch(command):
             assert captured['metadata']['run_status'] == 'incomplete_or_failed'
@@ -258,7 +260,7 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
         monkeypatch.setattr(run.subprocess, 'run', launch)
     monkeypatch.setattr(sys, "argv", argv)
     if audit_mode in ('stale_build', 'partial_build'):
-        with pytest.raises(ValueError, match='build manifest needs|runtime files differ'):
+        with pytest.raises(ValueError, match='immutable image digest|runtime files differ|build inputs'):
             run.main()
         assert calls == [], 'invalid build must be rejected before AWS mutations'
         return
@@ -327,3 +329,33 @@ def test_main_retains_blanks_and_never_passes_requests_without_audit(monkeypatch
     else:
         assert all(result["status"] == "passed" for result in results if result["graph"] == 3)
     assert calls == ["start_logging", "stop_logging"]
+
+
+@pytest.mark.parametrize('changed', ['Dockerfile', 'pyproject.toml', '.dockerignore'])
+def test_image_manifest_rejects_changed_build_inputs(tmp_path, changed):
+    from experiments.evidence import source_snapshot, validate_image_manifest
+    for name in ('src/rtmsf/worker.py', 'src/experiments/__init__.py',
+                 'src/experiments/aws/__init__.py', 'src/experiments/aws/crash_worker.py',
+                 'src/experiments/aws/activity_worker.py', 'Dockerfile', '.dockerignore'):
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('# original\n')
+    (tmp_path / 'pyproject.toml').write_text('[project]\nname="test"\n')
+    files = source_snapshot(tmp_path)['files']
+    build = {'image': 'repo@sha256:' + 'a' * 64,
+             'files': {name: value for name, value in files.items() if name.startswith('src/')},
+             'build_files': {name: files[name] for name in ('Dockerfile', 'pyproject.toml', '.dockerignore')}}
+    validate_image_manifest(build, files)
+    path = tmp_path / changed
+    path.write_text(path.read_text() + '# changed\n')
+    with pytest.raises(ValueError, match='build inputs'):
+        validate_image_manifest(build, source_snapshot(tmp_path)['files'])
+
+
+@pytest.mark.parametrize('image', ['repo:latest', 'repo@sha256:not-a-digest'])
+def test_image_manifest_rejects_mutable_image_and_missing_build_identity(image):
+    from experiments.evidence import validate_image_manifest
+    with pytest.raises(ValueError, match='immutable image digest'):
+        validate_image_manifest({'image': image, 'files': {}}, {})
+    with pytest.raises(ValueError, match='build inputs'):
+        validate_image_manifest({'image': 'repo@sha256:' + 'a' * 64, 'files': {}}, {})

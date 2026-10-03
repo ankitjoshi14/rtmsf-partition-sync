@@ -1,0 +1,9 @@
+condition,method,repetition,completed_operations,write_duration_s,pmcp_attempts,s3_head_requests,s3_get_requests,s3_list_requests,catalog_api_attempts,first_partition_visibility_s,attempts_during_writes,processed_events_during_writes,partitions_processed_during_writes,peak_queue_visible,peak_queue_inflight,drain_s,achieved_operations_per_s,max_schedule_delay_s,unacknowledged_at_write_end,oldest_unacknowledged_at_write_end_s,retry_attempts,producer_retry_attempts,max_pending_deliveries,max_buffer_bytes,queue_visibility_seconds,peak_rss_bytes,peak_pending_messages,peak_pending_body_bytes
+load_20ps_10p,rtmsf,1,2400,120.242,246,0,0,246,246,,89,887,10,1452,100,215.609,19.96,0.186,1513,93.187,0,0,100,16777216,1000,63442944,99,97157
+load_20ps_10p,rtmsf,1,2400,120.117,40,0,0,40,40,,30,2208,10,160,790,27.137,19.981,0.105,192,9.886,0,0,1000,16777216,1000,64770048,784,771114
+load_20ps_1000p,rtmsf,1,2400,120.156,2327,0,0,2327,2327,,816,853,640,1520,100,268.403,19.974,0.25,1619,88.065,0,0,100,16777216,1000,65163264,98,96702
+load_20ps_1000p,rtmsf,1,2400,120.112,2081,0,0,2081,2081,,1373,1450,1000,684,864,77.622,19.981,0.127,1390,77.597,0,0,1000,16777216,1000,67325952,844,834938
+load_20ps_10p,rtmsf,2,2400,120.081,40,0,0,40,40,,30,2046,10,94,704,32.049,19.987,0.157,354,17.857,0,0,1000,16777216,1000,65974272,698,686458
+load_20ps_10p,rtmsf,2,2400,120.364,244,0,0,244,244,,90,900,10,1380,100,194.088,19.939,0.236,1500,108.761,0,0,100,16777216,1000,63758336,97,95121
+load_20ps_1000p,rtmsf,2,2400,120.109,2020,0,0,2018,2020,,1297,1391,986,705,944,88.927,19.982,0.15,1345,73.297,2,0,1000,16777216,1000,65880064,849,840148
+load_20ps_1000p,rtmsf,2,2400,120.157,2318,0,0,2318,2318,,766,808,604,1552,100,274.466,19.974,0.166,1642,93.291,0,0,100,16777216,1000,65142784,96,94754
