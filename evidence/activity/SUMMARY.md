@@ -1,7 +1,5 @@
 # Activity validation
 
-Ankit Joshi
-
 Small AWS validation; one repetition does not establish stable latency or capacity limits.
 
 | Condition | Method | Repeat | PMCP attempts | HEAD / GET / LIST | First partition visible (s) | Drain (s) | Outcome |

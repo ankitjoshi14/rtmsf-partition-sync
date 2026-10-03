@@ -29,7 +29,7 @@ def write_activity_reports(root, rows, timeline, errors):
             writer.writeheader()
             writer.writerows({key: round(value, 3) if isinstance(value, float) else value
                               for key, value in record.items()} for record in records)
-    lines = ['# Activity validation', '', 'Ankit Joshi', '',
+    lines = ['# Activity validation', '',
         'Small AWS validation; one repetition does not establish stable latency or capacity limits.', '',
         '| Condition | Method | Repeat | PMCP attempts | HEAD / GET / LIST | First partition visible (s) | Drain (s) | Outcome |',
         '|---|---|---:|---:|---|---:|---:|---|']

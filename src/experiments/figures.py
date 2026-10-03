@@ -377,7 +377,7 @@ def _checks_table(checks):
 
 
 def _summary(rows, recovery, checks, metadata, recovery_table, checks_table):
-    lines = ["# AWS pilot report", "", "Author: Ankit Joshi", ""]
+    lines = ["# AWS pilot report", ""]
     if 'run_status' in metadata:
         lines.extend([f"Run status: **{_cell(metadata['run_status'])}**.", ""])
         lines.extend(f"- {_cell(key)}: {_cell(value)}" for key, value in metadata.items() if key.endswith('_error'))

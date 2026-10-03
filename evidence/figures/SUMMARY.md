@@ -1,7 +1,5 @@
 # AWS pilot report
 
-Author: Ankit Joshi
-
 Run status: **passed**.
 
 

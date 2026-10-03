@@ -76,6 +76,13 @@ valid routing, and enough worker/provider availability for retries to progress.
 It also requires an eligible notification after the relevant final storage-state
 change. Initial catalog alignment is assumed or supplied separately; drift in
 partitions with no eligible events is not repaired by the worker alone.
+Storage, routing, schema and other catalog writers must eventually stabilize;
+reads must accurately reflect that state, and an attempt must finish before retention or retry limits
+end automatic processing. New events joining a retry window share its remaining
+retry budget. The worker allows an initial attempt plus five retries by default;
+the AWS queue separately redrives after 20 receives. After dead-lettering, an
+operator must resolve the cause and replay retained input or repair membership.
+No automatic dead-letter reconciler is supplied.
 Permanent notification omission, queue expiry/purge, invalid routing and permanent
 provider failure are outside that guarantee. Storage verification is not atomic
 with arbitrary writers. An independent native repair can be an operational

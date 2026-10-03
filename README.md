@@ -28,8 +28,6 @@ and limits. Other cloud implementations and multi-worker operation are not valid
 | Understand each graph, workload and measurement | [Experiment specification](docs/experiments.md) — authoritative design |
 | Deploy, run experiments, regenerate graphs and clean up | [AWS runbook](docs/aws.md) |
 | Inspect the paper results and limitations | [Evidence index](evidence/README.md) |
-| Read the manuscript | [Paper](paper/manuscript.md) · [PDF](paper/manuscript.pdf) |
-| Read the research positioning | [Related work](docs/related-work.md) |
 
 ## Run locally
 
@@ -73,8 +71,7 @@ src/
       deploy.py / template.yaml AWS fixture provisioning
 tests/                    Local verification
 docs/                     System behavior, experiment specification and runbook
-paper/                    Manuscript and readable PDF
-evidence/                 Paper CSVs, inputs, figures and source provenance
+evidence/                 Measured CSVs, report inputs, figures and provenance
 runs/                     Generated local bundles (created on use, Git-ignored)
 ```
 
@@ -83,6 +80,9 @@ There are three responsibilities: **core system**, **experiment execution**, and
 a sibling to `src/experiments/aws/`, producing the same graph CSV format.
 The AWS adapter declares its interfaces explicitly, for example
 `class S3ObjectStore(ObjectStore)`; related AWS classes share one file.
+`__init__.py` marks a directory as a Python package. These files contain no
+worker or experiment logic. The manuscript and research notes are maintained
+separately from this software repository.
 
 ## Generate results
 
@@ -104,11 +104,11 @@ measurements; they do not create separate figures. Missing measurements remain
 unknown. The production image contains `rtmsf`; the experiment image additionally
 contains the fault launcher.
 
-Use the [paper evidence](evidence/paper/README.md) to try graph generation;
+Use the [retained evidence](evidence/README.md) to try graph generation;
 the regeneration commands are in its README.
 `evidence/` contains selected exports, not scripts or a history of exploratory
-runs. The full release archive retains each measured source archive;
-[provenance](evidence/paper/provenance.json) identifies those versions in the repository.
+runs. [Provenance](evidence/provenance.json) identifies each measured source
+version. Full audit records and source archives remain in the local run bundles.
 
 ## Contributing and citation
 
@@ -117,5 +117,5 @@ Report bugs or propose focused changes through
 Include a minimal reproduction and expected versus observed behavior; run the
 local tests and describe any changes to system behavior or experiment claims.
 
-Use [CITATION.cff](CITATION.cff) to cite the software. RTMSF is authored by
-Ankit Joshi and released under the [MIT License](LICENSE).
+Use [CITATION.cff](CITATION.cff) to cite the software, released under the
+[MIT License](LICENSE).

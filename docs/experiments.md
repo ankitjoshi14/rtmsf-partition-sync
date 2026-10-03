@@ -1,7 +1,5 @@
 # Experiment specification
 
-Ankit Joshi · October 2, 2026
-
 **This is the authoritative design for five graphs, one recovery table, and
 eight supporting checks.** The experiment runner collects the data specified
 here; the plotting utility turns that data into these outputs. Change this
@@ -31,11 +29,35 @@ activity comparisons use one repetition, and buffer validation uses two.
 Source versions are separate; do not pool them or treat a follow-up as a missing
 original repetition.
 
-An optional scale extension uses N=100/1K/5K/10K, five comparison repetitions
-and three lifecycle/recovery/supporting repetitions. Keep Graph 4's seed-table
-size and file-count sweep explicit. A 100K or 500K study is not required for
-these bounded claims; the runner currently accepts at most 100K partitions.
-Five repeats give a small variation check, not a tail-latency estimate.
+The next approved execution uses the following matrix. It is pending, separate
+from all historical observations above, and uses fresh fixtures from one source
+version throughout.
+
+| Output | Conditions | Repetitions |
+|---|---|---:|
+| Graphs 2/3 | 100 / 1K / 5K / 10K starting partitions; all three methods | 5 |
+| Graph 4 | 1 / 100 / 1K existing files; 1K starting partitions; RTMSF and crawler | 5 |
+| Graph 5 | 100 / 1K / 5K / 10K starting partitions; both layouts; RTMSF and Athena | 5 |
+| Graph 1, recovery and eight supporting checks | Existing lifecycle and named fault/check scenarios | 3 |
+| Activity | Four burst schedules with both handlers, four continuous schedules, four representative load points | 3 |
+| Buffer | 10 / 1K targets at 20/s; 100 / 1K message caps; 16 MiB payload cap and 1,000-second lease | 2 |
+
+Graph comparisons total 170 distinct trials: 60 shared Graph 2/3, 30 Graph 4 and
+80 Graph 5. Activity has 48 conditions; buffer has eight. Keep Q=10 seconds and
+T_max=31 seconds, including the immediate control's existing separate semantics.
+The five-graph run, activity run and buffer run execute sequentially in one
+top-level `runs/10k_<date>/` folder, using their existing runners and separate
+measurement bundles. No result assembly or pooling across source versions occurs.
+
+Older local run folders are moved outside the repository to
+`/Users/jarvis/GA/archives/rtmsf-runs/` before this execution. That personal archive
+is not required by a fork. A fork uses the committed source, documented settings
+and newly provisioned or idle validated AWS stack. The runner does not automatically
+archive or delete a user's previous runs.
+
+A 100K or 500K study is not required for these bounded claims; the runner currently
+accepts at most 100K partitions. Five repeats give a small variation check, not a
+tail-latency estimate. Consumer-workflow testing remains deferred.
 
 ## Shared setup
 
@@ -282,13 +304,13 @@ graph,method,layout,measurement,x_axis_label,x_value,x_unit,y_axis_label,y_value
 - PNG is for viewing; PDF is for the manuscript. Put repetition counts and
   limitations in captions/summary. Full settings and failures stay in the bundle.
 
-Regenerate the five paper graphs from the [retained measurements](../evidence/paper/README.md)
+Regenerate the five paper graphs from the [retained measurements](../evidence/README.md)
 without making AWS calls:
 
 ```sh
 uv run --frozen --extra experiment python -m experiments.figures \
-  --csv evidence/paper/figures/graph_data.csv \
-  --results evidence/paper/figures/report_inputs.json \
+  --csv evidence/figures/graph_data.csv \
+  --results evidence/figures/report_inputs.json \
   --output-dir runs/regenerated-figures
 ```
 
@@ -302,6 +324,8 @@ uv run --frozen --extra experiment python -m experiments.figures \
   or a claim of universally acceptable freshness.
 - AWS supplies the measured implementation. Other cloud adapters/testing remain
   future work; core portability is a design claim, not multi-cloud evidence.
+- Consumer-workflow testing is deferred. These outputs measure membership,
+  maintenance work and processing behavior, not a consumer's practical benefit.
 - Follow this specification and configure the desired sizes and repetitions for
   each execution. Its reports use its own CSV and recorded outcomes. Retain
   exact settings, source and failures alongside the results.
@@ -316,7 +340,7 @@ graphs. Catalog verification now saves complete expected/observed snapshots
 before assertions, including failures. Routing covers every object below a
 fully matched partition path, matching PMCP's nonempty-prefix semantics.
 The primary run predates these additions; later snapshots cannot fill its
-historical gaps. The [evidence index](../evidence/paper/README.md) identifies each
+historical gaps. The [evidence index](../evidence/README.md) identifies each
 measured source version and retained failure.
 
 The window remains Q=10 seconds/T_max=31 seconds. No window sweep, new cloud,
@@ -388,8 +412,8 @@ markers and nested objects, triggers reconciliation. Markers count as nonempty
 storage; the framework does not validate file formats. The marker lifecycle
 check verifies marker-only registration and marker-last removal.
 
-Keep the existing burst comparison and continuous mixed schedules. Add a separate
-load family with 1,000 registered, one-file partitions and 10, 100 or 1,000 upload
+The separate load family uses 1,000 registered, one-file partitions and
+10, 100 or 1,000 upload
 targets. Run for 120 seconds at 1, 5 or 20 operations/second. Three of every four
 operations append a unique file; the fourth deletes the oldest such appended file.
 The original files remain, so this family isolates processing/backlog under mixed
@@ -428,7 +452,7 @@ Completed September 30, 2026: eight conditions, two repetitions per configuratio
 19,200 operations and exact final catalog/query checks passed. The larger buffer
 improved grouping and observed drain; the 1,000-target workload still accumulated
 backlog at 20 operations/s. Peak worker RSS stayed below 65 MiB. See the
-[recorded results and limits](../evidence/paper/buffer/SUMMARY.md).
+[recorded results and limits](../evidence/buffer/SUMMARY.md).
 
 Further throughput tuning is deferred: the worker currently acknowledges one
 delivery at a time and processes partition checks serially. Native ACK batching

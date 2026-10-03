@@ -230,7 +230,7 @@ The graph-validation follow-up instead uses `--sizes 100 1000`,
 `--layout-sizes 100 1000`, `--files 1 100 1000`, `--graph4-partitions 1000`,
 and one repetition. These commands use current source and create fresh
 measurements. Exact historical source is retained in the full release archive;
-its digest is recorded in [provenance](../evidence/paper/provenance.json).
+its digest is recorded in [provenance](../evidence/provenance.json).
 Cloud timings need not match. Do not merge results across source versions.
 
 ### What a run and a rerun create
@@ -432,6 +432,84 @@ conditions, measurement delivery and cleanup):
 
 Each condition has a fresh worker process. Buffer settings and sampled memory
 are included in the activity CSV/report; the five graph outputs do not change.
+
+## Complete 10K execution
+
+The next approved matrix is in [the specification](experiments.md#outputs-at-a-glance).
+It uses 170 comparison trials, 48 activity conditions and eight buffer conditions.
+The comparison fixtures alone seed 604,480 files. The 170 required two-minute
+quiet periods take at least 5 hours 40 minutes; fixture setup, crawler runs,
+recovery and collection add time. Allow an overnight run and possible daytime
+completion. Time budgets below stop new trials, not all ongoing collection.
+
+Use a clean checkout and the frozen dependencies. Confirm the AWS account,
+ready stack, stopped worker, empty dead-letter queue and Docker access before
+provisioning trial resources. Build and record the experiment image using section 2;
+set `RTMSF_BUILD_MANIFEST` inside the new execution directory before building.
+An AWS CLI identity check alone does not verify that Python can reach AWS or that
+the session can access Docker. Check both:
+
+```bash
+aws sts get-caller-identity --profile "$RTMSF_PROFILE" --region "$RTMSF_REGION" \
+  --query Account --output text
+uv run --frozen --extra dev python -c \
+  'import boto3, os; print(boto3.Session(profile_name=os.environ["RTMSF_PROFILE"], region_name=os.environ["RTMSF_REGION"]).client("sts").get_caller_identity()["Account"])'
+docker info --format '{{.ServerVersion}}'
+```
+
+Each phase uses its existing runner, fresh fixtures and independent outcome/hash
+records. Keep all three under one top-level execution directory. The activity
+repetition count is three, independently of the five graph-comparison repeats:
+
+```bash
+export RTMSF_EXECUTION=runs/10k_20261003
+mkdir "$RTMSF_EXECUTION"
+export RTMSF_BUILD_MANIFEST="$RTMSF_EXECUTION/build/image-build.json"
+```
+
+After building/validating the image and updating the idle stack, run these commands
+sequentially from the same checkout. No phase reads results from another phase:
+
+```bash
+uv run --frozen --extra experiment python -m experiments.aws.run \
+  --stack "$RTMSF_STACK" --expected-account "$RTMSF_ACCOUNT" \
+  --profile "$RTMSF_PROFILE" --region "$RTMSF_REGION" \
+  --sizes 100 1000 5000 10000 --layout-sizes 100 1000 5000 10000 \
+  --files 1 100 1000 --graph4-partitions 1000 \
+  --repetitions 5 --correctness-repetitions 3 \
+  --timeout-seconds 900 --max-minutes 1800 \
+  --request-source cloudwatch --audit-wait-seconds 600 \
+  --build-manifest "$RTMSF_BUILD_MANIFEST" \
+  --output-dir "$RTMSF_EXECUTION/graphs"
+
+uv run --frozen --extra experiment python -m experiments.aws.activity \
+  --stack "$RTMSF_STACK" --expected-account "$RTMSF_ACCOUNT" \
+  --profile "$RTMSF_PROFILE" --region "$RTMSF_REGION" \
+  --build-manifest "$RTMSF_BUILD_MANIFEST" \
+  --quick --repetitions 3 --burst-repetitions 3 --max-minutes 360 \
+  --output-dir "$RTMSF_EXECUTION/activity"
+
+uv run --frozen --extra experiment python -m experiments.aws.activity \
+  --stack "$RTMSF_STACK" --expected-account "$RTMSF_ACCOUNT" \
+  --profile "$RTMSF_PROFILE" --region "$RTMSF_REGION" \
+  --build-manifest "$RTMSF_BUILD_MANIFEST" \
+  --conditions load_20ps_10p load_20ps_1000p \
+  --buffer-sizes 100 1000 --buffer-bytes 16777216 \
+  --queue-visibility-seconds 1000 --repetitions 2 --max-minutes 240 \
+  --output-dir "$RTMSF_EXECUTION/buffer"
+```
+
+Before starting the next phase, check that the previous command exited zero and
+its worker/crawler shutdown and resource cleanup completed. If it failed, preserve
+the bundle, resolve the recorded failure and stop before touching shared resources
+again. The `--quick` activity flag selects the four representative load points;
+it does not shorten their 120-second schedules or omit the four burst and four
+continuous schedules. Buffer timing and memory settings stay distinct from the
+normal-worker defaults.
+
+Old local runs can be moved to a personal archive outside the checkout before a
+new execution. Keep their bytes and failures; do not merge their CSVs into this
+run or alter their source/hash records. A fork does not need those old runs.
 
 ## Shutdown and retained resources
 
