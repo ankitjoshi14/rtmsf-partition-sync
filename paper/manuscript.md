@@ -236,7 +236,7 @@ tables; it is not a demonstrated constant-time lookup over a large table fleet.
 
 The public data flow is `ObjectEvent → PartitionEvent → PartitionIntent`.
 Delivery handles remain separate from these algorithmic values. Source timestamps
-are retained as telemetry, while the worker's monotonic clock determines deadlines.
+remain optional event metadata; the worker's monotonic clock determines deadlines.
 The AWS adapters use S3, Standard SQS, and Glue; an ECS/Fargate task runs the worker.
 
 The worker depends on the `EventSource` interface, whose operations receive,

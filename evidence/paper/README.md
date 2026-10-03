@@ -4,8 +4,9 @@ Ankit Joshi · October 2, 2026 · RTMSF software 0.2.0
 
 These are retained AWS measurements. [Experiment specification](../../docs/experiments.md)
 defines the workloads and axes; [AWS runbook](../../docs/aws.md) gives the execution
-commands. All measurements use one AWS worker, Q=10 s and T_max=31 s. Different
-source versions are identified separately and their results are not pooled.
+commands. RTMSF uses one AWS worker, Q=10 s and T_max=31 s. The immediate
+control processes each event without the settling delay. Source versions are
+identified separately and their results are not pooled.
 
 | Directory | Manuscript use | Measured conditions | Repetitions |
 |---|---|---|---|
