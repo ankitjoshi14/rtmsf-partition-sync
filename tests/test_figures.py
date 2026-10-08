@@ -99,6 +99,23 @@ def test_report_csv_orders_series_numerically_and_preserves_unknowns(tmp_path):
     assert "Trial outcomes unavailable" in artifacts["summary"].read_text()
 
 
+def test_compact_summary_keeps_missing_samples_and_unattempted_outcomes_visible():
+    from experiments.figures import REQUESTS, _ordered, _summary, graph_row
+
+    rows = [graph_row(2, 'rtmsf', metric, 100, value, repetition)
+            for repetition, values in [(1, (1, 0, 0)), (2, (1, None, 0))]
+            for metric, value in zip(REQUESTS, values)]
+    metadata = {'graphs': [2], 'graph_results': [
+        {'graph': 2, 'method': 'rtmsf', 'repetition': 3, 'status': 'passed', 'attempted': False}]}
+    summary = _summary(_ordered(rows), [], [], metadata)
+    assert '| 2 | rtmsf |  | 1 | 5/6 | 1/2 | 1 |' in summary
+    assert '| 2 | rtmsf |  | s3_get_requests | 100 | 1/2 |' in summary
+    assert '| 2 | rtmsf |  | s3_read_list_requests | 100 | 1/2 |' in summary
+    assert 'repetition 3: not attempted' in summary
+    assert '[Crash recovery](recovery_table.md)' in summary
+    assert '## Table 1. Crash recovery' not in summary
+
+
 def test_timeline_uses_repetition_one_and_preserves_unknown_gap():
     from experiments.figures import graph_row, render_figure
 

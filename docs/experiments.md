@@ -6,32 +6,20 @@ here; the plotting utility turns that data into these outputs. Change this
 specification first if an experiment decision changes.
 
 [System behavior](system-behavior.md) defines the guarantees and assumptions.
-[The AWS runbook](aws.md) gives commands. [The evidence index](../evidence/README.md)
-records completed-run status and source identities. The matrix below is measured;
-larger extensions are separate.
+Provider guides give deployment and execution commands; [AWS](aws.md#aws-experiment-setup) supplies the current implementation. [The evidence index](../evidence/README.md)
+records completed-run status and source identities. The matrix below is measured on AWS; larger extensions are separate.
+The output format is shared; measurement collection and baselines are provider-specific.
 
 ## Outputs at a glance
 
 | Output | Question answered | X values | Y | Methods |
 |---|---|---|---|---|
 | Graph 1 | Does the catalog follow file creation and deletion? | Actual elapsed seconds | Expected and observed presence: absent/present | RTMSF |
-| Graph 2 | Does a bigger table require more work for one new partition? | 10, 100, 500, 1K starting partitions | S3 HEAD + GET + LIST requests | RTMSF, Glue event crawler, Athena MSCK |
+| Graph 2 | Does a bigger table require more work for one new partition? | 100, 1K, 5K, 10K starting partitions | S3 HEAD + GET + LIST requests | RTMSF, Glue event crawler, Athena MSCK |
 | Graph 3 | Once triggered, how long until the new partition is visible? | Same as Graph 2; same trials | Seconds from each method's trigger | Same as Graph 2 |
-| Graph 4 | Does a fuller existing partition require more work? | 1, 100 existing files | S3 HEAD + GET + LIST requests | RTMSF, Glue event crawler |
-| Graph 5 | Does folder order change the work? | 10, 100, 500, 1K starting partitions | S3 HEAD + GET + LIST, two layout panels | RTMSF, Athena MSCK |
+| Graph 4 | Does a fuller existing partition require more work? | 1, 100, 1K existing files | S3 HEAD + GET + LIST requests | RTMSF, Glue event crawler |
+| Graph 5 | Does folder order change the work? | 100, 1K, 5K, 10K starting partitions | S3 HEAD + GET + LIST, two layout panels | RTMSF, Athena MSCK |
 | Table 1 | Does the system recover at each crash boundary? | Four named cases below | Observed state and verified/attempted counts | RTMSF |
-
-The primary figures use **two fresh comparative repetitions** and **one**
-lifecycle/recovery/supporting repetition: 24 shared Graph 2/3 trials, eight
-Graph 4 trials and 32 Graph 5 trials, **64 distinct comparison trials**.
-The separate graph-validation follow-up uses N=100/1K and F=1/100/1K once;
-activity comparisons use one repetition, and buffer validation uses two.
-Source versions are separate; do not pool them or treat a follow-up as a missing
-original repetition.
-
-The next approved execution uses the following matrix. It is pending, separate
-from all historical observations above, and uses fresh fixtures from one source
-version throughout.
 
 | Output | Conditions | Repetitions |
 |---|---|---:|
@@ -43,21 +31,14 @@ version throughout.
 | Buffer | 10 / 1K targets at 20/s; 100 / 1K message caps; 16 MiB payload cap and 1,000-second lease | 2 |
 
 Graph comparisons total 170 distinct trials: 60 shared Graph 2/3, 30 Graph 4 and
-80 Graph 5. Activity has 48 conditions; buffer has eight. Keep Q=10 seconds and
+80 Graph 5. Activity has 48 condition executions; buffer has eight. Keep Q=10 seconds and
 T_max=31 seconds, including the immediate control's existing separate semantics.
 The five-graph run, activity run and buffer run execute sequentially in one
 top-level `runs/10k_<date>/` folder, using their existing runners and separate
 measurement bundles. No result assembly or pooling across source versions occurs.
 
-Older local run folders are moved outside the repository to
-`/Users/jarvis/GA/archives/rtmsf-runs/` before this execution. That personal archive
-is not required by a fork. A fork uses the committed source, documented settings
-and newly provisioned or idle validated AWS stack. The runner does not automatically
-archive or delete a user's previous runs.
-
-A 100K or 500K study is not required for these bounded claims; the runner currently
-accepts at most 100K partitions. Five repeats give a small variation check, not a
-tail-latency estimate. Consumer-workflow testing remains deferred.
+Five repeats check variation; they do not estimate tail latency.
+Larger partition studies extend these measured ranges.
 
 ## Shared setup
 
@@ -109,14 +90,13 @@ Y labels are Absent/Present, CSV values are 0/1. Use actual action/poll times;
 a negative time represents the pre-upload baseline. Attach each upload/delete
 label once to its expected-presence row. Show unknown observations as gaps.
 
-**Repeat:** the primary run has one fresh cycle. For extended validation use
-three. Plot repetition 1, selected before running even if it fails; retain every
+**Repeat:** run three fresh cycles. Plot repetition 1, selected before running even if it fails; retain every
 trace and report its outcome. Do not average
 binary states. Additional file counts or a burst sweep are not part of this graph.
 
 ## Graph 2 — work as the table grows
 
-For each N = 10, 100, 500, 1K in the primary matrix:
+For each N = 100, 1K, 5K, 10K:
 
 1. Prepare N registered partitions with one file each, separately for each method.
 2. Upload one file into the **next unused partition**, absent from storage and
@@ -128,7 +108,7 @@ For each N = 10, 100, 500, 1K in the primary matrix:
 4. Collect maintenance HEAD/GET/LIST requests using the protocol below. Continue
    counting after first visibility until processing finishes. Verify all N+1
    exact catalog entries and query rows outside the measurement window.
-5. Repeat twice per method: 4 sizes × 3 methods × 2 = **24 trials**.
+5. Repeat five times per method: 4 sizes × 3 methods × 5 = **60 trials**.
 
 The normal RTMSF new-partition ADD checks its observed file with **one HEAD**,
 with no LIST. This is an expectation to verify, not a value to insert into data.
@@ -156,15 +136,15 @@ crawl. AWS permits manual/API or scheduled recrawls after initialization
 
 ## Graph 4 — work as the affected partition fills
 
-- Start with 100 registered partitions. Give the first partition F = 1 or 100
-  files; all others have one. Use fresh copies for RTMSF and Glue. The separate
-  validation uses 1K starting partitions and F=1/100/1K.
+- Start with 1K registered partitions. Give the first partition F = 1, 100, or 1K
+  files; all others have one. Use fresh copies for RTMSF and Glue.
 - Append **one file to that already registered partition** after setup settles.
 - Count maintenance HEAD/GET/LIST through processing completion. Then verify
   unchanged correct catalog membership and the additional query row.
+- The additional row uses the existing registration. RTMSF checks membership; it does not register the appended file.
 - Plot requests against **existing files before the append**. There is no
   appearance timer because this partition is already visible.
-- Repeat twice: 2 file counts × 2 methods × 2 = **eight trials**.
+- Repeat five times: 3 file counts × 2 methods × 5 = **30 trials**.
 
 RTMSF normally needs one bounded LIST to establish nonemptiness. Glue's affected-
 folder inspection may read files; measure its work rather than infer GET or LIST
@@ -175,13 +155,13 @@ discovery, and does not assert how every crawler configuration behaves.
 
 - Use the same N tenant/day pairs and file bytes in both layouts:
   `day=2026-09-25/tenant=t000000/` and `tenant=t000000/day=2026-09-25/`.
-- For N = 10, 100, 500, 1K, prepare fresh copies for each layout, RTMSF/Athena, and
+- For N = 100, 1K, 5K, 10K, prepare fresh copies for each layout, RTMSF/Athena, and
   repetition. Register N starting partitions with one file each.
 - Add one file for the **next unused tenant on the same day**. Verify absence
   before upload and all N+1 exact catalog entries and query rows afterward.
 - Collect HEAD/GET/LIST as in Graph 2. Plot two panels with shared axes:
   X=starting partitions, Y=total requests. `layout` distinguishes the CSV rows.
-- Rotate method/layout order; 4 sizes × 2 layouts × 2 methods × 2 = **32 trials**.
+- Rotate method/layout order; 4 sizes × 2 layouts × 2 methods × 5 = **80 trials**.
 
 The main layout stays unchanged. This exposes traversal sensitivity instead of
 choosing an expensive layout for the headline comparison. RTMSF's expected ADD
@@ -191,8 +171,7 @@ not a minimum request count required by upstream Hive, Spark, or every MSCK.
 ## Table 1 — crash recovery
 
 One fresh trial is **empty → upload one file → present → delete it → empty**,
-with one deliberate crash at the selected step. The primary run tests each case
-once; extended validation repeats each case three times.
+with one deliberate crash at the selected step. Repeat each case three times.
 
 | Case / runner identifier | Crash point | Expected immediately after recovery |
 |---|---|---|
@@ -224,8 +203,7 @@ table, cumulative mutation graph, or second graph CSV is needed.
 
 ## Eight supporting checks
 
-The primary run uses one fresh repetition per check (marker lifecycle is in the
-follow-up); extended validation uses three. Generate `checks_table.md` from individual
+Run three fresh repetitions per check. Generate `checks_table.md` from individual
 recorded outcomes; include failed, incomplete and unattempted conditions.
 
 | Check | Workload and verification |
@@ -266,7 +244,7 @@ these checks do not establish error-free handling of every event ordering.
 [CloudWatch](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-monitoring.html)
 and [CloudTrail delivery](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/how-cloudtrail-works.html)
 are best-effort; calibration and quiet periods do not prove exact completeness.
-Reconcile late records before publication. These are observed selected S3 request
+Reconcile late records before interpreting results. These are observed selected S3 request
 counts, not billing or total cloud cost. Retain Glue/SQS calls separately.
 
 ## Data files and plotting rules
@@ -275,6 +253,11 @@ Each execution writes `runs/<execution>/`: graph data, five PNG/PDF figures,
 recovery/check tables, `SUMMARY.md`, `report_inputs.json`, configuration, logs,
 source/image identity, dependency versions, inputs and artifact hashes.
 The [runbook](aws.md) explains execution and offline regeneration.
+
+The [offline export](aws.md#export-saved-evidence) verifies saved phase bundles and preserves CSV bytes and outcomes.
+Selected reports in `evidence/` belong in Git; raw execution records in `runs/` remain Git-ignored.
+`checks_table.md` and `recovery_table.md` contain generated outcomes, separate from the graph points in `graph_data.csv`.
+`report_inputs.json` stores their individual outcomes and settings for repeatable report generation.
 
 `graph_data.csv` has exactly these columns, in order:
 
@@ -298,13 +281,15 @@ graph,method,layout,measurement,x_axis_label,x_value,x_unit,y_axis_label,y_value
   keep blank values/gaps and report actual available/planned samples. Do not add
   duplicate total rows or silently replace failures with successful reruns.
 - One solid color per method; no separate graph per request family or bucket.
+  RTMSF: blue `#0072B2`; Glue: orange `#D55E00`; Athena: green `#009E73`.
+  Graph 1 uses neutral gray `#526477` for expected membership and RTMSF blue for observed membership.
   Graphs 2/4/5 use logarithmic X/Y; Graph 3 uses logarithmic X and linear seconds
   on Y. Preserve genuine zeros in the CSV/statistics and label them at the log-axis
   boundary. Graph 1 uses steps, repetition 1 only; retain all traces.
-- PNG is for viewing; PDF is for the manuscript. Put repetition counts and
+- PNG provides previews; PDF provides vector exports. Put repetition counts and
   limitations in captions/summary. Full settings and failures stay in the bundle.
 
-Regenerate the five paper graphs from the [retained measurements](../evidence/README.md)
+Regenerate the five graphs from the [retained measurements](../evidence/README.md)
 without making AWS calls:
 
 ```sh
@@ -314,43 +299,28 @@ uv run --frozen --extra experiment python -m experiments.figures \
   --output-dir runs/regenerated-figures
 ```
 
-## Settled scope and reproduction
+## Measurement limits and reproduction
 
-- Preserve the five existing graphs and recovery table. The completed review follow-ups
-  below add a focused immediate-handler comparison and active-load evidence;
-  they supersede the earlier decision to rely on burst checks alone.
+- Outputs contain five graphs, recovery, supporting checks, immediate-handler comparisons, and active-load tables.
 - Keep Q=10 seconds and T_max=31 seconds. No settling-window or scheduler-interval
   sweep. Report actual delays; neither setting is an end-to-end latency guarantee
   or a claim of universally acceptable freshness.
-- AWS supplies the measured implementation. Other cloud adapters/testing remain
-  future work; core portability is a design claim, not multi-cloud evidence.
-- Consumer-workflow testing is deferred. These outputs measure membership,
-  maintenance work and processing behavior, not a consumer's practical benefit.
-- Follow this specification and configure the desired sizes and repetitions for
-  each execution. Its reports use its own CSV and recorded outcomes. Retain
-  exact settings, source and failures alongside the results.
+- AWS supplies the measured implementation. The core uses provider-neutral interfaces; other cloud implementations remain unvalidated.
+- These outputs measure membership, maintenance work, and processing behavior. They do not measure downstream consumer performance.
 - Independent reruns should support similar conclusions, not identical seconds.
   Investigate disagreements. Keep setup work out of maintenance measurements,
   retain contrary results, and distinguish pilot validation from scale evidence.
 
 ## Activity and buffer evidence
 
-These follow-ups add tables to the manuscript, retaining the five numbered
-graphs. Catalog verification now saves complete expected/observed snapshots
-before assertions, including failures. Routing covers every object below a
-fully matched partition path, matching PMCP's nonempty-prefix semantics.
-The primary run predates these additions; later snapshots cannot fill its
-historical gaps. The [evidence index](../evidence/README.md) identifies each
-measured source version and retained failure.
-
-The window remains Q=10 seconds/T_max=31 seconds. No window sweep, new cloud,
-new performance baseline or multi-worker test is part of these results.
+These experiments add tables while retaining the five numbered graphs.
+Catalog verification saves complete expected/observed snapshots before assertions, including failures.
 
 ### Bounded activity validation
 
 Each condition gets a fresh bucket/table with 100 registered one-file partitions,
-the shared date/site/hour layout and identical payloads. Use one repetition for
-this pilot. RTMSF uses Q=10/T_max=31; the immediate control uses the same worker,
+the shared date/site/hour layout and identical payloads. Use three repetitions.
+RTMSF uses Q=10/T_max=31; the immediate control uses the same worker,
 PMCP and recovery rules, with a separate pending intent for every received event.
 It cannot combine events from one SQS batch. Both run in the same Fargate image
 and resource size. Rotate method order when repetitions are increased.
@@ -387,7 +357,7 @@ PUT repeats identical bytes at the same trial-owned key; DELETE repeats the same
 owned key. No verification read is added during measurement. Duplicate S3 events
 from accepted retries remain in worker evidence and request counts. The CSV keeps
 `producer_retry_attempts` separate from worker `retry_attempts`; three failed
-attempts still fail the condition. Earlier single-attempt failures remain recorded.
+attempts still fail the condition. Preserve failed runs alongside successful runs.
 If the first upload retries, its original completion time is unknown: leave
 first-partition visibility blank, retain timestamps/samples and explain the reason
 in the report. Also leave it blank if visibility precedes upload confirmation;
@@ -428,7 +398,7 @@ tested settings when reporting backlog and throughput. Queue growth at an
 offered rate does not establish sustainable capacity at that rate.
 
 The retained activity subset is the four burst schedules, four continuous
-conditions and loads (1/s,1K), (5/s,1K), (20/s,1K), (20/s,10), all once.
+conditions and loads (1/s,1K), (5/s,1K), (20/s,1K), (20/s,10), each repeated three times.
 The runbook records exact rerun options and source-version requirements.
 
 ### Focused buffer validation
@@ -445,19 +415,15 @@ All eight table definitions are loaded in each 0.25-vCPU/512-MiB worker;
 one table receives workload traffic per condition.
 Retain peak process RSS, sampled pending messages/payload bytes, backlog over
 time, PMCP attempts, drain, retries and exact final catalog/query checks.
-This is configuration validation, not a sixth paper graph or a multi-worker test.
+This produces a configuration-validation table using one worker.
 Raw payload bytes do not include parsed objects, schemas or SDK memory.
 
-Completed September 30, 2026: eight conditions, two repetitions per configuration,
-19,200 operations and exact final catalog/query checks passed. The larger buffer
-improved grouping and observed drain; the 1,000-target workload still accumulated
-backlog at 20 operations/s. Peak worker RSS stayed below 65 MiB. See the
-[recorded results and limits](../evidence/buffer/SUMMARY.md).
-
-Further throughput tuning is deferred: the worker currently acknowledges one
-delivery at a time and processes partition checks serially. Native ACK batching
-or bounded concurrency may improve throughput but are not measured gains or new
-algorithmic contributions. Keep provider batching inside the adapter contract;
-other providers may acknowledge individually. Retain overload evidence and the
-single-worker limit in the manuscript. No extra graph or multi-worker test is
-part of this reconciliation.
+See [the buffer results](../evidence/buffer/SUMMARY.md) for measured memory, grouping, backlog, and drain.
+The current worker acknowledges deliveries individually and checks partitions serially.
+The observed backlog characterizes the capacity of this serial implementation.
+WOERA and PMCP do not require distinct partitions to be reconciled serially.
+Parallel execution must preserve per-partition exclusivity, delivery completion,
+retry state, lease protection, and provider rate limits; it remains unevaluated.
+Aggregating completed deliveries into acknowledgement batches is also an unmeasured optimization.
+Provider batching belongs inside the adapter; other providers can acknowledge individually.
+Retain the measured overload behavior and single-worker limits when interpreting results.

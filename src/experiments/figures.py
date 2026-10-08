@@ -21,6 +21,7 @@ COLUMNS = (
 )
 METHODS = ("rtmsf", "glue_event_crawler", "athena_msck")
 METHOD_LABELS = ("RTMSF", "Glue event-based crawler", "Athena MSCK")
+# Consistent method colors across figures.
 COLORS = ("#0072B2", "#D55E00", "#009E73")
 REQUESTS = ("s3_head_requests", "s3_get_requests", "s3_list_requests")
 PRESENCE = ("expected_partition_presence", "observed_partition_presence")
@@ -198,8 +199,9 @@ def render_figure(graph, rows, metadata=None):
     if graph == 1:
         ax = fig.subplots()
         selected = [row for row in rows if row["repetition"] == 1]
+        # Expected membership is a reference, so use neutral gray.
         for measurement, label, color, style in zip(PRESENCE, ("Expected", "Observed"),
-                                                     (COLORS[1], COLORS[0]), ("--", "-")):
+                                                     ("#526477", COLORS[0]), ("--", "-")):
             points = [row for row in selected if row["measurement"] == measurement]
             # An expected state persists until the next successful workload action.
             # Extend it to the last observer timestamp without creating CSV samples.
@@ -376,7 +378,7 @@ def _checks_table(checks):
     return "\n".join(lines + [""])
 
 
-def _summary(rows, recovery, checks, metadata, recovery_table, checks_table):
+def _summary(rows, recovery, checks, metadata):
     lines = ["# AWS pilot report", ""]
     if 'run_status' in metadata:
         lines.extend([f"Run status: **{_cell(metadata['run_status'])}**.", ""])
@@ -407,17 +409,36 @@ def _summary(rows, recovery, checks, metadata, recovery_table, checks_table):
                   "Graph 3 uses solid colored lines. Graphs 2–5 show one median point and thin min–max whiskers where repetitions differ. Individual values stay in the CSV; no p95 is estimated.",
                   "Graph 3 triggers: RTMSF successful upload response; crawler immediately before StartCrawler; MSCK immediately before StartQueryExecution. These are method-specific response times.",
                   "Blank values remain unknown. " + _request_caption(metadata) + " A trial pass does not establish exact accounting.",
-                  "", recovery_table, checks_table, "## Measurement availability", "",
-                  "Available / recorded counts exclude blanks from the available sample size. A 0/0 condition has no point records.", "",
-                  "| Graph | Method | Layout | Measurement | X | Available / recorded |", "|---|---|---|---|---|---|"])
+                  "", "[Crash recovery](recovery_table.md) · [Supporting checks](checks_table.md)",
+                  "", "## Measurement availability", "",
+                  "Available counts exclude blanks. Plot samples use complete HEAD + GET + LIST totals, or visibility delays for Graph 3.",
+                  "Counts cover recorded rows only; missing conditions do not establish a pass. Individual values remain in [graph_data.csv](graph_data.csv).", "",
+                  "| Graph | Method | Layout | X conditions | Measurement rows available / recorded | Plot samples available / recorded | Usable repetitions per X |",
+                  "|---|---|---|---|---|---|---|"])
     totals = _request_totals([row for row in rows if row['graph'] in (2, 4, 5)])
+    series = {}
+    for row in rows:
+        if row['graph'] != 1:
+            series.setdefault((row['graph'], row['method'], row.get('layout', '')), []).append(row)
+    for (graph, method, layout), points in series.items():
+        samples = points if graph == 3 else _request_totals(points)
+        usable = [sum(row['y_value'] is not None for row in group) for group in _point_groups(samples).values()]
+        repetitions = str(min(usable)) if min(usable) == max(usable) else f'{min(usable)}–{max(usable)}'
+        lines.append(f"| {graph} | {method} | {layout} | {len(usable)} | "
+                     f"{sum(row['y_value'] is not None for row in points)}/{len(points)} | "
+                     f"{sum(row['y_value'] is not None for row in samples)}/{len(samples)} | {repetitions} |")
+    missing = []
     for (graph, method, layout, measurement, x), points in _point_groups(rows + totals).items():
         if graph == 1:
             continue
         available = sum(row["y_value"] is not None for row in points)
-        lines.append(f"| {graph} | {method} | {layout} | {measurement} | {x} | {available}/{len(points)} |")
+        if available < len(points):
+            missing.append(f"| {graph} | {method} | {layout} | {measurement} | {x} | {available}/{len(points)} |")
+    if missing:
+        lines.extend(["", "### Conditions with missing measurements", "",
+                      "| Graph | Method | Layout | Measurement | X | Available / recorded |", "|---|---|---|---|---|---|"] + missing)
     failures = [record for record in metadata.get("graph_results", []) + recovery + checks
-                if record.get("status") != "passed"]
+                if record.get("status") != "passed" or not record.get('attempted', True)]
     lines.extend(["", "## Failed, incomplete, or unattempted trials", ""])
     if not failures:
         lines.append("No failed or incomplete trial records were supplied. Missing records do not establish a pass.")
@@ -447,7 +468,7 @@ def write_reports(output_dir, rows, recovery_results, checks, metadata) -> dict[
     recovery_results, checks, metadata = list(recovery_results), list(checks), dict(metadata)
     recovery_table = _recovery_table(recovery_results, metadata)
     checks_table = _checks_table(checks)
-    summary = _summary(rows, recovery_results, checks, metadata, recovery_table, checks_table)
+    summary = _summary(rows, recovery_results, checks, metadata)
     output_dir.mkdir(parents=True, exist_ok=True)
     artifacts = {"graph_data": output_dir / "graph_data.csv",
                  "recovery_table": output_dir / "recovery_table.md",

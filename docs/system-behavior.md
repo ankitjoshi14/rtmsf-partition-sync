@@ -1,7 +1,8 @@
 # System behavior
 
-What RTMSF guarantees, what it assumes, and how the AWS worker is configured.
-The [experiment specification](experiments.md) defines how we test this behavior.
+RTMSF guarantees, assumptions, and provider interfaces.
+The [experiment specification](experiments.md) defines tests for this behavior.
+The [architecture diagram](figures/architecture.svg) shows event processing, storage checks, and catalog access.
 
 The public flow is `ObjectEvent → PartitionEvent → PartitionIntent`.
 
@@ -26,11 +27,21 @@ maps source/key to one table and validates the configured layout. Duplicate IDs
 and overlapping roots in the same source are rejected. Changing targets requires
 configuration and a controlled restart. RTMSF does not create or discover tables.
 
+The supplied router requires consecutive `column=value` segments below each table root, in catalog column order.
+For example, columns `day, hour` map to `orders/day=2026-10-05/hour=09/`.
+Existing partition locations and storage descriptors must already match the configured layout and table definition.
+New entries inherit the table storage descriptor. RTMSF does not validate or repair existing partition metadata.
+Custom partition locations outside this routing contract are unsupported.
+
 Object keys and partition values are preserved exactly. All objects below the
 configured partition path, including markers and nested files, trigger processing.
 The AWS adapter decodes
 S3 event keys once. No filesystem normalization, trimming, lowercasing, or second
-URL decoding rewrites the resulting key.
+URL decoding rewrites the resulting key. The supplied notification configuration
+and decoder cover `ObjectCreated:*` and `ObjectRemoved:*`. Tested cleanup uses
+application-issued deletes. Native S3 lifecycle expiration uses
+[`LifecycleExpiration:*`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-event-types-and-destinations.html)
+and is not covered; it requires additional event/adapter support or operational repair.
 
 `Q` is a processing-time settling interval reset by observed arrivals. `T_max`
 bounds initial buffering from the first arrival. Both use the worker's local
@@ -56,6 +67,10 @@ is observable; it must not be described as error-free handling of all churn.
 
 ## Ownership and recovery
 
+The operator assigns membership reconciliation to RTMSF and retains table/schema administration, initial alignment, batch readiness, and exceptional repair.
+The operator or supervisor also manages worker replacement. The worker does not coordinate concurrent catalog-maintenance processes.
+Coordinate external repair with writers and stop the worker before changing table definitions or repairing catalog metadata.
+
 The supplied AWS deployment has one active worker. It leaves input unacknowledged
 until every derived intent finishes or terminal input has been durably copied to
 the DLQ. Lease renewal covers pending work and bounded provider calls; a detected
@@ -66,58 +81,48 @@ A crash discards WOERA state. Durable unacknowledged messages replay into fresh
 `Q` intervals. An uncertain or completed catalog mutation may be attempted again;
 PMCP reconciles current state idempotently. No checkpoint database is used.
 
-Deployment and experiment tools wait for old task ARNs to reach `STOPPED` before
+The supplied AWS experiment deployment tools wait for old task ARNs to reach `STOPPED` before
 replacement. Service running-count zero alone is insufficient. Full multi-worker
 ADD/DROP would require an exclusive keyed event source and quiesce/replay; this
 Standard-SQS deployment does not validate that configuration or zombie fencing.
+Other launchers require their own single-worker replacement procedure; see the [normal AWS restart steps](aws.md#restart-and-exceptional-repair).
 
 Affected-partition convergence assumes notification admission and retention,
 valid routing, and enough worker/provider availability for retries to progress.
 It also requires an eligible notification after the relevant final storage-state
 change. Initial catalog alignment is assumed or supplied separately; drift in
 partitions with no eligible events is not repaired by the worker alone.
-Storage, routing, schema and other catalog writers must eventually stabilize;
-reads must accurately reflect that state, and an attempt must finish before retention or retry limits
-end automatic processing. New events joining a retry window share its remaining
+Storage, routing, schema and other catalog writers must stabilize. A reconciliation
+attempt must observe that stabilized storage/catalog state and complete its required
+operations before retention or retry limits end automatic processing. Eventual
+read consistency alone is insufficient: a stale nonempty LIST can finish DROP
+with NOOP and ACK before reads converge. Such an adapter needs a later eligible
+notification or an operational recheck; the core does not recheck after NOOP.
+The evaluated S3 integration provides
+[strong read-after-write consistency](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+for object PUT/DELETE operations. New events joining a retry window share its remaining
 retry budget. The worker allows an initial attempt plus five retries by default;
-the AWS queue separately redrives after 20 receives. After dead-lettering, an
-operator must resolve the cause and replay retained input or repair membership.
-No automatic dead-letter reconciler is supplied.
+the AWS experiment queue separately redrives after 20 receives. Normal deployments configure their own queue redrive policy.
 Permanent notification omission, queue expiry/purge, invalid routing and permanent
 provider failure are outside that guarantee. Storage verification is not atomic
 with arbitrary writers. An independent native repair can be an operational
 backstop for omitted events.
 
-## AWS configuration
+### Terminal input
 
-| Variable | Meaning |
-|---|---|
-| `EVENT_QUEUE_URL`, `DEAD_LETTER_QUEUE_URL` | Durable input and terminal failure queues |
-| `RTMSF_SOURCES` | JSON map of logical source IDs to S3 bucket names |
-| `RTMSF_TABLE_IDS` | JSON list of configured `database.table` identifiers |
-| `SETTLING_MS` | Q; current pilot uses 10000 (10 seconds) |
-| `MAXIMUM_MS` | Maximum buffering residence; experiment uses 31000 |
-| `QUEUE_VISIBILITY_SECONDS` | Initial/renewed delivery lease; default 180 |
-| `MAX_PENDING_DELIVERIES` | Shared unfinished-message cap across all configured tables; default 100 |
-| `MAX_BUFFER_BYTES` | Retained raw SQS body budget; default 16777216 (16 MiB), minimum 1 MiB |
+Correlate retained input with worker telemetry and inspect stabilized storage and catalog membership for every affected partition.
+The AWS failure queue preserves raw notification bodies; telemetry records the terminal reason separately.
+One delivery can contain several partitions, so checking one partition is insufficient.
 
-The AWS adapter reserves room for maximum-size messages before each receive.
-When byte capacity is unavailable it waits; input remains in SQS. This budget
-excludes parsed events, table definitions, temporary response/decoding memory
-and SDK state, so reserve additional process memory. Existing limits also bound
-active partitions (1,000) and decoded events (10,000). Increasing the message
-cap changes worst-case queue renewal time; startup rejects an insufficient
-visibility timeout. The focused 100/1,000 comparison uses 1,000 seconds for both
-settings, leaving Q=10 and T_max=31 unchanged. This longer lease can delay crash
-replay; it is not a universal deployment recommendation or a freshness bound.
+CREATE followed by DELETE can exhaust an ADD retry budget even when final absent membership is correct.
+If every affected partition is correct and completed file activity explains the outcome, close the item under your operational policy.
+Blind replay of the same empty ADD can repeat terminal handling.
+Otherwise, resolve the failure and replay eligible retained input or repair membership.
+Coordinate manual repair with writers and worker shutdown. RTMSF supplies no automatic failure classifier, DLQ reconciler, or general repair scanner.
 
-S3/Glue and queue mutation calls use explicit SDK timeout/retry settings. Runtime
-budgets include the supported SQS batch shapes; startup configuration is checked
-before polling. Provider integrations implement the four interfaces in `interfaces.py`:
-`EventSource`, `ObjectStore`, `PartitionCatalog`, and `TelemetrySink`.
+## Provider integrations
 
-Crash tests use the separate `experiments.aws.crash_worker` launcher and its
-`RTMSF_EXPERIMENT_FAULT` configuration. It records one durable marker outside
-table data, then exits at the selected boundary: before PMCP processing or after
-a successful catalog change, before acknowledgement. The marker prevents an
-endless crash loop. Normal `rtmsf.aws_app` startup does not read these fault settings.
+Providers implement `EventSource`, `ObjectStore`, `PartitionCatalog`, and `TelemetrySink` in `src/rtmsf/interfaces.py`.
+The core uses these interfaces for event delivery, storage checks, catalog changes, and telemetry.
+[AWS configuration](aws.md#aws-worker-settings-and-bounds) describes the supplied worker's settings and adapter limits.
+Other cloud implementations need their own setup guide and validation.

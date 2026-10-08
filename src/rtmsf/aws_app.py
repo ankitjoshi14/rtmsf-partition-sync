@@ -1,4 +1,4 @@
-"""Compose the finalized RTMSF worker with bounded AWS clients."""
+"""Compose the RTMSF worker with bounded AWS clients."""
 
 from dataclasses import dataclass
 import json

@@ -24,7 +24,7 @@ PARTITION_KEYS = {'hierarchical': ('dt', 'site', 'hour'),
 
 
 def fixture_table_name(name, method, run_id, base=0, files=1, layout=None):
-    """Readable AWS names; internal trial IDs stay stable in evidence records."""
+    """Build AWS table names from method, condition, repetition, and execution."""
     prefix = {'rtmsf': 'rtmsf', 'glue_event_crawler': 'crawler', 'athena_msck': 'msck'}[method]
     repetition = name.rsplit('_', 1)[-1]
     if name.startswith('g2_'):
@@ -67,7 +67,7 @@ def replay_verified(marker, telemetry, successor_id):
 
 
 class Pilot(AwsRuntime):
-    """Run the agreed workloads using shared AWS operations and evidence."""
+    """Run experiment workloads using shared AWS operations and evidence."""
 
     def __init__(self, session, outputs, bundle, run_id, args):
         super().__init__(session, outputs, bundle, run_id, args.timeout_seconds)

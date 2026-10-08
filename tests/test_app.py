@@ -10,7 +10,7 @@ def environment(**overrides):
     return {"EVENT_QUEUE_URL": "event-queue", "DEAD_LETTER_QUEUE_URL": "dead-queue", "RTMSF_SOURCES": '{"warehouse":"data-bucket"}', "RTMSF_TABLE_IDS": '["db.one"]', **overrides}
 
 
-def test_environment_uses_finalized_contract_and_runtime_defaults():
+def test_environment_uses_contract_and_runtime_defaults():
     config = app.AppConfig.from_environment(environment())
     assert dict(config.sources) == {"warehouse": "data-bucket"}
     assert config.table_ids == ("db.one",)

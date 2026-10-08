@@ -30,7 +30,7 @@ def write_activity_reports(root, rows, timeline, errors):
             writer.writerows({key: round(value, 3) if isinstance(value, float) else value
                               for key, value in record.items()} for record in records)
     lines = ['# Activity validation', '',
-        'Small AWS validation; one repetition does not establish stable latency or capacity limits.', '',
+        'Bounded AWS validation; these repetitions do not establish tail latency or maximum sustainable capacity.', '',
         '| Condition | Method | Repeat | PMCP attempts | HEAD / GET / LIST | First partition visible (s) | Drain (s) | Outcome |',
         '|---|---|---:|---:|---|---:|---:|---|']
     def number(value):

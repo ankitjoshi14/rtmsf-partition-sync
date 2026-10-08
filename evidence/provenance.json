@@ -1,48 +1,137 @@
 {
   "account_placeholder": "000000000000",
-  "author": "Ankit Joshi",
-  "failures": "Graph-validation retains incomplete_or_failed parent status; failed-activity retains ten passed, one failed and five unattempted conditions. A fixture-seeding connection failure happened before measurement; its planned graph conditions remained unattempted.",
-  "historical_limit": "Primary figures have no full catalog snapshots; later snapshots do not replace them.",
-  "identity_fields_removed": {},
-  "nested_identity_fields_removed": {},
-  "release_date": "2026-10-02",
+  "report_generators": {
+    "src/experiments/activity_reports.py": "1abd89bd27979d531cfdceafe464c58c1ce37d262e11a1fbb97b4132b116b224",
+    "src/experiments/export.py": "7db380bacea885b4d605880ad6696a958a9ca4d64ba3c4bb762aafba41e57579",
+    "src/experiments/figures.py": "c85708ca9da5ff367e435be4d1228c37f8d0e0a64413360cdd48bd8fd7a7afe2"
+  },
   "runs": {
     "activity": {
-      "execution": "run_20260930_151218_2a18",
-      "original_artifact_entries_verified": 1300,
-      "original_source_entries_verified": 62,
-      "source_sha256": "34236e6201b5654db12f62852c4806fe79062fabaef1d959ad7fe5982e6c1337"
+      "config": {
+        "buffer_bytes": 16777216,
+        "buffer_sizes": null,
+        "burst_repetitions": 3,
+        "conditions": [
+          "quick",
+          "spaced",
+          "distributed",
+          "mixed",
+          "continuous_1ps_10p",
+          "continuous_1ps_20p",
+          "continuous_3ps_10p",
+          "continuous_3ps_20p",
+          "load_1ps_1000p",
+          "load_5ps_1000p",
+          "load_20ps_10p",
+          "load_20ps_1000p"
+        ],
+        "correctness_repetitions": 3,
+        "graph4_partitions": 100,
+        "max_minutes": 360,
+        "queue_visibility_seconds": 180,
+        "quick": true,
+        "region": "us-west-2",
+        "repetitions": 3,
+        "stack": "rtmsf-paper-v1",
+        "timeout_seconds": 600
+      },
+      "execution": "run_20261004_020915_8da9",
+      "image": "000000000000.dkr.ecr.us-west-2.amazonaws.com/rtmsf-paper-v1-repository-ivdjq0nlptt1@sha256:875467884a0d0446b2b72730a250f2730cad02011810eb682d8a3bdd46c9b073",
+      "original_artifact_manifest_sha256": "2c1e35b04d450fdddc0687497703fa5e6f03cdd9d3706769e75f5547bd8a1d4d",
+      "original_input_hashes": {
+        "activity_data.csv": "5122225e13502797939debe163d90638280d9478ab64116dadfd46825dbfad72",
+        "activity_timeline.csv": "f4ae79745023803410647a8977545f657695a0c1ef69893391536dfc448861ac",
+        "manifest.json": "c916c89d420f491afa16aefdde3d6c0119d13cb87f9da319a6ca46689a1b10a6",
+        "report_inputs.json": "6a9d4236856d4f88000f3e88573b3c1c63b45da966810671ad72c9a98e62088e"
+      },
+      "source_sha256": "07a169040ee332f341ddba55581363434c7d43b371bcba2b30c379309aa7de22",
+      "started_at": null,
+      "verified_artifact_entries": 3707
     },
     "buffer": {
-      "execution": "run_20260930_194451_fcee",
-      "original_artifact_entries_verified": 1416,
-      "original_source_entries_verified": 62,
-      "source_sha256": "6ad2103fbb22059eef5de5f569e1abfe5d6772577a0612c5dde52c0927337c38"
-    },
-    "failed-activity": {
-      "execution": "run_20260930_141608_ea3f",
-      "original_artifact_entries_verified": 1165,
-      "original_source_entries_verified": 62,
-      "source_sha256": "2ebf4b16d6656a4724606a3d4bc89a015fe03cd35f75bc5ef5620b517ae00f1c"
-    },
-    "failed-seeding": {
-      "execution": "run_20260930_112636_03cf",
-      "original_artifact_entries_verified": 812,
-      "original_source_entries_verified": 62,
-      "source_sha256": "197912de608992cbf453e3589975f1a48b3166d81ddd4195aedd33d7e72e6fe1"
+      "config": {
+        "buffer_bytes": 16777216,
+        "buffer_sizes": [
+          100,
+          1000
+        ],
+        "burst_repetitions": 2,
+        "conditions": [
+          "load_20ps_10p",
+          "load_20ps_1000p"
+        ],
+        "correctness_repetitions": 2,
+        "graph4_partitions": 100,
+        "max_minutes": 240,
+        "queue_visibility_seconds": 1000,
+        "quick": false,
+        "region": "us-west-2",
+        "repetitions": 2,
+        "stack": "rtmsf-paper-v1",
+        "timeout_seconds": 600
+      },
+      "execution": "run_20261004_045939_c0fa",
+      "image": "000000000000.dkr.ecr.us-west-2.amazonaws.com/rtmsf-paper-v1-repository-ivdjq0nlptt1@sha256:875467884a0d0446b2b72730a250f2730cad02011810eb682d8a3bdd46c9b073",
+      "original_artifact_manifest_sha256": "6bcba5c520a0431f70a51ecb6a7642da1c526c2e5c65f39598cd3e134cc433de",
+      "original_input_hashes": {
+        "activity_data.csv": "a97e9ddd1cfdc26fec950cdccaf5f0a8e520be3c5d37de84afd759d4e79e151b",
+        "activity_timeline.csv": "94a3ec8cef2d1f220d6cdcefadb9231f24f509bf898cb8ab087a6fed85783e75",
+        "manifest.json": "cf3ea5b5c00228c980b558ae3a631e7cf07d88f0c26dfa64120c111a814acc3d",
+        "report_inputs.json": "19baf46191d0a55d5e4d21fea884d74df3235e480c807a7ee0bf8bfef49511b0"
+      },
+      "source_sha256": "07a169040ee332f341ddba55581363434c7d43b371bcba2b30c379309aa7de22",
+      "started_at": null,
+      "verified_artifact_entries": 3642
     },
     "figures": {
-      "execution": "run_20260930_004034_214f",
-      "original_artifact_entries_verified": 1019,
-      "original_source_entries_verified": 58,
-      "source_sha256": "b8623cf17cb6c9b2647717dc467cb05c232391cfa96d4ae5346ff724f8116efc"
-    },
-    "graph-validation": {
-      "execution": "run_20260930_113402_14ae",
-      "original_artifact_entries_verified": 2430,
-      "original_source_entries_verified": 62,
-      "source_sha256": "2ebf4b16d6656a4724606a3d4bc89a015fe03cd35f75bc5ef5620b517ae00f1c"
+      "config": {
+        "activity": null,
+        "audit_wait_seconds": 600,
+        "checks_only": null,
+        "cleanup_run": null,
+        "comparisons_only": false,
+        "correctness_repetitions": 3,
+        "files": [
+          1,
+          100,
+          1000
+        ],
+        "graph4_only": false,
+        "graph4_partitions": 1000,
+        "graph5_only": false,
+        "layout_sizes": [
+          100,
+          1000,
+          5000,
+          10000
+        ],
+        "max_minutes": 1800,
+        "recovery_only": null,
+        "region": "us-west-2",
+        "repetitions": 5,
+        "request_source": "cloudwatch",
+        "sizes": [
+          100,
+          1000,
+          5000,
+          10000
+        ],
+        "stack": "rtmsf-paper-v1",
+        "timeout_seconds": 900
+      },
+      "execution": "run_20261003_080700_dfd9",
+      "image": "000000000000.dkr.ecr.us-west-2.amazonaws.com/rtmsf-paper-v1-repository-ivdjq0nlptt1@sha256:875467884a0d0446b2b72730a250f2730cad02011810eb682d8a3bdd46c9b073",
+      "original_artifact_manifest_sha256": "abc4568f3d08e0b2e68e21e8252576b8abdab7863da1339448a0014ad6e037cf",
+      "original_input_hashes": {
+        "graph_data.csv": "cbfd846426fe3ff243664d2cca369e0e6640df4e44bd4211f6318cc1b3bf61b8",
+        "manifest.json": "59852e177826673ea5d232fe19b3221c96fb5624b57ddb6769e836ea845d5cd2",
+        "report_inputs.json": "e88a3b66fde58f4025d2d0e5d901059168a86ab95dc4afaab58653a8dcb8f5b4"
+      },
+      "source_sha256": "07a169040ee332f341ddba55581363434c7d43b371bcba2b30c379309aa7de22",
+      "started_at": "2026-10-03T08:07:00.801368+00:00",
+      "verified_artifact_entries": 4318
     }
   },
-  "selection": "Source, reports, scientific observations, scoped request/calibration coverage, catalog and query snapshots. Full CloudTrail downloads and duplicate collection/log files excluded."
+  "schema_version": 1,
+  "selection": "Scientific CSVs, report inputs, outcomes, compact graph request coverage; raw events and downloads stay in source bundles."
 }

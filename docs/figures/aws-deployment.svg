@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">RTMSF deployment on AWS</title>
+  <desc id="description">S3 sends object creation and deletion notifications to a Standard SQS queue. An ECS Fargate task runs the cloud-neutral routing, WOERA, and PMCP components through AWS adapters. Routing loads table definitions from Glue. PMCP reads and changes Glue partitions and performs S3 HEAD or bounded LIST checks. The worker renews and acknowledges SQS messages, sends terminal failures to a separate queue, and writes CloudWatch logs. ECR supplies the container image and an IAM task role grants access.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0072B2"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#203142}
+      .title{font-size:34px;font-weight:700}.sub{font-size:21px;fill:#526477}
+      .name{font-size:24px;font-weight:700}.body{font-size:20px}.small{font-size:18px;fill:#526477}
+      .service{fill:#fff;stroke:#c6d0da;stroke-width:2}.core{fill:#e8f4fa;stroke:#0072B2;stroke-width:2}
+      .wire{fill:none;stroke:#526477;stroke-width:2.5;stroke-linejoin:round;marker-end:url(#arrow)}
+      .flow{fill:none;stroke:#0072B2;stroke-width:3;marker-end:url(#blue-arrow)}
+      .support{fill:none;stroke:#8999a8;stroke-width:2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .icon{fill:none;stroke:#fff;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#fff"/>
+  <text x="60" y="63" class="title">RTMSF deployment on AWS</text>
+  <text x="60" y="101" class="sub">AWS adapters connect cloud services to the cloud-neutral synchronization core.</text>
+  <rect x="35" y="137" width="1530" height="785" rx="20" fill="#fafcfe" stroke="#c6d0da" stroke-width="2"/>
+  <text x="60" y="173" class="small">AWS account / Region</text>
+
+  <!-- Image distribution and permissions stay outside the event-processing path. -->
+  <rect x="365" y="185" width="240" height="85" rx="12" class="service"/>
+  <rect x="381" y="204" width="46" height="46" rx="7" fill="#ED7100"/>
+  <path class="icon" d="M390 217l14-7 14 7v20l-14 7-14-7zM390 217l14 7 14-7M404 224v20"/>
+  <text x="444" y="218" class="name">Amazon ECR</text><text x="444" y="248" class="small">Worker image</text>
+  <path class="support" d="M605 228H720V282"/>
+  <text x="635" y="214" class="small">Load image</text>
+  <rect x="1190" y="185" width="335" height="85" rx="12" class="service"/>
+  <rect x="1206" y="204" width="46" height="46" rx="7" fill="#DD344C"/>
+  <path class="icon" d="M1217 222v-4a12 12 0 0 1 24 0v4M1215 222h28v20h-28zM1229 230v5"/>
+  <text x="1270" y="220" class="name">IAM task role</text><text x="1270" y="248" class="small">S3 / SQS / Glue access</text>
+  <path class="support" d="M1190 228H1100V282"/>
+
+  <!-- Existing VPC and public subnet host the supplied Fargate deployment. -->
+  <rect x="630" y="282" width="520" height="443" rx="18" fill="#fff" stroke="#a5b4c2" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="651" y="312" class="small">Existing VPC / public subnet · outbound HTTPS</text>
+  <rect x="653" y="329" width="474" height="375" rx="16" fill="#fff" stroke="#0072B2" stroke-width="2.5"/>
+  <rect x="670" y="344" width="44" height="44" rx="7" fill="#ED7100"/>
+  <path class="icon" d="M680 357h24v18h-24zM685 353v4M693 353v4M701 353v4M685 375v4M693 375v4M701 375v4"/>
+  <text x="729" y="363" class="name">Amazon ECS on AWS Fargate</text>
+  <text x="729" y="391" class="small">One RTMSF worker · AWS adapters</text>
+  <rect x="690" y="413" width="365" height="67" rx="11" class="core"/>
+  <text x="872" y="442" class="name" text-anchor="middle">Routing</text><text x="872" y="467" class="small" text-anchor="middle">Match object path to configured table</text>
+  <path class="flow" d="M872 480V502"/>
+  <rect x="690" y="504" width="365" height="67" rx="11" class="core"/>
+  <text x="872" y="534" class="name" text-anchor="middle">WOERA</text><text x="872" y="559" class="small" text-anchor="middle">Group events by partition within Q / T_max</text>
+  <path class="flow" d="M872 571V593"/>
+  <rect x="690" y="595" width="365" height="84" rx="11" class="core"/>
+  <text x="872" y="625" class="name" text-anchor="middle">PMCP</text><text x="872" y="650" class="small" text-anchor="middle">Check storage and catalog membership</text><text x="872" y="672" class="small" text-anchor="middle">Register or remove a partition as needed</text>
+
+  <rect x="65" y="396" width="230" height="182" rx="14" class="service"/>
+  <rect x="146" y="414" width="64" height="60" rx="8" fill="#7AA116"/>
+  <path class="icon" d="M160 430q18-9 36 0l-4 30q-14 8-28 0zM160 430q18 9 36 0M168 447h20"/>
+  <text x="180" y="510" class="name" text-anchor="middle">Amazon S3</text><text x="180" y="541" class="body" text-anchor="middle">Partitioned objects</text>
+  <text x="180" y="566" class="small" text-anchor="middle">Configured table locations</text>
+  <rect x="355" y="396" width="230" height="182" rx="14" class="service"/>
+  <rect x="438" y="414" width="64" height="60" rx="8" fill="#B0084D"/>
+  <path class="icon" d="M449 427h41v34h-41zM456 435h8v8h-8zM476 435h8v8h-8zM456 451h8M476 451h8"/>
+  <text x="470" y="510" class="name" text-anchor="middle">Amazon SQS</text><text x="470" y="541" class="body" text-anchor="middle">Standard event queue</text><text x="470" y="566" class="small" text-anchor="middle">Durable pending notifications</text>
+  <path class="wire" d="M295 445H355"/>
+  <text x="313" y="325" class="small" text-anchor="middle">ObjectCreated /</text><text x="313" y="350" class="small" text-anchor="middle">ObjectRemoved</text>
+  <path d="M313 359V430" fill="none" stroke="#c6d0da"/>
+  <path class="wire" d="M585 446H690"/>
+  <text x="592" y="422" class="small">Receive</text>
+  <path class="wire" d="M690 463H612V603H470V578"/>
+  <text x="358" y="635" class="small">Renew visibility / acknowledge</text>
+
+  <rect x="1240" y="391" width="285" height="235" rx="14" class="service"/>
+  <rect x="1350" y="409" width="64" height="60" rx="8" fill="#8C4FFF"/>
+  <path class="icon" d="M1361 424q20-10 41 0v29q-21 11-41 0zM1361 424q20 11 41 0M1361 438q20 11 41 0"/>
+  <text x="1382" y="506" class="name" text-anchor="middle">AWS Glue Data Catalog</text><text x="1382" y="538" class="body" text-anchor="middle">Existing table definitions</text><text x="1382" y="566" class="body" text-anchor="middle">Partition membership</text><text x="1382" y="603" class="small" text-anchor="middle">Configured tables and locations</text>
+  <path class="wire" d="M1055 441H1240"/>
+  <text x="1350" y="370" class="small" text-anchor="middle">GetTable at startup</text>
+  <path class="wire" d="M1055 629H1183V570H1240"/>
+  <text x="1325" y="670" class="small" text-anchor="middle">GetPartition</text><text x="1325" y="698" class="small" text-anchor="middle">CreatePartition / DeletePartition</text>
+  <path class="wire" d="M785 679V763H180V578"/>
+  <text x="424" y="752" class="body" text-anchor="middle">S3 HEAD or bounded LIST</text>
+
+  <rect x="365" y="804" width="320" height="87" rx="12" class="service"/>
+  <rect x="381" y="824" width="46" height="46" rx="7" fill="#B0084D"/>
+  <path class="icon" d="M391 834h26v24h-26zM397 841h14M397 848h14M397 854h8"/>
+  <text x="443" y="839" class="name">SQS failure queue</text><text x="443" y="870" class="small">Terminal input before ACK</text>
+  <path class="wire" d="M690 658H665V789H525V804"/>
+  <rect x="1140" y="804" width="385" height="87" rx="12" class="service"/>
+  <rect x="1156" y="824" width="46" height="46" rx="7" fill="#E7157B"/>
+  <path class="icon" d="M1166 850h26M1170 846v-8M1178 846v-14M1186 846v-5M1170 856h18"/>
+  <text x="1218" y="839" class="name">Amazon CloudWatch Logs</text><text x="1218" y="870" class="small">Worker telemetry</text>
+  <path class="support" d="M1127 672H1160V776H1330V804"/>
+  <text x="888" y="859" class="small" text-anchor="middle">Solid: runtime calls</text><text x="888" y="884" class="small" text-anchor="middle">Dashed: deployment / logging</text>
+  <text x="60" y="964" class="body">RTMSF — Real-Time Metadata Synchronization Framework</text>
+</svg>

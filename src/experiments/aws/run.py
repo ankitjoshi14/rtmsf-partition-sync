@@ -62,7 +62,7 @@ def main() -> int:
     parser.add_argument('--files', type=int, nargs='+', default=[1, 10, 100, 1000])
     parser.add_argument('--graph4-partitions', type=int, default=1000)
     parser.add_argument('--layout-sizes', type=int, nargs='+', default=[100, 1000],
-                        help='Graph 5 starting partitions; paper matrix: 100 1000 10000')
+                        help='Graph 5 starting partition counts for each layout')
     parser.add_argument('--repetitions', type=int, default=1, help='repetitions per comparison condition (default: 1)')
     parser.add_argument('--correctness-repetitions', type=int,
                         help='Graph 1, recovery and supporting check repetitions (default: --repetitions)')
@@ -76,7 +76,7 @@ def main() -> int:
                         help='CloudWatch is the experiment protocol; CloudTrail-only is a diagnostic mode')
     parser.add_argument('--output-dir', type=Path, default=Path('runs'))
     parser.add_argument('--cleanup-run', type=Path, help='Clean this run\'s measurement buckets after its worker/crawlers have stopped')
-    parser.add_argument('--build-manifest', type=Path, help='image-contents.json containing immutable image and runtime file hashes')
+    parser.add_argument('--build-manifest', type=Path, help='image-build.json containing immutable image and runtime file hashes')
     parser.add_argument('--comparisons-only', action='store_true', help='only Graphs 2/3: new-partition comparisons')
     parser.add_argument('--graph4-only', action='store_true', help='only Graph 4 file-count comparisons on fresh fixtures')
     parser.add_argument('--graph5-only', action='store_true', help='only Graph 5: RTMSF/Athena, both key orders')
