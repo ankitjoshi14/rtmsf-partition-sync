@@ -1,0 +1,60 @@
+# Azure deployment architecture
+
+The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azure Container Apps worker → Databricks Unity Catalog**. It reuses the existing Python routing, WOERA, and PMCP core. The figure uses the same visual style as the [AWS](figures/aws-deployment.svg) and [OCI](figures/oci-deployment.svg) deployment diagrams.
+
+![RTMSF deployment architecture on Azure](figures/azure-deployment.svg)
+
+## Current validation boundary
+
+The Azure catalog proof passed on October 15, 2026. An external Parquet table with `partitionMetadataEnabled=true` initially hid a path-written row from table queries. Registering its complete partition twice exposed exactly one row and one partition. Dropping the partition twice without PURGE removed catalog membership while a separate path query still read the physical row.
+
+This proves the selected catalog's partition behavior. Azure adapters, unattended SQL authentication, the event pipeline, a deployed cloud worker, and crash/replay behavior remain unverified. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
+
+## Services and responsibilities
+
+| Azure component | Responsibility |
+|---|---|
+| ADLS Gen2 / Blob Storage | Store plain directory-partitioned Parquet files; provide authoritative primary-endpoint existence and listing checks. |
+| Event Grid storage subscription | Deliver file notifications for the configured disposable table prefix. Retain failed ingress delivery in a separate Blob dead-letter container. |
+| Service Bus queue | Retain pending input. Use PeekLock, renew every retained delivery, and complete only after all its reconciliation finishes. |
+| Service Bus native DLQ | Retain terminal and expired input. Successful dead-lettering already settles the delivery; the adapter must not complete it again. |
+| Azure Container Apps | Host exactly one RTMSF process and replica, with public application ingress disabled. Verify the old revision is stopped before replacing it. |
+| Azure Container Registry / Tasks | Build and distribute the worker and cloud-proof images in Azure. |
+| Databricks SQL warehouse / Unity Catalog | Resolve existing table definitions and execute exact SHOW/ADD/DROP partition operations for approved external Parquet tables. |
+| Azure managed identity | Authorize worker queue receive/settlement, read-only test storage access, and private image pulls. |
+| Databricks-managed service principal | Provide unattended OAuth M2M SQL authentication with restricted resource permissions. It is separate from Azure storage/queue identity. |
+| Databricks Access Connector | Authorize the SQL engine's governed storage reads. It does not authenticate the RTMSF worker to SQL. |
+| Azure Monitor / Log Analytics | Retain worker telemetry and evidence about processing, settlement, and recovery. |
+
+## First functional contract
+
+Support completed Blob REST uploads/overwrites, ADLS `FlushWithClose`, and individual file deletions. Initial ADLS file creation is not a completed upload. Validate the account, container, configured prefix, and exact decoded object key before routing.
+
+Directory rename, recursive directory deletion, SFTP mutations, and version/undelete restoration are outside this first contract. Transactional Delta/Iceberg commits require their own protocols. Do not infer an empty partition from a directory marker or from a listing page that still has a continuation token.
+
+Validate external table type, Parquet provider, explicit partition metadata, approved storage location, and complete partition columns at startup. Quote identifiers and literals safely. Never use PURGE or a partial partition specification. The new disposable `worker_probe` table and its storage prefix remain separate from the completed catalog proof.
+
+Bound pending messages, retained bytes, storage listing time, catalog statement time, and settlement/renewal calls. The configured queue lease must cover those bounds. A lost lease or uncertain settlement ends the run without prematurely acknowledging unfinished input; the live recovery proof must demonstrate convergence after replay.
+
+## Execution and access checkpoints
+
+Image builds, worker execution, fixture generation, and live tests run in Azure. No local RTMSF worker starts. Prepare source and review deployment artifacts before applying new access grants or deploying resources.
+
+The existing SQL warehouse is 2X-Small, with at most one cluster and five-minute auto-stop. Stop the worker and warehouse when each bounded proof session ends. Only existing Azure Free Trial credit is authorized; do not upgrade to pay-as-you-go or treat delayed billing as zero cost.
+
+Generate and enter any new OAuth credential through a user browser handoff into the reviewed cloud secret destination. Do not ask for credentials in chat, commit a secret, save a local `.env`, or emit a secret in logs. Exact Azure IAM grants and table ownership require review before application.
+
+## Completion evidence
+
+The first complete worker proof must demonstrate real committed events, first-file registration, additional-file no-op, overwrite, deletion with other files remaining, last-file removal, duplicate/reordered input, a same-partition burst, and restart/replay before and after catalog mutation and settlement. Use an independent catalog query and authoritative storage witness; duplicate SQL statements alone are insufficient.
+
+Save image/source identity, queue/log evidence, scenario outcomes, warehouse timings, observed credit consumption, and final stopped compute state. Broader AWS-style performance experiments follow only after this functional Azure proof passes.
+
+## Primary references
+
+- [External partition discovery](https://learn.microsoft.com/en-us/azure/databricks/tables/external-partition-discovery)
+- [SQL partition management](https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/sql-ref-syntax-ddl-alter-table-manage-partition)
+- [Storage event schema](https://learn.microsoft.com/en-us/azure/event-grid/event-schema-blob-storage)
+- [Service Bus locks and settlement](https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement)
+- [SQL connector authentication](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/python-sql-connector)
+- [OAuth M2M and scoped secrets](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/auth/oauth-m2m)

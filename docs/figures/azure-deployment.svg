@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">RTMSF deployment architecture on Azure</title>
+  <desc id="description">Planned Azure architecture: ADLS Gen2 emits committed file creation and deletion events through Event Grid into a Service Bus queue. Exactly one Azure Container Apps worker runs the existing routing, WOERA, and PMCP core through Azure adapters. It renews PeekLock deliveries, completes reconciled input, and uses native Service Bus dead-letter settlement for terminal input. PMCP reads authoritative storage and manages explicit external Parquet partition metadata through a Databricks SQL warehouse and Unity Catalog. Azure managed identity authorizes queue and storage access; Databricks OAuth machine-to-machine authorizes SQL access. The Unity Catalog access connector authorizes query reads from storage. Azure Container Registry supplies the cloud-built image and Azure Monitor retains logs. Only the SQL catalog proof has passed; the event pipeline, unattended authentication, and Azure worker have not yet been deployed or validated. Service symbols are generic, not official Microsoft icons.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0072B2"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#203142}
+      .title{font-size:34px;font-weight:700}.sub{font-size:21px;fill:#526477}
+      .name{font-size:24px;font-weight:700}.body{font-size:20px}.small{font-size:18px;fill:#526477}
+      .service{fill:#fff;stroke:#c6d0da;stroke-width:2}.core{fill:#e8f4fa;stroke:#0072B2;stroke-width:2}
+      .wire{fill:none;stroke:#526477;stroke-width:2.5;stroke-linejoin:round;marker-end:url(#arrow)}
+      .flow{fill:none;stroke:#0072B2;stroke-width:3;marker-end:url(#blue-arrow)}
+      .support{fill:none;stroke:#8999a8;stroke-width:2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .icon{fill:none;stroke:#fff;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#fff"/>
+  <text x="60" y="63" class="title">RTMSF deployment architecture on Azure</text>
+  <text x="60" y="101" class="sub">Planned cloud worker and event pipeline · SQL catalog partition proof passed</text>
+  <rect x="35" y="137" width="1530" height="800" rx="20" fill="#fafcfe" stroke="#c6d0da" stroke-width="2"/>
+  <text x="60" y="173" class="small">Azure subscription / Region</text>
+
+  <rect x="590" y="190" width="390" height="85" rx="12" class="service"/>
+  <rect x="606" y="209" width="46" height="46" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M615 222l14-7 14 7v20l-14 7-14-7zM615 222l14 7 14-7M629 229v20"/>
+  <text x="669" y="225" class="name">Azure Container Registry</text>
+  <text x="669" y="254" class="small">Image built in Azure</text>
+  <path class="support" d="M730 275V305"/>
+  <rect x="1020" y="190" width="505" height="85" rx="12" class="service"/>
+  <rect x="1036" y="209" width="46" height="46" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M1047 227v-4a12 12 0 0 1 24 0v4M1045 227h28v20h-28zM1059 235v5"/>
+  <text x="1099" y="219" class="name">Identity + OAuth M2M</text>
+  <text x="1099" y="244" class="small">Managed identity: queue / storage</text>
+  <text x="1099" y="265" class="small">Databricks OAuth: scoped SQL access</text>
+  <path class="support" d="M1140 275V305"/>
+
+  <rect x="85" y="215" width="360" height="110" rx="14" class="service"/>
+  <rect x="105" y="241" width="48" height="48" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M114 253q15-8 30 0l-3 24q-12 7-24 0zM114 253q15 8 30 0M121 266h16"/>
+  <text x="173" y="249" class="name">ADLS Gen2</text>
+  <text x="173" y="279" class="body">Partitioned Parquet files</text>
+  <text x="173" y="309" class="small">Authoritative primary storage</text>
+  <path class="wire" d="M265 325V360"/>
+
+  <rect x="85" y="360" width="360" height="110" rx="14" class="service"/>
+  <rect x="105" y="386" width="48" height="48" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M115 410h28M135 402l8 8-8 8M120 397v4M120 419v4"/>
+  <text x="173" y="394" class="name">Event Grid</text>
+  <text x="173" y="424" class="body">Storage event subscription</text>
+  <text x="173" y="454" class="small">Committed creates / file deletes</text>
+  <path class="wire" d="M265 470V505"/>
+
+  <rect x="85" y="505" width="360" height="130" rx="14" class="service"/>
+  <rect x="105" y="537" width="48" height="48" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M114 547h29v9h-29zM114 564h29v9h-29zM120 550h17M120 567h17"/>
+  <text x="173" y="542" class="name">Service Bus Queue</text>
+  <text x="173" y="574" class="body">Durable pending input</text>
+  <text x="173" y="604" class="small">PeekLock · renew · complete</text>
+
+  <rect x="590" y="305" width="570" height="465" rx="18" fill="#fff" stroke="#0072B2" stroke-width="2.5"/>
+  <rect x="609" y="324" width="46" height="46" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M619 336h26v19h-26zM624 332v4M632 332v4M640 332v4M624 355v5M632 355v5M640 355v5"/>
+  <text x="673" y="347" class="name">Azure Container Apps · RTMSF worker</text>
+  <text x="615" y="380" class="small">Exactly one cloud replica · no public application ingress</text>
+  <rect x="630" y="400" width="490" height="75" rx="11" class="core"/>
+  <text x="875" y="431" class="name" text-anchor="middle">Routing</text>
+  <text x="875" y="460" class="small" text-anchor="middle">Resolve existing tables and match exact object paths</text>
+  <path class="flow" d="M875 475V500"/>
+  <rect x="630" y="500" width="490" height="75" rx="11" class="core"/>
+  <text x="875" y="531" class="name" text-anchor="middle">WOERA</text>
+  <text x="875" y="560" class="small" text-anchor="middle">Group partition observations within Q / T_max</text>
+  <path class="flow" d="M875 575V600"/>
+  <rect x="630" y="600" width="490" height="105" rx="11" class="core"/>
+  <text x="875" y="634" class="name" text-anchor="middle">PMCP</text>
+  <text x="875" y="664" class="small" text-anchor="middle">Verify storage and reconcile catalog membership</text>
+  <text x="875" y="693" class="small" text-anchor="middle">Full partition specification · metadata-only DROP</text>
+  <text x="615" y="746" class="small">Python core reused · Azure adapters · bounded calls</text>
+
+  <path class="wire" d="M445 550H540V438H630"/>
+  <text x="486" y="426" class="small">Receive</text>
+  <path class="wire" d="M590 735H515V607H445"/>
+  <text x="458" y="784" class="small">Renew / complete</text>
+  <path class="wire" d="M1110 705V795H62V285H85"/>
+  <text x="830" y="817" class="body" text-anchor="middle">Primary storage HEAD / bounded paginated LIST</text>
+
+  <rect x="1230" y="385" width="295" height="305" rx="14" class="service"/>
+  <rect x="1354" y="405" width="48" height="48" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M1363 417q14-7 28 0v22q-14 8-28 0zM1363 417q14 8 28 0M1363 428q14 8 28 0"/>
+  <text x="1377" y="485" class="name" text-anchor="middle">Azure Databricks</text>
+  <text x="1377" y="516" class="body" text-anchor="middle">SQL warehouse</text>
+  <text x="1377" y="547" class="body" text-anchor="middle">Unity Catalog</text>
+  <text x="1377" y="579" class="small" text-anchor="middle">External Parquet partitions</text>
+  <text x="1377" y="608" class="small" text-anchor="middle">Explicit partition metadata</text>
+  <text x="1377" y="648" class="small" text-anchor="middle">Storage reads authorized by</text>
+  <text x="1377" y="674" class="small" text-anchor="middle">the UC Access Connector</text>
+  <path class="wire" d="M1120 440H1230"/>
+  <path class="wire" d="M1120 653H1188V566H1230"/>
+  <text x="1362" y="731" class="small" text-anchor="middle">SHOW / ADD / DROP PARTITION</text>
+
+  <rect x="85" y="680" width="360" height="100" rx="14" class="service"/>
+  <rect x="105" y="705" width="48" height="48" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M115 715h28v25h-28zM122 722h14M122 729h14M122 736h9"/>
+  <text x="173" y="716" class="name">Service Bus DLQ</text>
+  <text x="173" y="747" class="small">Terminal / expired deliveries</text>
+  <path class="wire" d="M590 678H488V718H445"/>
+
+  <rect x="85" y="835" width="360" height="85" rx="12" class="service"/>
+  <rect x="105" y="854" width="48" height="48" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M114 866q15-8 30 0l-3 24q-12 7-24 0zM114 866q15 8 30 0M121 879h16"/>
+  <text x="173" y="868" class="name">Event Grid dead letters</text>
+  <text x="173" y="897" class="small">Failed delivery retained in Blob</text>
+  <path class="wire" d="M445 415H472V869H445"/>
+  <rect x="1060" y="835" width="465" height="85" rx="12" class="service"/>
+  <rect x="1076" y="854" width="46" height="46" rx="7" fill="#0078D4"/>
+  <path class="icon" d="M1086 880h26M1090 876v-8M1098 876v-14M1106 876v-5M1090 886h18"/>
+  <text x="1139" y="869" class="name">Azure Monitor / Log Analytics</text>
+  <text x="1139" y="898" class="small">Worker telemetry and proof evidence</text>
+  <path class="support" d="M1160 735H1195V810H1292V835"/>
+  <text x="746" y="863" class="small" text-anchor="middle">Solid: intended runtime calls</text>
+  <text x="746" y="891" class="small" text-anchor="middle">Dashed: image / identity / logging</text>
+  <text x="60" y="965" class="small">Current evidence: catalog SQL only. Azure event delivery, cloud worker, OAuth login, and recovery remain unverified.</text>
+  <text x="60" y="989" class="small">Service symbols are generic. Worker execution, image builds, and live proof runs belong in Azure.</text>
+</svg>

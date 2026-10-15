@@ -21,6 +21,7 @@ The supplied router requires ordered `column=value` paths and correct existing p
 The core uses provider-neutral interfaces. AWS supplies catalog adapters and the benchmark runner.
 An OCI Compute worker passed lifecycle, burst-coalescing, and process-restart checks through OCI Object Storage, Events/Function, and Queue using the unchanged core and an in-memory catalog.
 Real OCI catalog integration and multi-worker operation remain unvalidated.
+The Azure catalog partition proof passed; its event pipeline and cloud worker remain planned.
 
 ## Choose your task
 
@@ -28,6 +29,7 @@ Real OCI catalog integration and multi-worker operation remain unvalidated.
 |---|---|
 | Understand the algorithm, guarantees, and limits | [System behavior](docs/system-behavior.md) |
 | Inspect the OCI adapters, functional proof, and remaining catalog work | [OCI guide](docs/oci.md) |
+| Inspect the Azure architecture, catalog proof, and remaining worker work | [Azure guide](docs/azure.md) |
 | Run the AWS worker with existing tables | [AWS worker setup](docs/aws.md#run-the-normal-aws-worker) |
 | Provision AWS resources and reproduce experiments | [AWS experiment setup](docs/aws.md#aws-experiment-setup) |
 | Understand the five graphs, recovery table, and supporting checks | [Experiment specification](docs/experiments.md) |
