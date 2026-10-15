@@ -12,3 +12,6 @@ runs/
 dist/
 build/
 build.json
+
+# Local OCI authentication and live resource configuration
+.oci/

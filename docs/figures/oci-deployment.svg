@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">RTMSF validated integration with OCI</title>
+  <desc id="description">OCI Object Storage emits create, update, and delete notifications through OCI Events. A Python Function bridge confirms publication to OCI Queue. One worker deployed on a 1 OCPU, 2 GB OCI Compute VM uses instance-principal authentication, OCI adapters and the unchanged routing, WOERA, and PMCP core. The worker renews pending Queue leases, acknowledges completed input, and copies invalid or terminal input to a separate quarantine queue before acknowledgement. PMCP performs authoritative Object Storage HEAD or bounded LIST calls and uses an in-memory catalog test double. External catalog integration is deferred and outside the tested OCI scope. Service symbols are generic, not official Oracle icons.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0072B2"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#203142}
+      .title{font-size:34px;font-weight:700}.sub{font-size:21px;fill:#526477}
+      .name{font-size:24px;font-weight:700}.body{font-size:20px}.small{font-size:18px;fill:#526477}
+      .service{fill:#fff;stroke:#c6d0da;stroke-width:2}.core{fill:#e8f4fa;stroke:#0072B2;stroke-width:2}
+      .wire{fill:none;stroke:#526477;stroke-width:2.5;stroke-linejoin:round;marker-end:url(#arrow)}
+      .flow{fill:none;stroke:#0072B2;stroke-width:3;marker-end:url(#blue-arrow)}
+      .planned{fill:none;stroke:#8999a8;stroke-width:2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .icon{fill:none;stroke:#fff;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#fff"/>
+  <text x="60" y="63" class="title">RTMSF validated integration with OCI</text>
+  <text x="60" y="101" class="sub">OCI-hosted event delivery, worker, and storage checks · external catalog outside validation</text>
+
+  <rect x="35" y="155" width="1190" height="765" rx="20" fill="#fafcfe" stroke="#c6d0da" stroke-width="2"/>
+  <text x="60" y="190" class="small">OCI account / Region</text>
+  <rect x="85" y="215" width="390" height="115" rx="14" class="service"/>
+  <rect x="105" y="239" width="48" height="48" rx="7" fill="#C74634"/>
+  <path class="icon" d="M114 251q15-8 30 0l-3 24q-12 7-24 0zM114 251q15 8 30 0M121 264h16"/>
+  <text x="173" y="250" class="name">OCI Object Storage</text>
+  <text x="173" y="280" class="body">Partitioned objects</text>
+  <text x="173" y="309" class="small">Authoritative current state</text>
+  <path class="wire" d="M280 330V365"/>
+
+  <rect x="85" y="365" width="390" height="100" rx="14" class="service"/>
+  <rect x="105" y="388" width="48" height="48" rx="7" fill="#C74634"/>
+  <path class="icon" d="M115 412h28M135 404l8 8-8 8M120 399v4M120 422v4"/>
+  <text x="173" y="399" class="name">OCI Events</text>
+  <text x="173" y="429" class="body">Rule filtered to the test bucket</text>
+  <text x="173" y="455" class="small">Create / update / delete</text>
+  <path class="wire" d="M280 465V500"/>
+
+  <rect x="85" y="500" width="390" height="110" rx="14" class="service"/>
+  <rect x="105" y="525" width="48" height="48" rx="7" fill="#C74634"/>
+  <path class="icon" d="M120 535l-7 14 7 14M138 535l7 14-7 14M132 536l-6 26"/>
+  <text x="173" y="536" class="name">OCI Functions</text>
+  <text x="173" y="566" class="body">Python event bridge</text>
+  <text x="173" y="596" class="small">Confirm Queue publication</text>
+  <path class="wire" d="M280 610V645"/>
+
+  <rect x="85" y="645" width="390" height="110" rx="14" class="service"/>
+  <rect x="105" y="670" width="48" height="48" rx="7" fill="#C74634"/>
+  <path class="icon" d="M114 680h29v9h-29zM114 697h29v9h-29zM120 683h17M120 700h17"/>
+  <text x="173" y="680" class="name">OCI Queue</text>
+  <text x="173" y="710" class="body">Pending event notifications</text>
+  <text x="173" y="740" class="small">Receipts and visibility leases</text>
+
+  <rect x="85" y="805" width="390" height="85" rx="14" class="service"/>
+  <rect x="105" y="824" width="48" height="48" rx="7" fill="#C74634"/>
+  <path class="icon" d="M115 835h28v25h-28zM122 842h14M122 849h14M122 856h9"/>
+  <text x="173" y="840" class="name">Quarantine Queue</text>
+  <text x="173" y="870" class="small">Invalid / terminal input before ACK</text>
+
+  <rect x="625" y="215" width="540" height="705" rx="18" fill="#fff" stroke="#0072B2" stroke-width="2.5"/>
+  <rect x="645" y="237" width="46" height="46" rx="7" fill="#0072B2"/>
+  <path class="icon" d="M655 249h26v19h-26zM660 245v4M668 245v4M676 245v4M660 268v5M668 268v5M676 268v5"/>
+  <text x="709" y="264" class="name">OCI Compute · RTMSF worker</text>
+  <text x="650" y="306" class="small">1 OCPU · 2 GB RAM · instance principal</text>
+
+  <text x="650" y="333" class="small">OCI adapters · unchanged core</text>
+
+  <rect x="665" y="350" width="460" height="90" rx="11" class="core"/>
+  <text x="895" y="386" class="name" text-anchor="middle">Routing</text>
+  <text x="895" y="416" class="small" text-anchor="middle">Match exact object path to a configured table</text>
+  <path class="flow" d="M895 440V495"/>
+  <rect x="665" y="495" width="460" height="90" rx="11" class="core"/>
+  <text x="895" y="531" class="name" text-anchor="middle">WOERA</text>
+  <text x="895" y="561" class="small" text-anchor="middle">Group partition events within Q / T_max</text>
+  <path class="flow" d="M895 585V640"/>
+  <rect x="665" y="640" width="460" height="100" rx="11" class="core"/>
+  <text x="895" y="676" class="name" text-anchor="middle">PMCP</text>
+  <text x="895" y="706" class="small" text-anchor="middle">Verify storage and reconcile partition membership</text>
+  <path class="wire" d="M895 740V790"/>
+  <rect x="665" y="790" width="460" height="70" rx="11" class="service"/>
+  <text x="895" y="820" class="name" text-anchor="middle">In-memory catalog</text>
+  <text x="895" y="848" class="small" text-anchor="middle">Validation test double only</text>
+  <text x="665" y="768" class="small">Renew pending leases</text>
+  <text x="1125" y="768" class="small" text-anchor="end">ACK completed input</text>
+  <text x="650" y="897" class="small">VM trace: buffer → reconcile → acknowledge</text>
+
+  <path class="wire" d="M475 690H585V386H665"/>
+  <text x="590" y="367" class="small">Receive</text>
+  <path class="wire" d="M625 765H540V730H475"/>
+  <path class="wire" d="M625 845H475"/>
+  <path class="wire" d="M1125 660H1195V135H280V215"/>
+  <text x="790" y="126" class="small" text-anchor="middle">Authoritative Object Storage HEAD / bounded LIST</text>
+
+  <rect x="1270" y="535" width="280" height="245" rx="14" fill="#fafafa" stroke="#8999a8" stroke-width="2" stroke-dasharray="7 6"/>
+  <rect x="1387" y="555" width="46" height="46" rx="7" fill="#8999a8"/>
+  <path class="icon" d="M1396 567q14-7 28 0v22q-14 8-28 0zM1396 567q14 8 28 0M1396 578q14 8 28 0"/>
+  <text x="1410" y="638" class="name" text-anchor="middle">External catalog</text>
+  <text x="1410" y="676" class="small" text-anchor="middle">Outside tested OCI scope</text>
+  <text x="1410" y="714" class="body" text-anchor="middle">Catalog adapter deferred</text>
+  <text x="1410" y="754" class="small" text-anchor="middle">No real catalog / query test</text>
+  <path class="planned" d="M1125 705H1270"/>
+  <text x="1197" y="695" class="small" text-anchor="middle">Future adapter</text>
+
+  <text x="60" y="963" class="small">Solid: tested runtime path · dashed: catalog integration outside validation</text>
+  <text x="60" y="989" class="small">Service symbols are generic; OCI names identify the actual services used.</text>
+</svg>

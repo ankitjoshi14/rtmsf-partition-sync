@@ -18,14 +18,16 @@ The supplied router requires ordered `column=value` paths and correct existing p
 
 ![RTMSF cloud-neutral architecture](docs/figures/architecture.svg)
 
-The core uses provider-neutral interfaces. AWS supplies the current adapters and experiment runner.
-Other cloud implementations and multi-worker operation are not validated.
+The core uses provider-neutral interfaces. AWS supplies catalog adapters and the benchmark runner.
+An OCI Compute worker passed lifecycle, burst-coalescing, and process-restart checks through OCI Object Storage, Events/Function, and Queue using the unchanged core and an in-memory catalog.
+Real OCI catalog integration and multi-worker operation remain unvalidated.
 
 ## Choose your task
 
 | Task | Guide |
 |---|---|
 | Understand the algorithm, guarantees, and limits | [System behavior](docs/system-behavior.md) |
+| Inspect the OCI adapters, functional proof, and remaining catalog work | [OCI guide](docs/oci.md) |
 | Run the AWS worker with existing tables | [AWS worker setup](docs/aws.md#run-the-normal-aws-worker) |
 | Provision AWS resources and reproduce experiments | [AWS experiment setup](docs/aws.md#aws-experiment-setup) |
 | Understand the five graphs, recovery table, and supporting checks | [Experiment specification](docs/experiments.md) |
@@ -48,17 +50,18 @@ Local tests use fakes and SDK stubs. They need no cloud account.
 
 ```text
 src/rtmsf/          Core algorithm, interfaces, and worker
-  adapters/        Provider implementations; AWS is available
+  adapters/        Provider implementations; AWS and OCI ingress/storage
 src/experiments/   Saved-result reporting and evidence export
   aws/             AWS provisioning, workloads, and measurement collection
+  oci/             Finite OCI functional check with a test catalog
 tests/             Local verification
 docs/              System behavior, experiment specification, and AWS guide
-evidence/          Selected measured CSVs, graphs, tables, and report inputs
+evidence/          Published AWS paper CSVs, graphs, tables, and report inputs
 runs/              Original local execution records; generated and Git-ignored
 ```
 
 Cloud-specific setup belongs in its provider guide and implementation folder.
-Provider adapters and experiment runners share the report format.
+AWS experiment runners share the benchmark report format. OCI functional checks write separate JSON records under Git-ignored `runs/`; their outcomes are summarized in the OCI guide.
 The [experiment specification](docs/experiments.md) defines that format and the measurements.
 
 Experiment runners save measurements and generate reports under `runs/`.
