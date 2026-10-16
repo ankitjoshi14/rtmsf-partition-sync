@@ -397,7 +397,7 @@ def _rows(document):
             or not _text(columns[0]["name"]) or "external_links" in result
             or any(result.get(key) is not None for key in ("next_chunk_index", "next_chunk_internal_link"))):
             raise ValueError("incomplete_inline_result")
-        chunks = manifest["chunks"]
+        chunks = manifest.get("chunks", [])
         if type(manifest["total_chunk_count"]) is not int:
             raise ValueError("invalid_chunk_count")
         if manifest["total_chunk_count"] == 0 and count == 0 and chunks == [] and result == {}:

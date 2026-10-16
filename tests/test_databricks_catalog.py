@@ -259,7 +259,18 @@ def test_only_complete_zero_rows_prove_absence_with_full_partition_spec(tmp_path
     assert http.statements[-1] == "SHOW PARTITIONS `proof`.`default`.`worker_probe` PARTITION (`dt` = '2026-10-15', `region` = 'west')"
 
 
-@pytest.mark.parametrize("defect", ["truncated", "row_count", "column_count", "chunk_count", "next_chunk_index", "next_chunk_internal_link", "external", "closed", "missing_manifest"])
+def test_zero_chunk_absence_accepts_omitted_chunks_observed_in_live_sql(tmp_path):
+    document = inline()
+    document["manifest"]["total_chunk_count"] = 0
+    document["manifest"].pop("chunks")
+    document["result"] = {}
+    http = HTTP([describe(), document])
+    _, result = resolved(tmp_path, http)
+    assert result.partition_exists(PARTITION) is False
+    assert http.mutations == []
+
+
+@pytest.mark.parametrize("defect", ["truncated", "row_count", "column_count", "chunk_count", "missing_chunks", "next_chunk_index", "next_chunk_internal_link", "external", "closed", "missing_manifest"])
 def test_incomplete_statement_read_never_becomes_absence(tmp_path, defect):
     document = inline()
     if defect == "truncated":
@@ -270,6 +281,8 @@ def test_incomplete_statement_read_never_becomes_absence(tmp_path, defect):
         document["manifest"]["schema"]["column_count"] = 2
     elif defect == "chunk_count":
         document["manifest"]["total_chunk_count"] = 2
+    elif defect == "missing_chunks":
+        document["manifest"].pop("chunks")
     elif defect == "next_chunk_index":
         document["result"]["next_chunk_index"] = 1
     elif defect == "next_chunk_internal_link":
