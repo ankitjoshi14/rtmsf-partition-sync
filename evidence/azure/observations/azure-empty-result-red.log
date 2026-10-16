@@ -1,0 +1,50 @@
+Enable succeeded:
+[stdout]
+rtmsf/adapters/databricks.py:500: in partition_exists
+    return bool(_rows(self._statements.execute("SHOW PARTITIONS " + self._quoted_table + " PARTITION " + spec)))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+document = {'manifest': {'format': 'JSON_ARRAY', 'schema': {'column_count': 1, 'columns': [{'name': 'partition', 'position': 0, '...k_count': 0, 'total_row_count': 0, ...}, 'result': {}, 'statement_id': 'statement-1', 'status': {'state': 'SUCCEEDED'}}
+
+    def _rows(document):
+        try:
+            manifest, result = document["manifest"], document.get("result", {})
+            schema = manifest["schema"]
+            columns = schema["columns"]
+            count = manifest["total_row_count"]
+            if (document["status"]["state"] != "SUCCEEDED" or manifest["format"] != "JSON_ARRAY"
+                or manifest.get("truncated") is not False or type(count) is not int or not 0 <= count <= 1
+                or type(schema["column_count"]) is not int or schema["column_count"] != 1 or len(columns) != 1
+                or type(columns[0]["position"]) is not int or columns[0]["position"] != 0 or columns[0]["type_name"] != "STRING"
+                or not _text(columns[0]["name"]) or "external_links" in result
+                or any(result.get(key) is not None for key in ("next_chunk_index", "next_chunk_internal_link"))):
+                raise ValueError("incomplete_inline_result")
+            chunks = manifest["chunks"]
+            if type(manifest["total_chunk_count"]) is not int:
+                raise ValueError("invalid_chunk_count")
+            if manifest["total_chunk_count"] == 0 and count == 0 and chunks == [] and result == {}:
+                return []
+            if (manifest["total_chunk_count"] != 1 or len(chunks) != 1
+                or any(type(chunks[0][key]) is not int or type(result[key]) is not int or chunks[0][key] != value or result[key] != value
+                    for key, value in (("chunk_index", 0), ("row_offset", 0), ("row_count", count)))):
+                raise ValueError("incomplete_inline_result")
+            rows = result["data_array"]
+            if not isinstance(rows, list) or len(rows) != count:
+                raise ValueError("incomplete_inline_result")
+            for row in rows:
+                if not isinstance(row, list) or len(row) != 1 or not isinstance(row[0], str):
+                    raise ValueError("incomplete_inline_result")
+                row[0].encode("utf-8", errors="strict")
+            return rows
+        except (KeyError, TypeError, ValueError, UnicodeError):
+>           raise RetryableExternalError("databricks_inline_result_unconfirmed") from None
+E           rtmsf.interfaces.RetryableExternalError: databricks_inline_result_unconfirmed
+
+src/rtmsf/adapters/databricks.py:418: RetryableExternalError
+=========================== short test summary info ============================
+FAILED tests/test_databricks_catalog.py::test_zero_chunk_absence_accepts_omitted_chunks_observed_in_live_sql
+1 failed, 93 passed in 0.91s
+{"stage": "empty-result-red", "exit": 1, "test_sha256": "299ed1aa3d722910116744996495f67ef7ac5c2dfbb2f523e2ed59e9c8136ac7"}
+
+[stderr]

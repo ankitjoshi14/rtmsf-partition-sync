@@ -21,7 +21,7 @@ The supplied router requires ordered `column=value` paths and correct existing p
 The core uses provider-neutral interfaces. AWS supplies catalog adapters and the benchmark runner.
 An OCI Compute worker passed lifecycle, burst-coalescing, and process-restart checks through OCI Object Storage, Events/Function, and Queue using the unchanged core and an in-memory catalog.
 Real OCI catalog integration and multi-worker operation remain unvalidated.
-The Azure catalog partition proof and event decoder unit tests passed in Azure; its event pipeline and cloud worker remain planned.
+The Azure VM worker passed a real ADLS/Event Grid/Service Bus/Databricks catalog lifecycle, a 12-file burst, and crash/replay before processing and after DROP. Four stale synthetic create hints were quarantined in the native DLQ. Azure performance remains unmeasured.
 
 ## Choose your task
 
@@ -29,7 +29,7 @@ The Azure catalog partition proof and event decoder unit tests passed in Azure; 
 |---|---|
 | Understand the algorithm, guarantees, and limits | [System behavior](docs/system-behavior.md) |
 | Inspect the OCI adapters, functional proof, and remaining catalog work | [OCI guide](docs/oci.md) |
-| Inspect the Azure architecture, catalog proof, and remaining worker work | [Azure guide](docs/azure.md) |
+| Inspect the Azure VM implementation, functional proof, and limits | [Azure guide](docs/azure.md) |
 | Run the AWS worker with existing tables | [AWS worker setup](docs/aws.md#run-the-normal-aws-worker) |
 | Provision AWS resources and reproduce experiments | [AWS experiment setup](docs/aws.md#aws-experiment-setup) |
 | Understand the five graphs, recovery table, and supporting checks | [Experiment specification](docs/experiments.md) |
@@ -52,13 +52,14 @@ Local tests use fakes and SDK stubs. They need no cloud account.
 
 ```text
 src/rtmsf/          Core algorithm, interfaces, and worker
-  adapters/        Provider implementations; AWS and OCI ingress/storage
+  adapters/        AWS, OCI, Azure ingress/storage, and Databricks catalog
 src/experiments/   Saved-result reporting and evidence export
   aws/             AWS provisioning, workloads, and measurement collection
   oci/             Finite OCI functional check with a test catalog
+  azure/           Bounded fault harness for the real single-VM proof
 tests/             Local verification
 docs/              System behavior, experiment specification, and AWS guide
-evidence/          Published AWS paper CSVs, graphs, tables, and report inputs
+evidence/          AWS paper measurements and selected Azure functional evidence
 runs/              Original local execution records; generated and Git-ignored
 ```
 

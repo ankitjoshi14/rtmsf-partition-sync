@@ -4,23 +4,31 @@ The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azu
 
 ![RTMSF deployment architecture on Azure](figures/azure-deployment.svg)
 
-## Current validation boundary
+## Observed functional proof
 
-The Azure catalog proof passed on October 15, 2026. An external Parquet table with `partitionMetadataEnabled=true` initially hid a path-written row from table queries. Registering its complete partition twice exposed exactly one row and one partition. Dropping the partition twice without PURGE removed catalog membership while a separate path query still read the physical row.
+The real Azure pipeline processed committed Blob REST events for the disposable external Parquet table `rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe` on October 16, 2026. The table has explicit `dt` partition metadata enabled. One private Azure VM runs the same routing, WOERA, and PMCP core used by AWS; managed identity authorizes storage, queue, and Key Vault access, and SQL-scoped Databricks OAuth authorizes the catalog adapter. No local worker, SDK calls, tests, builds, or fixtures were executed.
 
-The Event Grid decoder now has 46 unit cases verified in Azure Container Instances, alongside 61 existing core cases. It validates the configured account, container, and full ARM topic; preserves exact URL keys; and accepts only supported committed file events. The tests cover percent decoding, literal plus, malformed URLs, invalid Unicode, timestamps, and operation filtering. Live Azure events must still verify special-name subject escaping.
+Each completed stage used an independent catalog query, authoritative storage listing, worker telemetry, and an empty source-queue check. [Saved Azure evidence](../evidence/azure/README.md) records the actual observations and source hashes.
 
-One private Azure VM and Key Vault have also been deployed. The VM has no public IP, denies inbound traffic, and runs verification through Azure VM Run Command. The worker service is installed, stopped, and disabled while live-test preparation continues. Deallocate the VM between verification sessions.
+| Scenario | Observed result |
+|---|---|
+| First file | `dt=life` registered; row `id=1` became queryable. |
+| Additional file | Rows `1,2`; ADD was a no-op for the occupied partition. |
+| Overwrite | Rows `2,11`; partition membership remained unchanged. |
+| Partial deletion | Row `11` remained; DROP was a no-op because storage was occupied. |
+| Last-file deletion | No rows, partitions, or Parquet files remained; DROP applied. Directory markers remained. |
+| Same-partition burst | Twelve files/rows `100..111`; three groups of four observations produced one ADD and two no-ops. |
+| Synthetic duplicate/reordered hints | Four burst hints reconciled as no-op. Four hints for deleted life files reached native DLQ after `not_visible` retries; storage and catalog still agreed and the source queue drained. |
+| Crash before processing | SIGKILL before ADD; no mutation journal, file present, partition absent. A new PID received and acknowledged the same event with delivery count `0 → 1`; row `900` appeared and the queue drained. |
+| Crash after catalog mutation | SIGKILL after the exact DROP succeeded, before journal clear and acknowledgment. A new PID recovered the retained SQL receipt, received and acknowledged the same event with delivery count `0 → 1`, and drained the queue. Storage and catalog agreed. |
 
-The Service Bus and ADLS adapters have now passed the full repository suite on that VM: **467 tests passed in 11.94 seconds**, followed by successful wheel and source-distribution builds using the frozen dependency lock. The cases include native DLQ settlement, lease uncertainty, exhausted storage pagination, and telemetry failures that must stop processing for replay. No live queue or storage integration is established by these unit tests.
+The unchanged core gives CREATE precedence when CREATE and DELETE hints for a partition share a window. Source timestamps do not make the older CREATE disappear. The reordered-hint result therefore proves safe quarantine and agreement with current storage, rather than successful completion of every replayed message. Five messages are retained in the DLQ: four stale synthetic hints plus the original failed real event.
 
-The Databricks catalog adapter is now unit-verified in Azure: **543 tests passed in 7.82 seconds**, followed by successful wheel and source-distribution builds. The frozen source archive was `401d1e6c4f9281ab4d7728d5f97101e1ad9e544de61fe09b157dfed0f74bf4c4`; all 12 delivered file hashes matched before committing the adapter as `324f126`. Review regressions first reproduced incomplete-result and recovery failures, then verified rejection of result continuation, empty cancellation acknowledgment followed by terminal confirmation, and recovery of successful mutations whose results have expired.
+The first real registration exposed a valid Databricks empty-result shape with `total_chunk_count=0` and no `chunks` member. The adapter now accepts that shape while continuing to reject incomplete nonempty results. The regression failed in Azure before the fix. The final repository suite, including the bounded crash harness, passed **619 tests in 6.05 seconds**, followed by successful wheel and source-distribution builds and restricted-user installation on the VM.
 
-The adapter uses SQL-scoped workspace OAuth and bounded Statement Execution REST. It keeps a durable pending mutation receipt on the VM disk; missing statement identity or unconfirmed termination stops processing for reconciliation. HTTP phase limits remain operational bounds. VM managed identity retrieved the user-saved Key Vault secret and obtained SQL-scoped OAuth in 1.442 seconds. Live worker SQL roundtrips remain pending.
+The earlier catalog-only proof also verified that duplicate ADD/DROP statements are idempotent and DROP without PURGE leaves physical Parquet data readable by path. These functional proofs do not establish AWS-equivalent throughput, latency, request cost, or performance under load. Live special-name subject escaping, broader ADLS write APIs, and multi-worker operation remain unvalidated.
 
-The Azure composition entry point passed **603 tests in 11.49 seconds** on the VM, followed by successful wheel and source-distribution builds. A separate cloud installation verified the [systemd service](../deploy/azure/rtmsf.service), source identity, and service-file packaging. The approved VM queue-receiver, storage-reader, and named-secret grants and Event Grid sender/dead-letter grants have been deployed. The filtered event subscription and disposable worker table setup remain pending.
-
-The earlier catalog proof establishes the selected catalog's partition behavior. Real event-driven worker processing, live crash/replay behavior, and final spending evidence remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
+The VM service uses no public IP or inbound ports, `Restart=no`, a fixed host lock, a restricted service user, and a durable Databricks mutation journal. Temporary proof timers bound worker runtime. Cleanup verified zero rows, partitions, Parquet files, and pending source messages. The worker is stopped and disabled, its temporary service override is removed, ACI is terminated, and the VM is stopped/deallocated. Both temporary fixture grants, for storage access and queue sending, are removed. After manual console navigation, the Databricks warehouse visibly reports Stopped with zero active clusters; five-minute auto-stop remains configured. Azure billing currently reports $0.24 for Databricks and less than $0.01 for storage; this is delayed data, not final spend or a hard-cap guarantee.
 
 ## Services and responsibilities
 
@@ -47,7 +55,7 @@ Support completed Blob REST uploads/overwrites, ADLS `FlushWithClose`, and indiv
 
 Directory rename, recursive directory deletion, SFTP mutations, and version/undelete restoration are outside this first contract. Transactional Delta/Iceberg commits require their own protocols. Do not infer an empty partition from a directory marker or from a listing page that still has a continuation token.
 
-Validate external table type, Parquet provider, explicit partition metadata, approved storage location, and complete partition columns at startup. Quote identifiers and literals safely. Never use PURGE or a partial partition specification. The new disposable `worker_probe` table and its storage prefix remain separate from the completed catalog proof.
+Validate external table type, Parquet provider, explicit partition metadata, approved storage location, and complete partition columns at startup. Quote identifiers and literals safely. Never use PURGE or a partial partition specification. The disposable `worker_probe` table and its storage prefix remain separate from the catalog-only proof.
 
 Bound pending messages, retained bytes, storage listing time, catalog statement time, and settlement/renewal calls. The configured queue lease must cover those bounds. A lost lease or uncertain settlement ends the run without prematurely acknowledging unfinished input; the live recovery proof must demonstrate convergence after replay.
 

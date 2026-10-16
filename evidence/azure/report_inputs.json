@@ -1,0 +1,2524 @@
+{
+  "schema_version": 1,
+  "scope": "Single-VM Azure functional proof; no performance equivalence claim",
+  "base_main": "47a81e395360e2f5370bb7c4d5a979bb33bc1edf",
+  "source_commit": "87adaab",
+  "worker_release": "/opt/rtmsf/releases/crash-proof-verified-20261016",
+  "source_hashes": {
+    "src/experiments/azure/__init__.py": "cf5b0cd4682f6647af4472e9dd9e4a367867a9403c84c69ee66fbe2f59e9123c",
+    "src/experiments/azure/crash_worker.py": "388794cbd105d4323d8385f9a5d53d6451c3f8eacc7aea69fa3b315987aa29c9",
+    "tests/test_azure_crash_worker.py": "78fdccf294539a04cd4e92c658fa7cd2d4ae23eb6f2b96a3186aef5c06f66f99"
+  },
+  "execution": "Azure VM Run Command and Azure Container Instances; no local worker, SDK execution, tests, builds, or fixtures",
+  "tests": {
+    "passed": 619,
+    "seconds": 6.05,
+    "wheel_build": "PASS",
+    "sdist_build": "PASS",
+    "source": "observations/azure-fault-review-green.log"
+  },
+  "witnesses": {
+    "baseline": {
+      "stage": "baseline",
+      "utc": "2026-10-16T07:42:17.902665+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [],
+      "rows": [],
+      "storage": [],
+      "queue_peek": [],
+      "service": [
+        "MainPID=0",
+        "ExecMainStartTimestamp=",
+        "ExecMainStatus=0",
+        "ActiveState=inactive"
+      ],
+      "pmcp": [],
+      "result": "PASS"
+    },
+    "first": {
+      "stage": "first",
+      "utc": "2026-10-16T08:00:02.731287+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=life"
+      ],
+      "rows": [
+        {
+          "dt": "life",
+          "id": 1
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=life/a.parquet",
+          "bytes": 482
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=1812",
+        "ExecMainStartTimestamp=Fri 2026-10-16 07:59:37 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792137083892907",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137088946638",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137094893480",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137100774962",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137105974574",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137126804244",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137601643842",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        }
+      ],
+      "result": "PASS"
+    },
+    "second": {
+      "stage": "second",
+      "utc": "2026-10-16T08:02:22.757547+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=life"
+      ],
+      "rows": [
+        {
+          "dt": "life",
+          "id": 1
+        },
+        {
+          "dt": "life",
+          "id": 2
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=life/a.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life/b.parquet",
+          "bytes": 482
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=1812",
+        "ExecMainStartTimestamp=Fri 2026-10-16 07:59:37 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792137083892907",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137088946638",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137094893480",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137100774962",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137105974574",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137126804244",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137601643842",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792137722204835",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        }
+      ],
+      "result": "PASS"
+    },
+    "overwrite": {
+      "stage": "overwrite",
+      "utc": "2026-10-16T08:03:37.104213+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=life"
+      ],
+      "rows": [
+        {
+          "dt": "life",
+          "id": 2
+        },
+        {
+          "dt": "life",
+          "id": 11
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=life/a.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life/b.parquet",
+          "bytes": 482
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=1812",
+        "ExecMainStartTimestamp=Fri 2026-10-16 07:59:37 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792137088946638",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137094893480",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137100774962",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137105974574",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137126804244",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137601643842",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792137722204835",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137798138084",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        }
+      ],
+      "result": "PASS"
+    },
+    "partial-delete": {
+      "stage": "partial-delete",
+      "utc": "2026-10-16T08:04:57.405542+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=life"
+      ],
+      "rows": [
+        {
+          "dt": "life",
+          "id": 11
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=life/a.parquet",
+          "bytes": 482
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=1812",
+        "ExecMainStartTimestamp=Fri 2026-10-16 07:59:37 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792137094893480",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137100774962",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137105974574",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137126804244",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137601643842",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792137722204835",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137798138084",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137871077700",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "still_non_empty"
+        }
+      ],
+      "result": "PASS"
+    },
+    "last-delete": {
+      "stage": "last-delete",
+      "utc": "2026-10-16T08:06:11.722341+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [],
+      "rows": [],
+      "storage": [
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=1812",
+        "ExecMainStartTimestamp=Fri 2026-10-16 07:59:37 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792137100774962",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137105974574",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137126804244",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "external_retryable"
+        },
+        {
+          "utc_microseconds": "1792137601643842",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792137722204835",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137798138084",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137871077700",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "still_non_empty"
+        },
+        {
+          "utc_microseconds": "1792137963988711",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "APPLIED",
+          "reason": "deleted"
+        }
+      ],
+      "result": "PASS"
+    },
+    "burst": {
+      "stage": "burst",
+      "utc": "2026-10-16T08:08:02.024390+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=burst"
+      ],
+      "rows": [
+        {
+          "dt": "burst",
+          "id": 100
+        },
+        {
+          "dt": "burst",
+          "id": 101
+        },
+        {
+          "dt": "burst",
+          "id": 102
+        },
+        {
+          "dt": "burst",
+          "id": 103
+        },
+        {
+          "dt": "burst",
+          "id": 104
+        },
+        {
+          "dt": "burst",
+          "id": 105
+        },
+        {
+          "dt": "burst",
+          "id": 106
+        },
+        {
+          "dt": "burst",
+          "id": 107
+        },
+        {
+          "dt": "burst",
+          "id": 108
+        },
+        {
+          "dt": "burst",
+          "id": 109
+        },
+        {
+          "dt": "burst",
+          "id": 110
+        },
+        {
+          "dt": "burst",
+          "id": 111
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=burst/f0.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f1.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f10.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f11.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f2.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f3.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f4.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f5.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f6.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f7.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f8.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f9.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=1812",
+        "ExecMainStartTimestamp=Fri 2026-10-16 07:59:37 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792137601643842",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792137722204835",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137798138084",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792137871077700",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "still_non_empty"
+        },
+        {
+          "utc_microseconds": "1792137963988711",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "APPLIED",
+          "reason": "deleted"
+        },
+        {
+          "utc_microseconds": "1792138039741812",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792138051163358",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138062373708",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        }
+      ],
+      "result": "PASS"
+    },
+    "replay": {
+      "stage": "replay",
+      "utc": "2026-10-16T08:20:34.491286+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=burst"
+      ],
+      "rows": [
+        {
+          "dt": "burst",
+          "id": 100
+        },
+        {
+          "dt": "burst",
+          "id": 101
+        },
+        {
+          "dt": "burst",
+          "id": 102
+        },
+        {
+          "dt": "burst",
+          "id": 103
+        },
+        {
+          "dt": "burst",
+          "id": 104
+        },
+        {
+          "dt": "burst",
+          "id": 105
+        },
+        {
+          "dt": "burst",
+          "id": 106
+        },
+        {
+          "dt": "burst",
+          "id": 107
+        },
+        {
+          "dt": "burst",
+          "id": 108
+        },
+        {
+          "dt": "burst",
+          "id": 109
+        },
+        {
+          "dt": "burst",
+          "id": 110
+        },
+        {
+          "dt": "burst",
+          "id": 111
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=burst/f0.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f1.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f10.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f11.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f2.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f3.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f4.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f5.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f6.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f7.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f8.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f9.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=0",
+        "ExecMainStartTimestamp=",
+        "ExecMainStatus=0",
+        "ActiveState=inactive"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792138062373708",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138142418118",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138154410312",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138162751478",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138165763390",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138170178730",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138174053018",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138188762184",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        }
+      ],
+      "result": "PASS"
+    },
+    "recovery-queued": {
+      "stage": "recovery-queued",
+      "utc": "2026-10-16T08:28:18.275476+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=burst"
+      ],
+      "rows": [
+        {
+          "dt": "burst",
+          "id": 100
+        },
+        {
+          "dt": "burst",
+          "id": 101
+        },
+        {
+          "dt": "burst",
+          "id": 102
+        },
+        {
+          "dt": "burst",
+          "id": 103
+        },
+        {
+          "dt": "burst",
+          "id": 104
+        },
+        {
+          "dt": "burst",
+          "id": 105
+        },
+        {
+          "dt": "burst",
+          "id": 106
+        },
+        {
+          "dt": "burst",
+          "id": 107
+        },
+        {
+          "dt": "burst",
+          "id": 108
+        },
+        {
+          "dt": "burst",
+          "id": 109
+        },
+        {
+          "dt": "burst",
+          "id": 110
+        },
+        {
+          "dt": "burst",
+          "id": 111
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=burst/f0.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f1.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f10.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f11.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f2.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f3.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f4.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f5.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f6.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f7.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f8.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f9.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery/recover.parquet",
+          "bytes": 482
+        }
+      ],
+      "queue_peek": [
+        {
+          "message_id": "c5750276-23cc-41c6-b9f5-0f74e378c1ec",
+          "sequence_number": 27,
+          "delivery_count": 0,
+          "event_id": "6949d31b-af77-423a-8dff-89f3ad62b252",
+          "topic": "/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38/resourceGroups/rtmsf-azure-proof-20261014/providers/Microsoft.Storage/storageAccounts/rtmsfproof202610147405",
+          "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet",
+          "event_type": "Microsoft.Storage.BlobCreated",
+          "api": "PutBlob"
+        }
+      ],
+      "service": [
+        "MainPID=0",
+        "ExecMainStartTimestamp=Fri 2026-10-16 08:27:24 UTC",
+        "ExecMainStatus=9",
+        "ActiveState=failed"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792138062373708",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138142418118",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138154410312",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138162751478",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138165763390",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138170178730",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138174053018",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138188762184",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        }
+      ],
+      "result": "PASS"
+    },
+    "recovery": {
+      "stage": "recovery",
+      "utc": "2026-10-16T08:33:29.252573+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=burst",
+        "dt=recovery"
+      ],
+      "rows": [
+        {
+          "dt": "burst",
+          "id": 100
+        },
+        {
+          "dt": "burst",
+          "id": 101
+        },
+        {
+          "dt": "burst",
+          "id": 102
+        },
+        {
+          "dt": "burst",
+          "id": 103
+        },
+        {
+          "dt": "burst",
+          "id": 104
+        },
+        {
+          "dt": "burst",
+          "id": 105
+        },
+        {
+          "dt": "burst",
+          "id": 106
+        },
+        {
+          "dt": "burst",
+          "id": 107
+        },
+        {
+          "dt": "burst",
+          "id": 108
+        },
+        {
+          "dt": "burst",
+          "id": 109
+        },
+        {
+          "dt": "burst",
+          "id": 110
+        },
+        {
+          "dt": "burst",
+          "id": 111
+        },
+        {
+          "dt": "recovery",
+          "id": 900
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=burst/f0.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f1.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f10.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f11.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f2.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f3.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f4.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f5.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f6.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f7.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f8.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f9.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery/recover.parquet",
+          "bytes": 482
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=2898",
+        "ExecMainStartTimestamp=Fri 2026-10-16 08:29:33 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792138142418118",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138154410312",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138162751478",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138165763390",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138170178730",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138174053018",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138188762184",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792139603612099",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=recovery",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        }
+      ],
+      "result": "PASS"
+    },
+    "recovery-delete-pending": {
+      "stage": "recovery-delete-pending",
+      "utc": "2026-10-16T08:35:03.311503+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=burst"
+      ],
+      "rows": [
+        {
+          "dt": "burst",
+          "id": 100
+        },
+        {
+          "dt": "burst",
+          "id": 101
+        },
+        {
+          "dt": "burst",
+          "id": 102
+        },
+        {
+          "dt": "burst",
+          "id": 103
+        },
+        {
+          "dt": "burst",
+          "id": 104
+        },
+        {
+          "dt": "burst",
+          "id": 105
+        },
+        {
+          "dt": "burst",
+          "id": 106
+        },
+        {
+          "dt": "burst",
+          "id": 107
+        },
+        {
+          "dt": "burst",
+          "id": 108
+        },
+        {
+          "dt": "burst",
+          "id": 109
+        },
+        {
+          "dt": "burst",
+          "id": 110
+        },
+        {
+          "dt": "burst",
+          "id": 111
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=burst/f0.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f1.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f10.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f11.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f2.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f3.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f4.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f5.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f6.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f7.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f8.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f9.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery",
+          "bytes": 0
+        }
+      ],
+      "queue_peek": [
+        {
+          "message_id": "27b3d54a-b7d2-4172-8739-148674cb5ea0",
+          "sequence_number": 28,
+          "delivery_count": 0,
+          "event_id": "08d42847-7e49-4485-8e1f-a2d6dac93866",
+          "topic": "/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38/resourceGroups/rtmsf-azure-proof-20261014/providers/Microsoft.Storage/storageAccounts/rtmsfproof202610147405",
+          "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet",
+          "event_type": "Microsoft.Storage.BlobDeleted",
+          "api": "DeleteBlob"
+        }
+      ],
+      "service": [
+        "MainPID=0",
+        "ExecMainStartTimestamp=Fri 2026-10-16 08:34:24 UTC",
+        "ExecMainStatus=9",
+        "ActiveState=failed"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792138142418118",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "NOOP",
+          "reason": "already_exists_verified"
+        },
+        {
+          "utc_microseconds": "1792138154410312",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138162751478",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138165763390",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138170178730",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138174053018",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138188762184",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792139603612099",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=recovery",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        }
+      ],
+      "result": "PASS"
+    },
+    "recovery-delete": {
+      "stage": "recovery-delete",
+      "utc": "2026-10-16T08:40:08.834578+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [
+        "dt=burst"
+      ],
+      "rows": [
+        {
+          "dt": "burst",
+          "id": 100
+        },
+        {
+          "dt": "burst",
+          "id": 101
+        },
+        {
+          "dt": "burst",
+          "id": 102
+        },
+        {
+          "dt": "burst",
+          "id": 103
+        },
+        {
+          "dt": "burst",
+          "id": 104
+        },
+        {
+          "dt": "burst",
+          "id": 105
+        },
+        {
+          "dt": "burst",
+          "id": 106
+        },
+        {
+          "dt": "burst",
+          "id": 107
+        },
+        {
+          "dt": "burst",
+          "id": 108
+        },
+        {
+          "dt": "burst",
+          "id": 109
+        },
+        {
+          "dt": "burst",
+          "id": 110
+        },
+        {
+          "dt": "burst",
+          "id": 111
+        }
+      ],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=burst/f0.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f1.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f10.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f11.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f2.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f3.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f4.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f5.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f6.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f7.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f8.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=burst/f9.parquet",
+          "bytes": 482
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery",
+          "bytes": 0
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=3184",
+        "ExecMainStartTimestamp=Fri 2026-10-16 08:36:17 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792138154410312",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138162751478",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138165763390",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138170178730",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138174053018",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138188762184",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792139603612099",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=recovery",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792140004453818",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=recovery",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "not_found"
+        }
+      ],
+      "result": "PASS"
+    },
+    "cleanup": {
+      "stage": "cleanup",
+      "utc": "2026-10-16T08:43:29.041209+00:00",
+      "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+      "partitions": [],
+      "rows": [],
+      "storage": [
+        {
+          "path": "worker_probe/dt=burst",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=life",
+          "bytes": 0
+        },
+        {
+          "path": "worker_probe/dt=recovery",
+          "bytes": 0
+        }
+      ],
+      "queue_peek": [],
+      "service": [
+        "MainPID=3184",
+        "ExecMainStartTimestamp=Fri 2026-10-16 08:36:17 UTC",
+        "ExecMainStatus=0",
+        "ActiveState=active"
+      ],
+      "pmcp": [
+        {
+          "utc_microseconds": "1792138170178730",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138174053018",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792138188762184",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=life",
+          "observation_count": 4,
+          "mutation": "ADD",
+          "status": "RETRY",
+          "reason": "not_visible"
+        },
+        {
+          "utc_microseconds": "1792139603612099",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=recovery",
+          "observation_count": 1,
+          "mutation": "ADD",
+          "status": "APPLIED",
+          "reason": "created"
+        },
+        {
+          "utc_microseconds": "1792140004453818",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=recovery",
+          "observation_count": 1,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "not_found"
+        },
+        {
+          "utc_microseconds": "1792140103220260",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "DROP",
+          "status": "APPLIED",
+          "reason": "deleted"
+        },
+        {
+          "utc_microseconds": "1792140114445049",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "not_found"
+        },
+        {
+          "utc_microseconds": "1792140125718499",
+          "component": "worker",
+          "action": "pmcp_result",
+          "source_id": "proof",
+          "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+          "partition": "dt=burst",
+          "observation_count": 4,
+          "mutation": "DROP",
+          "status": "NOOP",
+          "reason": "not_found"
+        }
+      ],
+      "result": "PASS"
+    }
+  },
+  "crashes": {
+    "before": {
+      "crash": {
+        "crash_check": "before_processing",
+        "result": "PASS",
+        "point": "before_processing",
+        "pid": 2800,
+        "table": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "utc": "2026-10-16T08:28:17.135985+00:00",
+        "pending_events": [
+          {
+            "event_id": "6949d31b-af77-423a-8dff-89f3ad62b252",
+            "message_id": "c5750276-23cc-41c6-b9f5-0f74e378c1ec",
+            "sequence_number": 27,
+            "delivery_count": 0,
+            "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"
+          }
+        ],
+        "journal": null
+      },
+      "replay": {
+        "replay": "before_processing",
+        "result": "PASS",
+        "crash_pid": 2800,
+        "new_pid": 2898,
+        "received": {
+          "component": "experiment",
+          "action": "message_received",
+          "point": "before_processing",
+          "pid": 2898,
+          "event_id": "6949d31b-af77-423a-8dff-89f3ad62b252",
+          "message_id": "c5750276-23cc-41c6-b9f5-0f74e378c1ec",
+          "sequence_number": 27,
+          "delivery_count": 1,
+          "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"
+        },
+        "acknowledged": {
+          "component": "experiment",
+          "action": "message_acknowledged",
+          "point": "before_processing",
+          "pid": 2898,
+          "event_id": "6949d31b-af77-423a-8dff-89f3ad62b252",
+          "message_id": "c5750276-23cc-41c6-b9f5-0f74e378c1ec",
+          "sequence_number": 27,
+          "delivery_count": 1,
+          "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"
+        },
+        "journal_clear": true
+      }
+    },
+    "after": {
+      "crash": {
+        "crash_check": "after_catalog_change",
+        "result": "PASS",
+        "point": "after_catalog_change",
+        "pid": 3086,
+        "table": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "utc": "2026-10-16T08:35:02.687443+00:00",
+        "pending_events": [
+          {
+            "event_id": "08d42847-7e49-4485-8e1f-a2d6dac93866",
+            "message_id": "27b3d54a-b7d2-4172-8739-148674cb5ea0",
+            "sequence_number": 28,
+            "delivery_count": 0,
+            "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"
+          }
+        ],
+        "journal": {
+          "marker_id": "b2bdad6f89b44b6faf1c301fa3518391",
+          "statement_id": "01f1c93c-79f6-179c-9ba5-c37492b02c16",
+          "statement_sha256": "1e459ba9901d249af273fe6f9d4bbc0bc75b1034cb312bb73691d5f77cb0ed1e",
+          "target_sha256": "dd2b36ab57a74d45e75fa73b82cdd294be154f47e4eab8226a55371e0186e1ca",
+          "version": 1
+        }
+      },
+      "replay": {
+        "replay": "after_catalog_change",
+        "result": "PASS",
+        "crash_pid": 3086,
+        "new_pid": 3184,
+        "received": {
+          "component": "experiment",
+          "action": "message_received",
+          "point": "after_catalog_change",
+          "pid": 3184,
+          "event_id": "08d42847-7e49-4485-8e1f-a2d6dac93866",
+          "message_id": "27b3d54a-b7d2-4172-8739-148674cb5ea0",
+          "sequence_number": 28,
+          "delivery_count": 1,
+          "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"
+        },
+        "acknowledged": {
+          "component": "experiment",
+          "action": "message_acknowledged",
+          "point": "after_catalog_change",
+          "pid": 3184,
+          "event_id": "08d42847-7e49-4485-8e1f-a2d6dac93866",
+          "message_id": "27b3d54a-b7d2-4172-8739-148674cb5ea0",
+          "sequence_number": 28,
+          "delivery_count": 1,
+          "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"
+        },
+        "journal_clear": true,
+        "retained_journal_recovered": {
+          "marker_id": "b2bdad6f89b44b6faf1c301fa3518391",
+          "statement_id": "01f1c93c-79f6-179c-9ba5-c37492b02c16",
+          "statement_sha256": "1e459ba9901d249af273fe6f9d4bbc0bc75b1034cb312bb73691d5f77cb0ed1e",
+          "target_sha256": "dd2b36ab57a74d45e75fa73b82cdd294be154f47e4eab8226a55371e0186e1ca",
+          "version": 1
+        }
+      }
+    }
+  },
+  "initial_cleanup_observation": {
+    "stage": "cleanup",
+    "utc": "2026-10-16T08:41:47.713576+00:00",
+    "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17",
+    "partitions": [],
+    "rows": [],
+    "storage": [
+      {
+        "path": "worker_probe/dt=burst",
+        "bytes": 0
+      },
+      {
+        "path": "worker_probe/dt=life",
+        "bytes": 0
+      },
+      {
+        "path": "worker_probe/dt=recovery",
+        "bytes": 0
+      }
+    ],
+    "queue_peek": [
+      {
+        "message_id": "5a9e7ac2-b0ea-428e-9117-69c8ba246a57",
+        "sequence_number": 33,
+        "delivery_count": 0,
+        "event_id": "a8f6c139-94db-401f-a312-57068485e024",
+        "topic": "/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38/resourceGroups/rtmsf-azure-proof-20261014/providers/Microsoft.Storage/storageAccounts/rtmsfproof202610147405",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=burst/f11.parquet",
+        "event_type": "Microsoft.Storage.BlobDeleted",
+        "api": "DeleteBlob"
+      },
+      {
+        "message_id": "b47cd388-1da8-4f90-8cd2-2195c35ffec9",
+        "sequence_number": 34,
+        "delivery_count": 0,
+        "event_id": "7e3d8a66-9f85-4b1b-8f60-8cbf3417d815",
+        "topic": "/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38/resourceGroups/rtmsf-azure-proof-20261014/providers/Microsoft.Storage/storageAccounts/rtmsfproof202610147405",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=burst/f3.parquet",
+        "event_type": "Microsoft.Storage.BlobDeleted",
+        "api": "DeleteBlob"
+      },
+      {
+        "message_id": "a6495cbf-697b-412e-94a5-37e8edceea76",
+        "sequence_number": 35,
+        "delivery_count": 0,
+        "event_id": "8dbdf94f-f815-4879-a9aa-e2a9f497170f",
+        "topic": "/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38/resourceGroups/rtmsf-azure-proof-20261014/providers/Microsoft.Storage/storageAccounts/rtmsfproof202610147405",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=burst/f2.parquet",
+        "event_type": "Microsoft.Storage.BlobDeleted",
+        "api": "DeleteBlob"
+      }
+    ],
+    "service": [
+      "MainPID=3184",
+      "ExecMainStartTimestamp=Fri 2026-10-16 08:36:17 UTC",
+      "ExecMainStatus=0",
+      "ActiveState=active"
+    ],
+    "pmcp": [
+      {
+        "utc_microseconds": "1792138162751478",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=life",
+        "observation_count": 4,
+        "mutation": "ADD",
+        "status": "RETRY",
+        "reason": "not_visible"
+      },
+      {
+        "utc_microseconds": "1792138165763390",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=life",
+        "observation_count": 4,
+        "mutation": "ADD",
+        "status": "RETRY",
+        "reason": "not_visible"
+      },
+      {
+        "utc_microseconds": "1792138170178730",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=life",
+        "observation_count": 4,
+        "mutation": "ADD",
+        "status": "RETRY",
+        "reason": "not_visible"
+      },
+      {
+        "utc_microseconds": "1792138174053018",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=life",
+        "observation_count": 4,
+        "mutation": "ADD",
+        "status": "RETRY",
+        "reason": "not_visible"
+      },
+      {
+        "utc_microseconds": "1792138188762184",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=life",
+        "observation_count": 4,
+        "mutation": "ADD",
+        "status": "RETRY",
+        "reason": "not_visible"
+      },
+      {
+        "utc_microseconds": "1792139603612099",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=recovery",
+        "observation_count": 1,
+        "mutation": "ADD",
+        "status": "APPLIED",
+        "reason": "created"
+      },
+      {
+        "utc_microseconds": "1792140004453818",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=recovery",
+        "observation_count": 1,
+        "mutation": "DROP",
+        "status": "NOOP",
+        "reason": "not_found"
+      },
+      {
+        "utc_microseconds": "1792140103220260",
+        "component": "worker",
+        "action": "pmcp_result",
+        "source_id": "proof",
+        "table_id": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe",
+        "partition": "dt=burst",
+        "observation_count": 4,
+        "mutation": "DROP",
+        "status": "APPLIED",
+        "reason": "deleted"
+      }
+    ],
+    "result": "FAIL",
+    "error_type": "AssertionError"
+  },
+  "dead_letter": {
+    "dlq_peek": [
+      {
+        "message_id": "3615097f-82ac-457a-96cf-79e2b72dd922",
+        "event_id": "2447b5aa-137e-40f4-b1f8-cc04307a80ef",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=life/a.parquet",
+        "reason": "max_retries:external_retryable",
+        "delivery_count": 0
+      },
+      {
+        "message_id": "rtmsf-synthetic-c5d3d68b-e9ed-47e8-a95d-f7349b044fbb-0",
+        "event_id": "rtmsf-synthetic-c5d3d68b-e9ed-47e8-a95d-f7349b044fbb",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=life/a.parquet",
+        "reason": "max_retries:not_visible",
+        "delivery_count": 0
+      },
+      {
+        "message_id": "rtmsf-synthetic-c5d3d68b-e9ed-47e8-a95d-f7349b044fbb-1",
+        "event_id": "rtmsf-synthetic-c5d3d68b-e9ed-47e8-a95d-f7349b044fbb",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=life/a.parquet",
+        "reason": "max_retries:not_visible",
+        "delivery_count": 0
+      },
+      {
+        "message_id": "rtmsf-synthetic-a6787bf8-7688-44c1-acf0-055da28cdd0e-0",
+        "event_id": "rtmsf-synthetic-a6787bf8-7688-44c1-acf0-055da28cdd0e",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=life/a.parquet",
+        "reason": "max_retries:not_visible",
+        "delivery_count": 0
+      },
+      {
+        "message_id": "rtmsf-synthetic-a6787bf8-7688-44c1-acf0-055da28cdd0e-1",
+        "event_id": "rtmsf-synthetic-a6787bf8-7688-44c1-acf0-055da28cdd0e",
+        "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=life/a.parquet",
+        "reason": "max_retries:not_visible",
+        "delivery_count": 0
+      }
+    ]
+  },
+  "shutdown": {
+    "worker": "inactive, PID 0, disabled; normal ExecStart restored",
+    "aci": "Terminated",
+    "vm": "Stopped (deallocated)",
+    "fixture_storage_grant": "removed",
+    "fixture_queue_grant": "removed",
+    "warehouse": "Stopped; 0 active clusters; visible console status verified after manual navigation"
+  },
+  "budget": {
+    "databricks_limit_usd": 10,
+    "azure": "existing trial credit; subscription unchanged",
+    "observed_databricks_usd": 0.24,
+    "observed_storage_usd": "less than 0.01",
+    "final_spend": "unknown; billing delayed"
+  },
+  "limitations": [
+    "Four stale synthetic create hints reached native DLQ after not_visible retries; CREATE wins within a coalescing window.",
+    "The initial real event failed before the empty Databricks manifest fix and remains in DLQ.",
+    "The early rows-only replay log and early cleanup FAIL are not completion evidence.",
+    "High-volume performance, live special-name escaping, broader ADLS APIs, and multi-worker operation were not tested."
+  ]
+}

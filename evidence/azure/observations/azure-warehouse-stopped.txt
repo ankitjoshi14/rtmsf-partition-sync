@@ -1,0 +1,116 @@
+Browser tab: 25, Title: "SQL Warehouse - Databricks", URL: "https://adb-7405618157516848.8.azuredatabricks.net/sql/warehouses/635921002ec4059f?o=7405618157516848".
+1 AXWebArea SQL Warehouse - Databricks, URL: adb-7405618157516848.8.azuredatabricks.net/sql/warehouses/635921002ec4059f?o=7405618157516848
+	2 container
+		3 container app-root
+			4 button Skip to Content, ID: skip-link-content
+			5 container Top Navigation
+				6 button (expanded) Description: Toggle navigation, Secondary Actions: Collapse
+				7 link Description: Databricks, Value: adb-7405618157516848.8.azuredatabricks.net/?o=7405618157516848
+				8 combo box (collapsed) Description: Search, Secondary Actions: Expand
+					9 container
+						10 text field (settable) Search data, notebooks, recents, and more..., ID: downshift-8-input
+						11 text ⌘ + P
+				12 pop up button (collapsed) rtmsf-azure-proof-20261014, ID: radix-:r1h:, Secondary Actions: Expand
+					13 text rtmsf-azure-proof-20261014
+				14 pop up button (collapsed) Genie Code, Secondary Actions: Expand
+					15 text Genie Code
+				16 pop up button (collapsed) Switch apps, ID: radix-:r1j:, Secondary Actions: Expand
+					17 text Switch apps
+				18 pop up button (collapsed) Description: Ankit Joshi, ID: radix-:r1l:, Secondary Actions: Expand
+					19 container Ankit Joshi
+						20 text A
+			21 container Notifications (F8)
+				22 content list
+			23 container Side Navigation
+				24 container
+					25 pop up button (collapsed) New, ID: radix-:r1q:, Secondary Actions: Expand
+					26 link Description: Workspace, Value: adb-7405618157516848.8.azuredatabricks.net/browse?o=7405618157516848
+					27 link Description: Recents, Value: adb-7405618157516848.8.azuredatabricks.net/recents?o=7405618157516848
+					28 link Description: Catalog, Value: adb-7405618157516848.8.azuredatabricks.net/explore/data?o=7405618157516848
+					29 link Description: Jobs & Pipelines, Value: adb-7405618157516848.8.azuredatabricks.net/jobs?o=7405618157516848
+					30 link Description: Compute, Value: adb-7405618157516848.8.azuredatabricks.net/compute?o=7405618157516848
+					31 link Description: Discover, Value: adb-7405618157516848.8.azuredatabricks.net/search/discover?o=7405618157516848
+					32 link Description: Marketplace, Value: adb-7405618157516848.8.azuredatabricks.net/marketplace?o=7405618157516848
+					33 button (expanded) SQL, Secondary Actions: Collapse
+					34 container radix-:r1t:
+						35 link Description: SQL Editor, Value: adb-7405618157516848.8.azuredatabricks.net/editor/queries?contextId=sql-editor&o=7405618157516848
+						36 link Description: Queries, Value: adb-7405618157516848.8.azuredatabricks.net/sql/queries?o=7405618157516848
+						37 link Description: Dashboards, Value: adb-7405618157516848.8.azuredatabricks.net/sql/dashboards?o=7405618157516848
+						38 link Description: Genie Agents, Value: adb-7405618157516848.8.azuredatabricks.net/genie?o=7405618157516848
+						39 link Description: Alerts, Value: adb-7405618157516848.8.azuredatabricks.net/sql/alerts-v2?o=7405618157516848
+						40 link Description: Query History, Value: adb-7405618157516848.8.azuredatabricks.net/sql/history?userId=146278749002127&o=7405618157516848
+						41 link Description: SQL Warehouses, Value: adb-7405618157516848.8.azuredatabricks.net/compute/sql-warehouses?o=7405618157516848
+					42 button (expanded) Data Engineering, Secondary Actions: Collapse
+					43 container radix-:r1u:
+						44 link Description: Runs, Value: adb-7405618157516848.8.azuredatabricks.net/jobs/runs?o=7405618157516848
+						45 link Description: Data Ingestion, Value: adb-7405618157516848.8.azuredatabricks.net/ingestion/add?o=7405618157516848
+						46 link Description: Visual Data Prep, Value: adb-7405618157516848.8.azuredatabricks.net/editor/designer-files?o=7405618157516848
+					47 button (expanded) AI/ML, Secondary Actions: Collapse
+					48 container radix-:r1v:
+						49 link Description: Playground, Value: adb-7405618157516848.8.azuredatabricks.net/ml/playground?o=7405618157516848
+						50 link Description: Agents, Value: adb-7405618157516848.8.azuredatabricks.net/ml/bricks?o=7405618157516848
+						51 link Description: AI Gateway, Value: adb-7405618157516848.8.azuredatabricks.net/ml/ai-gateway?o=7405618157516848
+						52 link Description: Experiments, Value: adb-7405618157516848.8.azuredatabricks.net/ml/experiments?o=7405618157516848
+						53 link Description: Features, Value: adb-7405618157516848.8.azuredatabricks.net/feature-store?o=7405618157516848
+						54 link Description: Models, Value: adb-7405618157516848.8.azuredatabricks.net/ml/models?o=7405618157516848
+						55 link Description: Serving, Value: adb-7405618157516848.8.azuredatabricks.net/ml/endpoints?o=7405618157516848
+			56 container
+				57 text Automated browser control detected The Databricks console doesn't support automated browser control. Continue manually, or connect your agent through Genie One MCP.
+				58 button Learn about Genie One MCP
+			59 container TopRouter-main
+				60 container dbsql-app-root
+					61 container Breadcrumbs
+						62 content list
+							63 link Description: SQL Warehouses, Value: adb-7405618157516848.8.azuredatabricks.net/compute/sql-warehouses?o=7405618157516848
+					64 heading Serverless Starter Warehouse, Value: 2
+						65 text Serverless Starter Warehouse
+					66 container
+						67 button Send feedback
+						68 pop up button (collapsed) Description: More actions, ID: radix-:r1dh:, Secondary Actions: Expand
+						69 button Manage this SQL warehouse permissions
+						70 link Description: Edit this SQL warehouse, Value: adb-7405618157516848.8.azuredatabricks.net/sql/warehouses/635921002ec4059f/edit?o=7405618157516848
+						71 button Start this SQL warehouse
+					72 tab group
+						73 tab (selected, settable, boolean) Overview, Value: 1, ID: radix-:r1dd:-trigger-overview
+						74 tab (selectable, settable, boolean) Connection details, Value: 0, ID: radix-:r1dd:-trigger-connectionDetails
+						75 tab (selectable, settable, boolean) Monitoring, Value: 0, ID: radix-:r1dd:-trigger-monitoring
+					76 container Description: Overview, ID: radix-:r1dd:-content-overview
+						77 container
+							78 text Status
+							79 container Status
+								80 text Stopped
+							81 text Name
+							82 container Name
+								83 text Serverless Starter Warehouse  (ID: 635921002ec4059f)
+							84 text Type
+							85 container Type
+								86 text Serverless
+							87 text Cluster size
+							88 container Cluster size
+								89 text 2X-Small
+							90 text Auto stop
+							91 container Auto stop
+								92 text After
+								93 text 5
+								94 text  minutes of inactivity
+							95 text Scaling
+							96 container Scaling
+								97 text Cluster count: Active
+								98 text 0
+								99 text  Min
+								100 text 1
+								101 text  Max
+								102 text 1
+							103 text Channel
+							104 container Channel
+								105 container
+									106 text Current (v 2026.39)
+							107 text Created by
+							108 container Created by
+								109 text Table Feature Enablement Service Principal
+					110 container Notifications (F8)
+						111 content list
+		112 container Notifications (F8)
+			113 content list
+
+The focused UI element is 1 AXWebArea SQL Warehouse - Databricks, URL: adb-7405618157516848.8.azuredatabricks.net/sql/warehouses/635921002ec4059f?o=7405618157516848

@@ -1,0 +1,10 @@
+Enable succeeded:
+[stdout]
+{"stage": "cleanup", "result": "PASS", "return_code": 0, "rows": 0, "partitions": [], "pending_queue": 0, "dlq_messages": 0, "sha256": "f532e3bef8738ca40d6f0b450c1e8afc4bc3b59b7baca422005b33e9563019f6", "gzip_base64": "H4sIALXj0WoC/+2W32/TMBDH3/krqryyDDtx86NSHypapEnAqrY8oAlFjnMFa00cHKdlTPvf8Tmsa9lGK/Eyjb1ZX99dvvfxxcm11xj+FbxBzxMr4FVbeyc9rzUClYAEkU+JT6MFSQYsHATpKWE0IOlrQgaEYKjaVKAxeFkwnqch+HEohM9ozvw8LoQfcJJQGiYANMaEmmsjjVRVY7MuvlhFq8123RilOz8X1zbUfMPSG6UvQWe1Vjm8Kcwwb3VjsFZ+ZQBTyc1J7/HwlVzC8dEahFqDvtrPQG/fW2ghqwEut25Br6Vwbr0PXFbTs/EwpAnD3MkPEKjNjW14IUuwoMt6+E7L3h3XnuUaRgMa9z4t3v6RZdpm6BCPhJFrQAWG3K09fHhdirrjZI8rK6XQqrHeqwIdezROA0udxoTGSRy6QkKVtaqgMnd9o4w1VYUalsw0NO3K4W1UqwVksnB7Wqklqobnq1tRm7JZZvxnqyFzARn2Rgllp92WE093Ge/NANbYOSGVI1GOO5lQrTPKrF62ht+Gj8Zj580BQmE2Wcw+o6SBN11MpUy2lo20Rj132H8lxEg/JDR5IfQYoSSJo+D3WL8Quk8ojUgY4bWYPmlCuzfbQ5ToIUqj6fT92WS8z0nYpYHiACNGCGGsj8P0rBiNZ+fTfUgfzztlf5KWNv8wI0rCAG0/7dt6+/k95lW7D+jBKSpgBcdMEaXMjhFh6XMm9E8jFPRje1Wn/y8g90vZtWQ3pqP53Lt59Qvi+oDF6AoAAA=="}
+Restart=no
+MainPID=0
+ExecStart={ path=/opt/rtmsf/current/.venv/bin/python ; argv[]=/opt/rtmsf/current/.venv/bin/python -m rtmsf.azure_app ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }
+ActiveState=inactive
+UnitFileState=disabled
+
+[stderr]

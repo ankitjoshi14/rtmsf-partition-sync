@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
   <title id="title">RTMSF deployment architecture on Azure</title>
-  <desc id="description">Planned Azure architecture: ADLS Gen2 emits committed file creation and deletion events through Event Grid into a Service Bus queue. One Azure VM systemd worker runs the existing routing, WOERA, and PMCP core through Azure adapters. It renews PeekLock deliveries, completes reconciled input, and uses native Service Bus dead-letter settlement for terminal input. PMCP reads authoritative storage and manages explicit external Parquet partition metadata through a Databricks SQL warehouse and Unity Catalog. Azure managed identity authorizes queue and storage access; Databricks OAuth machine-to-machine authorizes SQL access. The Unity Catalog access connector authorizes query reads from storage. Azure VM Run Command installs source and dependencies in Azure; the VM journal records proof logs. The OAuth secret is entered into Azure Key Vault by the user. The VM and Key Vault are deployed, and the SQL catalog proof and decoder unit tests have passed. The event pipeline, unattended authentication, and worker runtime remain unverified. Microsoft Azure service icons retain their official shapes and colors; Run Command and VM journal use generic symbols.</desc>
+  <desc id="description">Verified Azure functional deployment: ADLS Gen2 emits committed file creation and deletion events through Event Grid into a Service Bus queue. One Azure VM systemd worker runs the existing routing, WOERA, and PMCP core through Azure adapters. It renews PeekLock deliveries, completes reconciled input, and uses native Service Bus dead-letter settlement for terminal input. PMCP reads authoritative storage and manages explicit external Parquet partition metadata through a Databricks SQL warehouse and Unity Catalog. Azure managed identity authorizes queue and storage access; Databricks OAuth machine-to-machine authorizes SQL access. The Unity Catalog access connector authorizes query reads from storage. Azure VM Run Command installs source and dependencies in Azure; the VM journal records proof logs. The OAuth secret is entered into Azure Key Vault by the user. The deployed pipeline passed lifecycle, burst, and pre-processing and post-DROP process crash/replay checks with an independent catalog and storage witness. Four stale synthetic create hints were quarantined in native DLQ; five failed proof messages are retained. Performance equivalence to AWS remains unmeasured. Microsoft Azure service icons retain their official shapes and colors; Run Command and VM journal use generic symbols.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
     <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0072B2"/></marker>
@@ -17,7 +17,7 @@
   </defs>
   <rect width="1600" height="1000" fill="#fff"/>
   <text x="60" y="63" class="title">RTMSF deployment architecture on Azure</text>
-  <text x="60" y="101" class="sub">VM deployed · Catalog proof and decoder tests passed · Event pipeline pending</text>
+  <text x="60" y="101" class="sub">Azure VM worker · Real catalog lifecycle and crash/replay verified</text>
   <rect x="35" y="137" width="1530" height="800" rx="20" fill="#fafcfe" stroke="#c6d0da" stroke-width="2"/>
   <text x="60" y="173" class="small">Azure subscription / Region</text>
 
@@ -114,6 +114,6 @@
   <text x="669" y="869" class="name">Azure Key Vault</text>
   <text x="669" y="898" class="small">User-entered OAuth credential</text>
   <path class="support" d="M875 835V770"/>
-  <text x="60" y="965" class="small">Current evidence: catalog SQL + 107 Azure unit tests. Azure event delivery, cloud worker, OAuth login, and recovery remain unverified.</text>
+  <text x="60" y="965" class="small">Observed: real event lifecycle + two crash/replay trials + 619 cloud tests. Four stale hints quarantined; performance unmeasured.</text>
   <text x="60" y="989" class="small">Official Microsoft Azure icons · Solid: runtime calls · Dashed: support · Worker and proof execution belong in Azure.</text>
 </svg>

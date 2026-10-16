@@ -1,0 +1,50 @@
+Scope:
+rtmsf-azure-proof-20261014
+VIEW
+VIEW
+AccumulatedCosts
+Oct 2026
+Add filter
+ACTUAL COST (USD)
+$0.24
+FORECAST UNAVAILABLE
+--
+BUDGET: NONE
+--
+Group by: None
+Granularity: Accumulated
+Area
+Oct 1
+Oct 3
+Oct 5
+Oct 7
+Oct 9
+Oct 11
+Oct 13
+Oct 15
+Oct 17
+Oct 19
+Oct 21
+Oct 23
+Oct 25
+Oct 31
+$0.00
+$0.20
+$0.40
+$0.60
+$0.80
+$1.00
+Accumulated cost
+Service name
+Azure Databricks
+$0.24
+Storage
+<$0.01
+Location
+us east
+$0.24
+Resource
+rtmsf-azure-proof-20261014 (microsoft.databricks/workspaces)
+$0.24
+rtmsfproof202610147405 (microsoft.storage/storageaccounts)
+<$0.01
