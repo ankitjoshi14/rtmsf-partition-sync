@@ -10,15 +10,17 @@ The Azure catalog proof passed on October 15, 2026. An external Parquet table wi
 
 The Event Grid decoder now has 46 unit cases verified in Azure Container Instances, alongside 61 existing core cases. It validates the configured account, container, and full ARM topic; preserves exact URL keys; and accepts only supported committed file events. The tests cover percent decoding, literal plus, malformed URLs, invalid Unicode, timestamps, and operation filtering. Live Azure events must still verify special-name subject escaping.
 
-One private Azure VM and Key Vault have also been deployed. The VM has no public IP, denies inbound traffic, and runs verification through Azure VM Run Command. It is deallocated between verification sessions; no worker service is installed yet.
+One private Azure VM and Key Vault have also been deployed. The VM has no public IP, denies inbound traffic, and runs verification through Azure VM Run Command. The worker service is installed, stopped, and disabled while live-test preparation continues. Deallocate the VM between verification sessions.
 
 The Service Bus and ADLS adapters have now passed the full repository suite on that VM: **467 tests passed in 11.94 seconds**, followed by successful wheel and source-distribution builds using the frozen dependency lock. The cases include native DLQ settlement, lease uncertainty, exhausted storage pagination, and telemetry failures that must stop processing for replay. No live queue or storage integration is established by these unit tests.
 
 The Databricks catalog adapter is now unit-verified in Azure: **543 tests passed in 7.82 seconds**, followed by successful wheel and source-distribution builds. The frozen source archive was `401d1e6c4f9281ab4d7728d5f97101e1ad9e544de61fe09b157dfed0f74bf4c4`; all 12 delivered file hashes matched before committing the adapter as `324f126`. Review regressions first reproduced incomplete-result and recovery failures, then verified rejection of result continuation, empty cancellation acknowledgment followed by terminal confirmation, and recovery of successful mutations whose results have expired.
 
-The adapter uses SQL-scoped workspace OAuth and bounded Statement Execution REST. It keeps a durable pending mutation receipt on the VM disk; missing statement identity or unconfirmed termination stops processing for reconciliation. HTTP phase limits remain operational bounds. These unit tests validate controlled responses; live unattended authentication and SQL roundtrips remain pending.
+The adapter uses SQL-scoped workspace OAuth and bounded Statement Execution REST. It keeps a durable pending mutation receipt on the VM disk; missing statement identity or unconfirmed termination stops processing for reconciliation. HTTP phase limits remain operational bounds. VM managed identity retrieved the user-saved Key Vault secret and obtained SQL-scoped OAuth in 1.442 seconds. Live worker SQL roundtrips remain pending.
 
-The earlier catalog proof establishes the selected catalog's partition behavior. The event pipeline, worker composition/service, live crash/replay behavior, and final spending evidence remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
+The Azure composition entry point passed **603 tests in 11.49 seconds** on the VM, followed by successful wheel and source-distribution builds. A separate cloud installation verified the [systemd service](../deploy/azure/rtmsf.service), source identity, and service-file packaging. The approved VM queue-receiver, storage-reader, and named-secret grants and Event Grid sender/dead-letter grants have been deployed. The filtered event subscription and disposable worker table setup remain pending.
+
+The earlier catalog proof establishes the selected catalog's partition behavior. Real event-driven worker processing, live crash/replay behavior, and final spending evidence remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
 
 ## Services and responsibilities
 
@@ -56,6 +58,14 @@ Builds, dependency installation, worker execution, fixture generation, and live 
 The existing SQL warehouse is 2X-Small, with at most one cluster and five-minute auto-stop. Stop the worker, deallocate the VM, and stop the warehouse when each bounded proof session ends. VM disks and other retained resources can still incur charges while compute is deallocated. The Databricks spending limit is $10; Azure uses existing Free Trial credit. Do not upgrade to pay-as-you-go or treat delayed billing as zero cost.
 
 Generate and enter any new OAuth credential through a user browser handoff into the reviewed cloud secret destination. Do not ask for credentials in chat, commit a secret, save a local `.env`, or emit a secret in logs. Exact Azure IAM grants and table ownership require review before application.
+
+## Worker service
+
+Install a verified release under `/opt/rtmsf/releases/`, with `/opt/rtmsf/current` pointing to it, and the service file at `/etc/systemd/system/rtmsf.service`. The restricted `rtmsf` user must be able to read and execute the release. Only `/var/lib/rtmsf` is writable by the service; it contains the fixed host lock and durable Databricks mutation journal. Preserve both files across upgrades, stop the old service, and confirm `MainPID=0` before changing the release link.
+
+Place the credential-free configuration in `/etc/rtmsf/azure.env`, owned by `root:rtmsf` with mode `0640`. Set `RTMSF_SOURCES` to the one approved account/container/full ARM topic mapping; set `RTMSF_TABLE_ID`, `RTMSF_ROOT_PREFIX`, `AZURE_SERVICE_BUS_NAMESPACE`, `AZURE_SERVICE_BUS_QUEUE`, `AZURE_KEY_VAULT_URL`, `DATABRICKS_HOST`, `DATABRICKS_WAREHOUSE_ID`, and `DATABRICKS_CLIENT_ID`. The application retrieves only `databricks-client-secret` from Key Vault in memory.
+
+The service runs `python -m rtmsf.azure_app` from the release's Azure dependency environment. Automatic restart is disabled so an uncertain mutation or settlement remains visible for reconciliation. Start it only after the approved table metadata, permissions, event filters, queue retention, and live-session budget are verified. Use `systemctl stop rtmsf` and confirm the process has exited before deallocating the VM.
 
 ## Completion evidence
 
