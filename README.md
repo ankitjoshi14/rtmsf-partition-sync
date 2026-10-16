@@ -21,7 +21,7 @@ The supplied router requires ordered `column=value` paths and correct existing p
 The core uses provider-neutral interfaces. AWS supplies catalog adapters and the benchmark runner.
 An OCI Compute worker passed lifecycle, burst-coalescing, and process-restart checks through OCI Object Storage, Events/Function, and Queue using the unchanged core and an in-memory catalog.
 Real OCI catalog integration and multi-worker operation remain unvalidated.
-The Azure catalog partition proof passed; its event pipeline and cloud worker remain planned.
+The Azure catalog partition proof and event decoder unit tests passed in Azure; its event pipeline and cloud worker remain planned.
 
 ## Choose your task
 
