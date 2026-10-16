@@ -139,13 +139,25 @@ class DatabricksSQLStatements:
         raise DatabricksWorkerStop(reason) from None
 
     @contextmanager
-    def operation(self):
-        outer = self._deadline is None
-        if outer:
-            self._deadline = self._clock() + self._seconds
-            self._requests = self._polls = 0
+    def operation(self, *, deadline=None):
         try:
+            if deadline is not None and (isinstance(deadline, bool) or not math.isfinite(deadline)):
+                raise ValueError("invalid_deadline")
+        except (TypeError, ValueError, OverflowError):
+            raise ValueError("invalid_databricks_operation_deadline") from None
+        outer = self._deadline is None
+        bounded = self._clock() + self._seconds
+        if deadline is not None:
+            bounded = min(bounded, deadline)
+        if outer:
+            self._deadline = bounded
+            self._requests = self._polls = 0
+        else:
+            self._deadline = min(self._deadline, bounded)
+        try:
+            self._remaining()
             yield
+            self._remaining()
         finally:
             if outer:
                 self._deadline = None

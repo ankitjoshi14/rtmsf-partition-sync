@@ -386,10 +386,93 @@ def test_one_operation_deadline_covers_pmcp_reads_storage_and_mutation(tmp_path)
     http = HTTP([describe(), slow_read], clock=clock)
     statements, result = resolved(tmp_path, http, operation_seconds=10)
     pmcp = PartitionMutationCommitProtocol(Store(clock=clock, delay=6), result)
-    with statements.operation():
-        outcome = pmcp.apply(PartitionIntent(PARTITION, "ADD"))
-    assert outcome.status == "RETRY"
+    with pytest.raises(RetryableExternalError, match="databricks_operation_budget_exceeded"):
+        with statements.operation():
+            outcome = pmcp.apply(PartitionIntent(PARTITION, "ADD"))
+            assert outcome.status == "RETRY"
     assert http.mutations == []
+
+
+def test_external_absolute_deadline_bounds_authentication_and_sql(tmp_path):
+    http = HTTP([inline()])
+    statements = sql_client(tmp_path, http)
+    with statements.operation(deadline=6):
+        http.clock.sleep(4)
+        statements.execute("SELECT 1")
+    assert len(http.calls) == 2
+    assert all(call["connect_timeout"] + call["read_timeout"] <= 2 for call in http.calls)
+
+
+def test_external_deadline_cannot_extend_the_configured_operation_limit(tmp_path):
+    http = HTTP()
+    statements = sql_client(tmp_path, http, operation_seconds=10)
+    with pytest.raises(RetryableExternalError, match="databricks_operation_budget_exceeded"):
+        with statements.operation(deadline=100):
+            http.clock.sleep(11)
+    assert http.calls == []
+
+
+@pytest.mark.parametrize("deadline", [True, "5", math.nan, math.inf, -math.inf])
+def test_external_deadline_must_be_finite_absolute_monotonic_time(tmp_path, deadline):
+    statements = sql_client(tmp_path, HTTP())
+    with pytest.raises(ValueError, match="^invalid_databricks_operation_deadline$"):
+        with statements.operation(deadline=deadline):
+            pytest.fail("invalid deadline reached operation body")
+
+
+def test_exhausted_external_deadline_stops_before_entering_body(tmp_path):
+    http = HTTP()
+    statements = sql_client(tmp_path, http)
+    http.clock.sleep(5)
+    with pytest.raises(RetryableExternalError, match="databricks_operation_budget_exceeded"):
+        with statements.operation(deadline=5):
+            pytest.fail("expired deadline reached operation body")
+    with statements.operation():
+        assert statements._remaining() == 30
+
+
+def test_default_and_later_nested_deadlines_never_extend_outer_deadline(tmp_path):
+    http = HTTP()
+    statements = sql_client(tmp_path, http)
+    with statements.operation(deadline=5):
+        http.clock.sleep(2)
+        with statements.operation():
+            assert statements._remaining() == 3
+        with statements.operation(deadline=100):
+            assert statements._remaining() == 3
+        assert statements._remaining() == 3
+
+
+def test_earlier_nested_deadline_remains_in_force_until_outer_operation_finishes(tmp_path):
+    http = HTTP()
+    statements = sql_client(tmp_path, http)
+    with pytest.raises(RetryableExternalError, match="databricks_operation_budget_exceeded"):
+        with statements.operation():
+            with statements.operation(deadline=5):
+                assert statements._remaining() == 5
+            http.clock.sleep(6)
+
+
+def test_elapsed_non_sql_work_is_checked_after_successful_body(tmp_path):
+    http = HTTP()
+    statements = sql_client(tmp_path, http, operation_seconds=10)
+    with pytest.raises(RetryableExternalError, match="databricks_operation_budget_exceeded"):
+        with statements.operation():
+            http.clock.sleep(11)
+    assert http.calls == []
+
+
+def test_failed_operation_body_keeps_original_exception_after_deadline(tmp_path):
+    http = HTTP()
+    statements = sql_client(tmp_path, http, operation_seconds=10)
+    failure = RuntimeError("test-only-original-body-failure")
+    with pytest.raises(RuntimeError) as raised:
+        with statements.operation():
+            http.clock.sleep(11)
+            raise failure
+    assert raised.value is failure
+    with statements.operation():
+        assert statements._remaining() == 10
 
 
 def test_atomic_fsynced_marker_precedes_post_and_id_precedes_poll(tmp_path, monkeypatch):
