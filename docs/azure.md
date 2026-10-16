@@ -1,6 +1,6 @@
 # Azure deployment architecture
 
-The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azure VM worker → Databricks Unity Catalog**. It reuses the existing Python routing, WOERA, and PMCP core. The figure uses the same visual style as the [AWS](figures/aws-deployment.svg) and [OCI](figures/oci-deployment.svg) deployment diagrams.
+The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azure VM worker → Databricks Unity Catalog**. It reuses the existing Python routing, WOERA, and PMCP core. The figure uses the same visual style as the [AWS](figures/aws-deployment.svg) and [OCI](figures/oci-deployment.svg) deployment diagrams, with [official Microsoft Azure service icons](figures/azure-icons.md).
 
 ![RTMSF deployment architecture on Azure](figures/azure-deployment.svg)
 
@@ -9,6 +9,8 @@ The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azu
 The Azure catalog proof passed on October 15, 2026. An external Parquet table with `partitionMetadataEnabled=true` initially hid a path-written row from table queries. Registering its complete partition twice exposed exactly one row and one partition. Dropping the partition twice without PURGE removed catalog membership while a separate path query still read the physical row.
 
 The Event Grid decoder now has 46 unit cases verified in Azure Container Instances, alongside 61 existing core cases. It validates the configured account, container, and full ARM topic; preserves exact URL keys; and accepts only supported committed file events. The tests cover percent decoding, literal plus, malformed URLs, invalid Unicode, timestamps, and operation filtering. Live Azure events must still verify special-name subject escaping.
+
+One private Azure VM and Key Vault have also been deployed. The VM has no public IP, denies inbound traffic, and runs verification through Azure VM Run Command. It is deallocated between verification sessions; no worker service is installed yet.
 
 The catalog proof establishes the selected catalog's partition behavior. Queue, storage, and catalog adapters, unattended SQL authentication, the event pipeline, a deployed cloud worker, and crash/replay behavior remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
 
