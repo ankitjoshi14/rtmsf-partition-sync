@@ -14,7 +14,11 @@ One private Azure VM and Key Vault have also been deployed. The VM has no public
 
 The Service Bus and ADLS adapters have now passed the full repository suite on that VM: **467 tests passed in 11.94 seconds**, followed by successful wheel and source-distribution builds using the frozen dependency lock. The cases include native DLQ settlement, lease uncertainty, exhausted storage pagination, and telemetry failures that must stop processing for replay. No live queue or storage integration is established by these unit tests.
 
-The catalog proof establishes the selected catalog's partition behavior. The Databricks catalog adapter, unattended SQL authentication, the event pipeline, a deployed cloud worker, and crash/replay behavior remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
+The Databricks catalog adapter is now unit-verified in Azure: **543 tests passed in 7.82 seconds**, followed by successful wheel and source-distribution builds. The frozen source archive was `401d1e6c4f9281ab4d7728d5f97101e1ad9e544de61fe09b157dfed0f74bf4c4`; all 12 delivered file hashes matched before committing the adapter as `324f126`. Review regressions first reproduced incomplete-result and recovery failures, then verified rejection of result continuation, empty cancellation acknowledgment followed by terminal confirmation, and recovery of successful mutations whose results have expired.
+
+The adapter uses SQL-scoped workspace OAuth and bounded Statement Execution REST. It keeps a durable pending mutation receipt on the VM disk; missing statement identity or unconfirmed termination stops processing for reconciliation. HTTP phase limits remain operational bounds. These unit tests validate controlled responses; live unattended authentication and SQL roundtrips remain pending.
+
+The earlier catalog proof establishes the selected catalog's partition behavior. The event pipeline, worker composition/service, live crash/replay behavior, and final spending evidence remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
 
 ## Services and responsibilities
 
