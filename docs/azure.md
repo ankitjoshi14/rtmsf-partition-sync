@@ -12,7 +12,9 @@ The Event Grid decoder now has 46 unit cases verified in Azure Container Instanc
 
 One private Azure VM and Key Vault have also been deployed. The VM has no public IP, denies inbound traffic, and runs verification through Azure VM Run Command. It is deallocated between verification sessions; no worker service is installed yet.
 
-The catalog proof establishes the selected catalog's partition behavior. Queue, storage, and catalog adapters, unattended SQL authentication, the event pipeline, a deployed cloud worker, and crash/replay behavior remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
+The Service Bus and ADLS adapters have now passed the full repository suite on that VM: **467 tests passed in 11.94 seconds**, followed by successful wheel and source-distribution builds using the frozen dependency lock. The cases include native DLQ settlement, lease uncertainty, exhausted storage pagination, and telemetry failures that must stop processing for replay. No live queue or storage integration is established by these unit tests.
+
+The catalog proof establishes the selected catalog's partition behavior. The Databricks catalog adapter, unattended SQL authentication, the event pipeline, a deployed cloud worker, and crash/replay behavior remain unfinished. The diagram describes the intended deployment; it does not claim a completed Azure port or establish Azure performance from AWS measurements.
 
 ## Services and responsibilities
 
