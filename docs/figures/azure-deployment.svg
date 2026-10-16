@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
   <title id="title">RTMSF deployment architecture on Azure</title>
-  <desc id="description">Planned Azure architecture: ADLS Gen2 emits committed file creation and deletion events through Event Grid into a Service Bus queue. Exactly one Azure Container Apps worker runs the existing routing, WOERA, and PMCP core through Azure adapters. It renews PeekLock deliveries, completes reconciled input, and uses native Service Bus dead-letter settlement for terminal input. PMCP reads authoritative storage and manages explicit external Parquet partition metadata through a Databricks SQL warehouse and Unity Catalog. Azure managed identity authorizes queue and storage access; Databricks OAuth machine-to-machine authorizes SQL access. The Unity Catalog access connector authorizes query reads from storage. Azure Container Registry supplies the cloud-built image and Azure Monitor retains logs. Only the SQL catalog proof has passed; the event pipeline, unattended authentication, and Azure worker have not yet been deployed or validated. Service symbols are generic, not official Microsoft icons.</desc>
+  <desc id="description">Planned Azure architecture: ADLS Gen2 emits committed file creation and deletion events through Event Grid into a Service Bus queue. One Azure VM systemd worker runs the existing routing, WOERA, and PMCP core through Azure adapters. It renews PeekLock deliveries, completes reconciled input, and uses native Service Bus dead-letter settlement for terminal input. PMCP reads authoritative storage and manages explicit external Parquet partition metadata through a Databricks SQL warehouse and Unity Catalog. Azure managed identity authorizes queue and storage access; Databricks OAuth machine-to-machine authorizes SQL access. The Unity Catalog access connector authorizes query reads from storage. Azure VM Run Command installs source and dependencies in Azure; the VM journal records proof logs. The OAuth secret is entered into Azure Key Vault by the user. The SQL catalog proof and decoder unit tests have passed; the event pipeline, unattended authentication, and Azure worker have not yet been deployed or validated. Service symbols are generic, not official Microsoft icons.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
     <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0072B2"/></marker>
@@ -17,15 +17,15 @@
   </defs>
   <rect width="1600" height="1000" fill="#fff"/>
   <text x="60" y="63" class="title">RTMSF deployment architecture on Azure</text>
-  <text x="60" y="101" class="sub">Planned cloud worker and event pipeline · SQL catalog partition proof passed</text>
+  <text x="60" y="101" class="sub">Planned VM worker and event pipeline · Catalog proof and decoder tests passed</text>
   <rect x="35" y="137" width="1530" height="800" rx="20" fill="#fafcfe" stroke="#c6d0da" stroke-width="2"/>
   <text x="60" y="173" class="small">Azure subscription / Region</text>
 
   <rect x="590" y="190" width="390" height="85" rx="12" class="service"/>
   <rect x="606" y="209" width="46" height="46" rx="7" fill="#0078D4"/>
   <path class="icon" d="M615 222l14-7 14 7v20l-14 7-14-7zM615 222l14 7 14-7M629 229v20"/>
-  <text x="669" y="225" class="name">Azure Container Registry</text>
-  <text x="669" y="254" class="small">Image built in Azure</text>
+  <text x="669" y="225" class="name">Azure VM Run Command</text>
+  <text x="669" y="254" class="small">Source installed in Azure</text>
   <path class="support" d="M730 275V305"/>
   <rect x="1020" y="190" width="505" height="85" rx="12" class="service"/>
   <rect x="1036" y="209" width="46" height="46" rx="7" fill="#0078D4"/>
@@ -61,8 +61,8 @@
   <rect x="590" y="305" width="570" height="465" rx="18" fill="#fff" stroke="#0072B2" stroke-width="2.5"/>
   <rect x="609" y="324" width="46" height="46" rx="7" fill="#0078D4"/>
   <path class="icon" d="M619 336h26v19h-26zM624 332v4M632 332v4M640 332v4M624 355v5M632 355v5M640 355v5"/>
-  <text x="673" y="347" class="name">Azure Container Apps · RTMSF worker</text>
-  <text x="615" y="380" class="small">Exactly one cloud replica · no public application ingress</text>
+  <text x="673" y="347" class="name">Azure VM · RTMSF worker</text>
+  <text x="615" y="380" class="small">One systemd worker · no public IP or inbound ports</text>
   <rect x="630" y="400" width="490" height="75" rx="11" class="core"/>
   <text x="875" y="431" class="name" text-anchor="middle">Routing</text>
   <text x="875" y="460" class="small" text-anchor="middle">Resolve existing tables and match exact object paths</text>
@@ -114,11 +114,11 @@
   <rect x="1060" y="835" width="465" height="85" rx="12" class="service"/>
   <rect x="1076" y="854" width="46" height="46" rx="7" fill="#0078D4"/>
   <path class="icon" d="M1086 880h26M1090 876v-8M1098 876v-14M1106 876v-5M1090 886h18"/>
-  <text x="1139" y="869" class="name">Azure Monitor / Log Analytics</text>
+  <text x="1139" y="869" class="name">VM journal + proof logs</text>
   <text x="1139" y="898" class="small">Worker telemetry and proof evidence</text>
   <path class="support" d="M1160 735H1195V810H1292V835"/>
   <text x="746" y="863" class="small" text-anchor="middle">Solid: intended runtime calls</text>
-  <text x="746" y="891" class="small" text-anchor="middle">Dashed: image / identity / logging</text>
-  <text x="60" y="965" class="small">Current evidence: catalog SQL only. Azure event delivery, cloud worker, OAuth login, and recovery remain unverified.</text>
-  <text x="60" y="989" class="small">Service symbols are generic. Worker execution, image builds, and live proof runs belong in Azure.</text>
+  <text x="746" y="891" class="small" text-anchor="middle">Dashed: installation / identity / logging</text>
+  <text x="60" y="965" class="small">Current evidence: catalog SQL + 107 Azure unit tests. Azure event delivery, cloud worker, OAuth login, and recovery remain unverified.</text>
+  <text x="60" y="989" class="small">Service symbols are generic. Worker execution, builds, and live proof runs belong in Azure.</text>
 </svg>

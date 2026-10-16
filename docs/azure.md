@@ -1,6 +1,6 @@
 # Azure deployment architecture
 
-The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azure Container Apps worker → Databricks Unity Catalog**. It reuses the existing Python routing, WOERA, and PMCP core. The figure uses the same visual style as the [AWS](figures/aws-deployment.svg) and [OCI](figures/oci-deployment.svg) deployment diagrams.
+The first Azure target is **ADLS Gen2 → Event Grid → Service Bus → one Azure VM worker → Databricks Unity Catalog**. It reuses the existing Python routing, WOERA, and PMCP core. The figure uses the same visual style as the [AWS](figures/aws-deployment.svg) and [OCI](figures/oci-deployment.svg) deployment diagrams.
 
 ![RTMSF deployment architecture on Azure](figures/azure-deployment.svg)
 
@@ -20,13 +20,16 @@ The catalog proof establishes the selected catalog's partition behavior. Queue, 
 | Event Grid storage subscription | Deliver file notifications for the configured disposable table prefix. Retain failed ingress delivery in a separate Blob dead-letter container. |
 | Service Bus queue | Retain pending input. Use PeekLock, renew every retained delivery, and complete only after all its reconciliation finishes. |
 | Service Bus native DLQ | Retain terminal and expired input. Successful dead-lettering already settles the delivery; the adapter must not complete it again. |
-| Azure Container Apps | Host exactly one RTMSF process and replica, with public application ingress disabled. Verify the old revision is stopped before replacing it. |
-| Azure Container Registry / Tasks | Build and distribute the worker and cloud-proof images in Azure. |
+| Azure Virtual Machine | Run one RTMSF systemd service, with no public IP or inbound ports. Stop and verify the old process before updating or replacing it. |
+| Azure VM Run Command | Install and verify source and dependencies in Azure without a local CLI login or SSH connection. |
+| Azure Key Vault | Store the user-entered Databricks OAuth credential; let only the approved VM identity retrieve the worker secret. |
 | Databricks SQL warehouse / Unity Catalog | Resolve existing table definitions and execute exact SHOW/ADD/DROP partition operations for approved external Parquet tables. |
-| Azure managed identity | Authorize worker queue receive/settlement, read-only test storage access, and private image pulls. |
+| Azure managed identity | Authorize worker queue receive/settlement, read-only test storage access, and retrieval of its approved OAuth secret. |
 | Databricks-managed service principal | Provide unattended OAuth M2M SQL authentication with restricted resource permissions. It is separate from Azure storage/queue identity. |
 | Databricks Access Connector | Authorize the SQL engine's governed storage reads. It does not authenticate the RTMSF worker to SQL. |
-| Azure Monitor / Log Analytics | Retain worker telemetry and evidence about processing, settlement, and recovery. |
+| VM journal / proof evidence | Record processing, settlement, and recovery evidence. Export the bounded proof logs before deallocating compute. |
+
+The user selected a single VM on October 15, 2026, to match AWS EC2 ownership. Container Apps Single revision mode and maximum one replica do not guarantee one active process during replacement or platform prewarming, so they are insufficient for the unchanged core. The VM path avoids adding distributed worker ownership to this first port.
 
 ## First functional contract
 
@@ -40,9 +43,9 @@ Bound pending messages, retained bytes, storage listing time, catalog statement 
 
 ## Execution and access checkpoints
 
-Image builds, worker execution, fixture generation, and live tests run in Azure. No local RTMSF worker starts. Prepare source and review deployment artifacts before applying new access grants or deploying resources.
+Builds, dependency installation, worker execution, fixture generation, and live tests run in Azure. No local RTMSF worker starts. Prepare source and review deployment artifacts before applying new access grants or deploying resources.
 
-The existing SQL warehouse is 2X-Small, with at most one cluster and five-minute auto-stop. Stop the worker and warehouse when each bounded proof session ends. Only existing Azure Free Trial credit is authorized; do not upgrade to pay-as-you-go or treat delayed billing as zero cost.
+The existing SQL warehouse is 2X-Small, with at most one cluster and five-minute auto-stop. Stop the worker, deallocate the VM, and stop the warehouse when each bounded proof session ends. VM disks and other retained resources can still incur charges while compute is deallocated. The Databricks spending limit is $10; Azure uses existing Free Trial credit. Do not upgrade to pay-as-you-go or treat delayed billing as zero cost.
 
 Generate and enter any new OAuth credential through a user browser handoff into the reviewed cloud secret destination. Do not ask for credentials in chat, commit a secret, save a local `.env`, or emit a secret in logs. Exact Azure IAM grants and table ownership require review before application.
 
@@ -50,7 +53,7 @@ Generate and enter any new OAuth credential through a user browser handoff into 
 
 The first complete worker proof must demonstrate real committed events, first-file registration, additional-file no-op, overwrite, deletion with other files remaining, last-file removal, duplicate/reordered input, a same-partition burst, and restart/replay before and after catalog mutation and settlement. Use an independent catalog query and authoritative storage witness; duplicate SQL statements alone are insufficient.
 
-Save image/source identity, queue/log evidence, scenario outcomes, warehouse timings, observed credit consumption, and final stopped compute state. Broader AWS-style performance experiments follow only after this functional Azure proof passes.
+Save source/dependency identity, queue/log evidence, scenario outcomes, warehouse timings, observed credit consumption, and final stopped compute state. Broader AWS-style performance experiments follow only after this functional Azure proof passes.
 
 ## Primary references
 
