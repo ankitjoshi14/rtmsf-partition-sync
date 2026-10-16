@@ -168,9 +168,18 @@ def test_resolves_exact_external_parquet_metadata_once(tmp_path):
     assert http.statements == ["DESCRIBE TABLE EXTENDED `proof`.`default`.`worker_probe` AS JSON"]
 
 
+def test_resolves_databricks_location_without_trailing_slash(tmp_path):
+    document = metadata()
+    document["location"] = ROOT_LOCATION[:-1]
+    _, result = catalog(tmp_path, HTTP([describe(document)]))
+    assert result.resolve_tables((TABLE,)) == (TableDefinition(TABLE, SOURCE, ROOT_PREFIX, ("dt", "region")),)
+
+
 @pytest.mark.parametrize("change", [
     {"catalog_name": "other"}, {"type": "MANAGED"}, {"provider": "delta"},
-    {"location": ROOT_LOCATION + "other/"}, {"table_properties": {}},
+    {"location": ROOT_LOCATION + "other/"}, {"location": ROOT_LOCATION + "/"},
+    {"location": ROOT_LOCATION[:-1] + "-other"}, {"location": ROOT_LOCATION[:-1] + "%2F"},
+    {"table_properties": {}},
     {"table_properties": {"partitionMetadataEnabled": "false"}},
     {"partition_columns": []}, {"partition_columns": ["dt", "dt"]},
     {"partition_columns": ["missing"]},

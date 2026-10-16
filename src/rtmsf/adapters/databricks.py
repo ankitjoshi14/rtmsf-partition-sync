@@ -455,7 +455,7 @@ class DatabricksPartitionCatalog(PartitionCatalog):
                     metadata = _json(rows[0][0])
                     if (tuple(metadata[key] for key in ("catalog_name", "schema_name", "table_name")) != self._identity
                         or metadata["type"] != "EXTERNAL" or metadata["provider"] != "parquet"
-                        or metadata["location"] != self._root_location
+                        or metadata["location"] not in (self._root_location, self._root_location[:-1])
                         or metadata["table_properties"]["partitionMetadataEnabled"] != "true"):
                         raise ValueError("unsupported_table_metadata")
                     partition_columns = metadata["partition_columns"]
