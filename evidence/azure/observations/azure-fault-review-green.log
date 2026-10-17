@@ -1,0 +1,9 @@
+Enable succeeded:
+[stdout]
+619 passed in 6.05s
+{"stage": "fault-green", "exit": 0, "sha256": {"src/experiments/azure/__init__.py": "cf5b0cd4682f6647af4472e9dd9e4a367867a9403c84c69ee66fbe2f59e9123c", "src/experiments/azure/crash_worker.py": "388794cbd105d4323d8385f9a5d53d6451c3f8eacc7aea69fa3b315987aa29c9", "tests/test_azure_crash_worker.py": "78fdccf294539a04cd4e92c658fa7cd2d4ae23eb6f2b96a3186aef5c06f66f99"}}
+Successfully built dist/rtmsf_partition_sync-0.2.0.tar.gz
+Successfully built dist/rtmsf_partition_sync-0.2.0-py3-none-any.whl
+{"stage": "fault-build", "exit": 0}
+
+[stderr]

@@ -1,0 +1,10 @@
+generic "Status":
+        - generic "Status"
+        - generic: ":"
+        - generic "Stopped (deallocated)"
+        - button "Copy to clipboard the value for Status Stopped (deallocated)":
+      - generic "Location":
+        - generic "Location"
+        - generic: ":"
+        - generic "East US"
+        - button "Copy to clipboard the v

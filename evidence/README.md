@@ -4,6 +4,7 @@ This folder contains selected reports from saved experiment runs. It belongs in 
 The exporter copies measurement CSVs unchanged and generates reports from saved inputs.
 Original execution records remain separate under `runs/` and are Git-ignored.
 Start with [SUMMARY.md](SUMMARY.md) for settings and outcomes.
+The separate [Azure functional proof](azure/README.md) contains real catalog/storage/queue observations and process-recovery evidence; it is not part of the AWS performance measurements.
 
 | Item | Purpose |
 |---|---|

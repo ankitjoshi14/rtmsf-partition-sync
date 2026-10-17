@@ -1,0 +1,8 @@
+Enable succeeded:
+[stdout]
+MainPID=0
+ActiveState=inactive
+{"query": "SHOW PARTITIONS `rtmsf_azure_proof_20261014`.`rtmsf_proof`.`worker_probe` PARTITION (`dt` = 'life')", "statement_id": "01f1c936-c267-1d61-a521-580d4f9a30bb", "status": {"state": "SUCCEEDED"}, "manifest": {"format": "JSON_ARRAY", "schema": {"column_count": 1, "columns": [{"name": "partition", "type_text": "STRING", "type_name": "STRING", "position": 0}]}, "total_chunk_count": 0, "total_row_count": 0, "truncated": false}, "result": {}}
+{"blob": "worker_probe/dt=life/a.parquet", "resource_type": "file", "copy_status": null}
+
+[stderr]

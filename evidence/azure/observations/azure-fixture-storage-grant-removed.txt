@@ -1,0 +1,65 @@
+Number of role assignments for this subscription
+15 5000
+Type
+:
+All
+Use 'Space' or 'Enter' key to enable edit mode
+Role
+:
+All
+Use 'Space' or 'Enter' key to enable edit mode
+Scope
+:
+All scopes
+Use 'Space' or 'Enter' key to enable edit mode
+Group by
+:
+Role
+Use 'Space' or 'Enter' key to enable edit mode
+All (5)
+Job function roles (4)
+Privileged administrator roles (1)
+Required
+Name
+Type
+Role
+Scope
+Condition
+Owner (1)
+
+AJ
+
+Ankit Joshi
+42784d27-7b1f-423c-8e07-0b2bde623394
+User
+Owner
+Subscription (Inherited)
+None
+Storage Blob Data Contributor (2)
+rtmsf-proof-access-20261014
+83700fcc-fc36-47c7-bc37-60f322faa265
+Managed identity
+Storage Blob Data Contributor
+This resource
+Add
+rtmsfproofevents202610157405
+3261144f-dd7c-483e-a699-4feeb6fcd1f0
+Managed identity
+Storage Blob Data Contributor
+Parent resource (Inherited)
+None
+Storage Blob Data Reader (1)
+rtmsf-proof-worker-20261015
+ea392222-1798-45df-bc34-98e8972363d8
+Managed identity
+Storage Blob Data Reader
+This resource
+Add
+Storage Blob Delegator (1)
+rtmsf-proof-access-20261014
+83700fcc-fc36-47c7-bc37-60f322faa265
+Managed identity
+Storage Blob Delegator
+Parent resource (Inherited)
+None
+Showing 1 - 5 of 5 results.

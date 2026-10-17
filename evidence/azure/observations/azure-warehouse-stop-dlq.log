@@ -1,0 +1,6 @@
+Enable succeeded:
+[stdout]
+{"warehouse": "UNVERIFIED", "error_type": "DatabricksWorkerStop", "result": "FAIL"}
+{"stage": "dlq", "result": "OBSERVED", "return_code": 0, "rows": 0, "partitions": null, "pending_queue": 0, "dlq_messages": 5, "sha256": "7eb567e21d72f41eb46b502eaad179270132ebe562ff899dee47921985dc3bf7", "gzip_base64": "H4sIAP7j0WoC/+WTwWrDMBBE7/2K4HO2lm3ZkgP9ih5LMStp1apxrESS3YSQf28cesqlpVAK6XGHmWF57B4z0++6LdE6Wy2ejtmGYsQX6pw5z1nVFDVrhQVZogZeC4S20RZES6USpTFtWWbLRUYTDekzU3IuVI0IRSUIOLMcVGElaM14xQRKRnbOxFG9kU5zJFe9V48UJqcp5oYsjn3KtR8SuoFCzLfBe3txxfzdhzWF7iwpyk166J2lHO+3GHYjpbk5EEY/zMUb3HeBUnAUV7RPFAbsL8IBVU+z11DvJgqHTvtxmJdhp+XiGkNIm2ghHob0Sslp0LWpTCMVUEsGuCAJ2NYGrKh4qxjnVilg12B+0vIXoAafuslF9+uEiv9MCBshhTr/hWikBM51AagtA1bXBkupjWH09Q19p+WmCRW3S+j5dPcBS/l+QJ4FAAA="}
+
+[stderr]

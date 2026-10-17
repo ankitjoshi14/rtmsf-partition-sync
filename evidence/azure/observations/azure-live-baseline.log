@@ -1,0 +1,6 @@
+Enable succeeded:
+[stdout]
+WITNESS_SOURCE_VERIFIED e2f13f3d3f923414b0d69c2b3ff531a71f7292164f61c715b17672b8068ae3f9
+{"stage": "baseline", "utc": "2026-10-16T07:42:17.902665+00:00", "owner": "fd4ab93e-73cc-41b4-b7dc-2a081138ee17", "partitions": [], "rows": [], "storage": [], "queue_peek": [], "service": ["MainPID=0", "ExecMainStartTimestamp=", "ExecMainStatus=0", "ActiveState=inactive"], "pmcp": [], "result": "PASS"}
+
+[stderr]

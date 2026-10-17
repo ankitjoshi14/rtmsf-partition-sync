@@ -1,0 +1,27 @@
+[Unit]
+Description=RTMSF Azure proof worker
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=rtmsf
+Group=rtmsf
+WorkingDirectory=/opt/rtmsf/current
+EnvironmentFile=/etc/rtmsf/azure.env
+ExecStart=/opt/rtmsf/current/.venv/bin/python -m rtmsf.azure_app
+Restart=no
+KillMode=control-group
+TimeoutStopSec=150
+StateDirectory=rtmsf
+StateDirectoryMode=0700
+UMask=0077
+LimitCORE=0
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/rtmsf
+
+[Install]
+WantedBy=multi-user.target
