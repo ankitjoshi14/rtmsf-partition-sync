@@ -421,8 +421,9 @@ def test_failed_malformed_publication_cannot_be_bypassed_with_an_ack():
     assert "acknowledge" not in boundary.actions()
 
 
-def test_invalid_server_timestamp_is_sanitized_before_admission():
-    item = message(); pubsub.PubsubMessage.pb(item.message).publish_time.nanos = 1_000_000_001
+@pytest.mark.parametrize("field,value", [("nanos", 1_000_000_001), ("seconds", 253402300800)])
+def test_invalid_server_timestamp_is_sanitized_before_admission(field, value):
+    item = message(); setattr(pubsub.PubsubMessage.pb(item.message).publish_time, field, value)
     boundary = Boundary([item]); source = boundary.source()
     with pytest.raises(FatalExternalError, match="gcp_pubsub_invalid_message"):
         receive(source)

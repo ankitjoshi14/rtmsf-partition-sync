@@ -388,7 +388,7 @@ class PubSubEventSource:
                         raise ValueError
                     item.message.publish_time.astimezone(timezone.utc)
                     _attributes(item.message.attributes)
-                except (AttributeError, ValueError, TypeError, UnicodeError, FatalExternalError):
+                except (AttributeError, ValueError, TypeError, UnicodeError, OverflowError, FatalExternalError):
                     raise FatalExternalError("gcp_pubsub_invalid_message") from None
                 prepared.append(_PubSubPending(item.ack_id, pubsub.PubsubMessage(item.message),
                                                _protobuf_size(item), (), started + self._subscription_lease))
