@@ -1,6 +1,7 @@
 """Offline safety and finite supervision of the approved native GCP soak."""
 
 from copy import deepcopy
+from contextlib import contextmanager
 import base64
 from email.parser import BytesParser
 from email.policy import default
@@ -952,3 +953,47 @@ def test_signal_after_child_reaped_prevents_replacement(monkeypatch, tmp_path, n
     assert state.order == [("start", 1000), ("wait", 1000)]
     assert state.processes[0].waited and state.http.keys[app.SOAK_KEY] == FIXTURE_A
     assert value["failed_children"] == (1 if termination == "retryable" else 0)
+
+
+@pytest.mark.parametrize("number", (signal.SIGTERM, signal.SIGINT))
+@pytest.mark.parametrize("stage", ("lock", "streams"))
+@pytest.mark.parametrize("replacement", (False, True))
+def test_signal_during_start_cancels_before_popen_and_closes_streams(monkeypatch, tmp_path, number, stage, replacement):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    expected_starts = 1 if replacement else 0
+    target_name = "child-000002.stderr" if replacement else "child-000001.stderr"
+    lock = app.run._host_lock
+    path_open = app.Path.open
+    opened, native_locks = [], []
+
+    @contextmanager
+    def interrupt_lock(path):
+        with lock(path):
+            if path == app.run.LOCK_PATH:
+                native_locks.append(path)
+                if stage == "lock" and len(native_locks) == (3 if replacement else 2):
+                    state.handlers[number](number, None)
+            yield
+
+    def interrupt_stream(path, *args, **kwargs):
+        stream = path_open(path, *args, **kwargs)
+        if path.name.startswith("child-") and path.suffix in {".stdout", ".stderr"}:
+            opened.append(stream)
+            if stage == "streams" and path.name == target_name:
+                state.handlers[number](number, None)
+        return stream
+
+    def first_exit():
+        if replacement and len(state.processes) == 1 and state.processes[0].poll() is None:
+            state.processes[0].exit()
+
+    monkeypatch.setattr(app.run, "_host_lock", interrupt_lock)
+    monkeypatch.setattr(app.Path, "open", interrupt_stream)
+    state.control = first_exit
+    assert app.main(soak_argv(tmp_path, "3")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "stopped" and value["stop_reason"] == "signal"
+    assert value["child_starts"] == expected_starts and value["child_restarts"] == 0 and value["child_pid"] is None
+    assert len(state.processes) == expected_starts
+    assert state.order == ([("start", 1000), ("wait", 1000)] if replacement else [])
+    assert all(stream.closed for stream in opened) and all(process.waited for process in state.processes)

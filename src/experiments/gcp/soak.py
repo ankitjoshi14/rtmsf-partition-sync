@@ -262,6 +262,11 @@ class _Child:
             self.files = []
             for stream in ("stdout", "stderr"):
                 self.files.append((self.args.output_dir / f"child-{index:06d}.{stream}").open("x"))
+            if self.stop_signal.is_set():
+                for output in self.files:
+                    output.close()
+                self.files = []
+                return
             self.process = subprocess.Popen([
                 sys.executable, "-m", "experiments.gcp.run", "--resources", str(self.args.resources),
                 "--output-dir", str(self.root), "--duration-seconds",
