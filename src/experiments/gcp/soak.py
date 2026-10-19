@@ -8,8 +8,9 @@ Provisioning or catalog-safety success cannot substitute for these live gates.
 
 Baseline JSON: {"run_id": RUN, "objects": [{"name": ..., "generation": "...",
 "size": ..., "sha256": "..."}], "catalog_partitions": ..., "catalog_rows": ...}.
-The last two fields are informational. The <=32 objects must include the exact
+The last two fields are informational. The <=64 objects must include the exact
 immutable owner and b sentinel below; all are read back before any mutation.
+Sizes may be 0..1MiB, including empty markers and exact terminal-slash names.
 Only dt=soak/part-00000.parquet and the nonrouted _SOAK_PULSE may be mutated.
 The pulse is retained, every child has its own evidence, and final query proof
 must be supplied independently. No resource cleanup or exactly-once claim.
@@ -48,8 +49,8 @@ B_SENTINEL = {"name": run.ROOT + "dt=b/part-00000.parquet", "generation": "17924
 
 def _json(path):
     with path.open("rb") as source:
-        body = source.read(65537)
-    if len(body) > 65536:
+        body = source.read(131073)
+    if len(body) > 131072:
         raise ValueError("gcp_soak_document_too_large")
     return json.loads(body, object_pairs_hook=_unique_json_object)
 
@@ -78,7 +79,7 @@ def load_baseline(path):
     try:
         value = _json(path)
         objects = value["objects"]
-        if value["run_id"] != run.RUN or not isinstance(objects, list) or not 2 <= len(objects) <= 32:
+        if value["run_id"] != run.RUN or not isinstance(objects, list) or not 2 <= len(objects) <= 64:
             raise ValueError
         names = set()
         for item in objects:
@@ -86,10 +87,10 @@ def load_baseline(path):
                 raise ValueError
             name = item["name"]
             if (not isinstance(name, str) or not name.startswith(run.ROOT) or len(name.encode("utf-8")) > 1024
-                    or any(segment in ("", ".", "..") for segment in name.split("/"))
+                    or any(segment in ("", ".", "..") for segment in name.removesuffix("/").split("/"))
                     or name.startswith(SOAK_PREFIX) or name == PULSE_KEY or name in names
                     or not _generation(item["generation"]) or type(item["size"]) is not int
-                    or not 1 <= item["size"] <= 1048576 or not isinstance(item["sha256"], str)
+                    or not 0 <= item["size"] <= 1048576 or not isinstance(item["sha256"], str)
                     or re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) is None):
                 raise ValueError
             names.add(name)
@@ -124,8 +125,9 @@ def _verify_blob(storage, expected):
     storage._call(blob.reload)
     if _metadata(blob, expected["name"], expected["size"], expected["sha256"]) != expected:
         raise ValueError("gcp_soak_object_mismatch")
-    body = storage._call(blob.download_as_bytes, start=0, end=expected["size"] - 1,
-                         if_generation_match=int(expected["generation"]), checksum=None)
+    byte_range = {"start": 0, "end": expected["size"] - 1} if expected["size"] else {}
+    body = storage._call(blob.download_as_bytes, if_generation_match=int(expected["generation"]),
+                         checksum=None, **byte_range)
     if len(body) != expected["size"] or hashlib.sha256(body).hexdigest() != expected["sha256"]:
         raise ValueError("gcp_soak_object_mismatch")
     return blob

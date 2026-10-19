@@ -84,14 +84,14 @@ def test_gate_contract_requires_evidence_and_current_object_configuration(tmp_pa
 def test_bounded_baseline_requires_immutable_owner_and_b_sentinel(tmp_path):
     app = harness()
     assert app.load_baseline(document(tmp_path, "baseline.json", baseline())) == baseline()["objects"]
-    for objects in ([], [OWNER], [B_SENTINEL], [OWNER, B_SENTINEL, OWNER], baseline()["objects"] * 17):
+    for objects in ([], [OWNER], [B_SENTINEL], [OWNER, B_SENTINEL, OWNER], baseline()["objects"] * 33):
         with pytest.raises(ValueError, match="gcp_soak_invalid_baseline"):
             app.load_baseline(document(tmp_path, "baseline.json", {"run_id": RUN, "objects": objects}))
 
 
 @pytest.mark.parametrize("field,value", [("name", "outside/file"), ("name", ROOT + "dt=soak/file"),
     ("name", ROOT + "_SOAK_PULSE"), ("name", ROOT + "../file"), ("generation", "0"),
-    ("generation", "01"), ("generation", 17), ("generation", True), ("size", True), ("size", 0),
+    ("generation", "01"), ("generation", 17), ("generation", True), ("size", True), ("size", -1),
     ("size", 1048577), ("sha256", "AUTH-SENTINEL"), ("unknown", "AUTH-SENTINEL")])
 def test_unsafe_baseline_refused_without_echo(tmp_path, field, value):
     app = harness()
@@ -167,7 +167,10 @@ class SoakHTTP(StorageHTTP):
                 status = 404
             elif query.get("alt") == ["media"]:
                 assert query["ifGenerationMatch"] == [self.generations[key]]
-                assert kwargs["headers"]["range"] == f"bytes=0-{len(self.keys[key]) - 1}"
+                if self.keys[key]:
+                    assert kwargs["headers"]["range"] == f"bytes=0-{len(self.keys[key]) - 1}"
+                else:
+                    assert "range" not in kwargs["headers"]
                 body = self.keys[key]
             else:
                 body = {"name": key, "bucket": BUCKET, "generation": self.generations[key], "size": str(len(self.keys[key]))}
@@ -790,3 +793,60 @@ def test_exit_evidence_write_failure_still_confirms_child_is_gone(monkeypatch, t
     monkeypatch.setattr(app.run.JsonEvidence, "emit", fail_exit)
     assert app.main(soak_argv(tmp_path, "1")) == 1
     assert report(tmp_path)["child_pid"] is None and all(process.waited for process in state.processes)
+
+
+@pytest.mark.parametrize("suffix", ("dt=marker/_SUCCESS", "dt=marker/inner/_SUCCESS", "dt=marker_slash/"))
+def test_zero_byte_and_terminal_slash_markers_are_preserved_in_baseline(monkeypatch, tmp_path, suffix):
+    app, storage, state = storage_setup(monkeypatch, tmp_path)
+    marker = {"name": ROOT + suffix, "generation": "21", "size": 0,
+              "sha256": hashlib.sha256(b"").hexdigest()}
+    changed = baseline()
+    changed["objects"].append(marker)
+    objects = app.load_baseline(document(tmp_path, "baseline.json", changed))
+    state.http.keys[marker["name"]] = b""
+    state.http.generations[marker["name"]] = "21"
+    app.verify_baseline(storage, objects)
+    app.verify_baseline(storage, objects)
+    assert state.http.keys[marker["name"]] == b"" and state.http.generations[marker["name"]] == "21"
+    assert not state.http.mutations
+
+
+def test_baseline_sixty_four_unique_objects_fit_and_sixty_five_refuse(tmp_path):
+    app = harness()
+    changed = baseline()
+    changed["objects"].extend({"name": ROOT + f"dt=markers/marker-{i}", "generation": str(i + 1),
+                               "size": 0, "sha256": hashlib.sha256(b"").hexdigest()} for i in range(62))
+    assert len(app.load_baseline(document(tmp_path, "baseline.json", changed))) == 64
+    changed["objects"].append({"name": ROOT + "dt=markers/marker-last", "generation": "64", "size": 0,
+                               "sha256": hashlib.sha256(b"").hexdigest()})
+    with pytest.raises(ValueError):
+        app.load_baseline(document(tmp_path, "baseline.json", changed))
+
+
+@pytest.mark.parametrize("suffix", ("dt=marker//inner/", "dt=marker/./", "dt=marker/../", "dt=soak/", "dt=soak/inner/_SUCCESS", "_SOAK_PULSE"))
+def test_marker_support_keeps_interior_and_owned_name_guards(tmp_path, suffix):
+    changed = baseline()
+    changed["objects"].append({"name": ROOT + suffix, "generation": "21", "size": 0,
+                               "sha256": hashlib.sha256(b"").hexdigest()})
+    with pytest.raises(ValueError):
+        harness().load_baseline(document(tmp_path, "baseline.json", changed))
+
+
+def test_empty_marker_hash_must_match_actual_empty_bytes(monkeypatch, tmp_path):
+    app, storage, state = storage_setup(monkeypatch, tmp_path)
+    marker = {"name": ROOT + "dt=marker/_SUCCESS", "generation": "21", "size": 0, "sha256": "a" * 64}
+    state.http.keys[marker["name"]] = b""
+    state.http.generations[marker["name"]] = "21"
+    with pytest.raises(ValueError, match="gcp_soak_object_mismatch"):
+        app.verify_baseline(storage, [marker])
+    assert state.http.keys[marker["name"]] == b"" and not state.http.mutations
+
+
+def test_sixty_four_baseline_names_fit_the_bounded_document_read(tmp_path):
+    changed = baseline()
+    changed["objects"].extend({"name": ROOT + f"dt=markers/{i:02d}/" + "x" * (1024 - len(ROOT) - len("dt=markers/00/")),
+                               "generation": str(i + 1), "size": 0, "sha256": hashlib.sha256(b"").hexdigest()}
+                              for i in range(62))
+    path = document(tmp_path, "baseline.json", changed)
+    assert 65536 < path.stat().st_size < 131072
+    assert len(harness().load_baseline(path)) == 64
