@@ -850,3 +850,105 @@ def test_sixty_four_baseline_names_fit_the_bounded_document_read(tmp_path):
     path = document(tmp_path, "baseline.json", changed)
     assert 65536 < path.stat().st_size < 131072
     assert len(harness().load_baseline(path)) == 64
+
+
+@pytest.mark.parametrize("category", ("external_fatal", "runtime", "configuration", "unknown", "missing"))
+def test_requested_shutdown_cannot_hide_failed_or_missing_child_report(monkeypatch, tmp_path, category):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    stop = app._Child.stop
+
+    def failing_shutdown(child):
+        if child.process is not None:
+            process = child.process
+
+            def terminate():
+                if category == "missing":
+                    process.returncode = 1
+                else:
+                    process.exit(1, "failed", category)
+
+            process.terminate = terminate
+        stop(child)
+
+    monkeypatch.setattr(app._Child, "stop", failing_shutdown)
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["failed_children"] == 1
+    assert value["child_pid"] is None and all(process.waited for process in state.processes)
+    assert value["latest_child_exit"]["expected_stop"] is True
+    assert value["latest_child_exit"]["return_code"] == 1
+    assert value["baseline_final"] == "passed" and value["final_delete_ack"] is not None
+    assert (tmp_path / "soak" / "soak-evidence.jsonl").exists()
+
+
+def test_forced_kill_after_scenario_checks_cannot_report_completion(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    state.force_kill = True
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["forced_child_kills"] == 1 and value["failed_children"] == 1
+    assert value["child_pid"] is None and all(process.waited for process in state.processes)
+    assert value["latest_child_exit"]["category"] == "missing_report"
+    assert value["latest_child_exit"]["return_code"] == -signal.SIGKILL
+
+
+def test_retryable_report_at_requested_stop_stays_a_counted_failure(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    stop = app._Child.stop
+
+    def retryable_shutdown(child):
+        if child.process is not None:
+            process = child.process
+            process.terminate = lambda: process.exit()
+        stop(child)
+
+    monkeypatch.setattr(app._Child, "stop", retryable_shutdown)
+    assert app.main(soak_argv(tmp_path, "1")) == 0
+    value = report(tmp_path)
+    assert value["status"] == "completed_with_terminal_events" and value["failed_children"] == 1
+    assert value["child_restarts"] == 0 and value["child_pid"] is None
+
+
+def test_forced_kill_cannot_use_a_preexisting_retryable_report(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    state.force_kill = True
+    stop = app._Child.stop
+
+    def stale_report(child):
+        if child.process is not None:
+            process = child.process
+            process.exit()
+            process.returncode = None
+        stop(child)
+
+    monkeypatch.setattr(app._Child, "stop", stale_report)
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    assert report(tmp_path)["status"] == "failed" and report(tmp_path)["failed_children"] == 1
+
+
+@pytest.mark.parametrize("number", (signal.SIGTERM, signal.SIGINT))
+@pytest.mark.parametrize("termination", ("retryable", "duration"))
+def test_signal_after_child_reaped_prevents_replacement(monkeypatch, tmp_path, number, termination):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    exiting = app._Child._exit
+
+    def stop_after_reap(child, *args, **kwargs):
+        exiting(child, *args, **kwargs)
+        state.handlers[number](number, None)
+
+    def first_exit():
+        if len(state.processes) == 1 and state.processes[0].poll() is None:
+            if termination == "retryable":
+                state.processes[0].exit()
+            else:
+                state.processes[0].exit(0, "stopped", None, "duration")
+
+    monkeypatch.setattr(app._Child, "_exit", stop_after_reap)
+    state.control = first_exit
+    assert app.main(soak_argv(tmp_path, "3")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "stopped" and value["stop_reason"] == "signal"
+    assert value["child_starts"] == 1 and value["child_restarts"] == 0 and value["child_pid"] is None
+    assert state.order == [("start", 1000), ("wait", 1000)]
+    assert state.processes[0].waited and state.http.keys[app.SOAK_KEY] == FIXTURE_A
+    assert value["failed_children"] == (1 if termination == "retryable" else 0)

@@ -244,11 +244,14 @@ def _checkpoint(root, report):
 
 
 class _Child:
-    def __init__(self, args, report, evidence):
+    def __init__(self, args, report, evidence, stop_signal):
         self.args, self.report, self.evidence = args, report, evidence
+        self.stop_signal = stop_signal
         self.process, self.files, self.tail = None, [], None
 
     def start(self, until):
+        if self.stop_signal.is_set():
+            return
         if self.process is not None:
             raise RuntimeError("gcp_soak_child_overlap")
         with run._host_lock(run.LOCK_PATH):
@@ -308,22 +311,23 @@ class _Child:
             reason = value.get("stop_reason") if value.get("stop_reason") in {"duration", "signal"} else None
         except (OSError, ValueError, TypeError, AttributeError):
             category, status, pending = "missing_report", "unknown", None
-        recoverable = ((code != 0 and status == "failed" and category == "external_retryable")
-                       or (code == 0 and status == "stopped" and reason == "duration"))
+        clean_exit = (code == 0 and status == "stopped" and category is None
+                      and (reason == "duration" or (expected and reason == "signal")))
+        retryable_exit = code > 0 and status == "failed" and category == "external_retryable"
         record = {"action": "child_exited", "index": self.report["child_starts"], "return_code": code,
                   "status": status, "category": category, "pending_deliveries": pending, "expected_stop": expected,
                   "evidence_error": evidence_error}
-        if recoverable and code != 0:
+        if retryable_exit:
             record.update(classification="external_retryable_process_restart", cause="unproven")
         self.report["child_exits"] += 1
-        if not expected and code != 0:
+        if not clean_exit:
             self.report["failed_children"] += 1
         self.report.update(latest_child_exit=record, child_pid=None)
         self.process, self.tail = None, None
         self.evidence.emit(record)
         if evidence_error:
             raise ValueError("gcp_soak_invalid_evidence")
-        if not recoverable and not expected:
+        if not clean_exit and not retryable_exit:
             raise RuntimeError("gcp_soak_unrecoverable_child_exit")
 
     def check(self, until):
@@ -332,7 +336,7 @@ class _Child:
             code = self.process.poll()
             if code is not None:
                 self._exit(code)
-        if self.process is None and time.monotonic() < until:
+        if self.process is None and not self.stop_signal.is_set() and time.monotonic() < until:
             self.start(until)
 
     def stop(self):
@@ -491,7 +495,7 @@ def main(argv=None):
                 _checkpoint(args.output_dir, report)
                 with (args.output_dir / "soak-evidence.jsonl").open("x") as output:
                     evidence = run.JsonEvidence(output)
-                    child = _Child(args, report, evidence)
+                    child = _Child(args, report, evidence, stop)
                     complete = _soak(args, config, objects, fixture, report, evidence, stop, child)
                 if not complete or stop.is_set():
                     report.update(status="stopped", stop_reason="signal")
