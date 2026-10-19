@@ -7,6 +7,7 @@ from functools import partial
 import ipaddress
 import math
 import re
+import socket
 import time
 
 from google.api_core import exceptions as api_errors
@@ -241,8 +242,25 @@ def _hadoop_location(bucket, prefix):
 HMS_OWNER_KEY = "gcp_probe_run_id"
 
 
+class _HmsSocket(TSocket.TSocket):
+    def open(self):
+        if self.handle is not None:
+            raise TTransport.TTransportException(
+                type=TTransport.TTransportException.ALREADY_OPEN, message="gcp_hms_connection_already_open")
+        # Thrift's resolver/retry open logs raw failures before the adapter can sanitize them.
+        handle = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            handle.settimeout(self._timeout)
+            handle.connect((self.host, self.port))
+            self.handle = handle
+        finally:
+            if self.handle is None:
+                with suppress(Exception):
+                    handle.close()
+
+
 def _hms_connection(host, port):
-    sock = TSocket.TSocket(host, port)
+    sock = _HmsSocket(host, port, socket_family=socket.AF_INET)
     transport = TTransport.TBufferedTransport(sock)
     client = ThriftHiveMetastore.Client(TBinaryProtocol.TBinaryProtocol(transport))
     return sock, transport, client

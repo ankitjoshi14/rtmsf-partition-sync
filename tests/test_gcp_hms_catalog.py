@@ -601,3 +601,89 @@ def test_existing_conflict_appearing_during_drop_lookup_prevents_mutation():
     with pytest.raises(FatalExternalError):
         result.delete_partition(ref())
     assert mutations(server) == []
+
+
+@pytest.mark.parametrize("stage", ["connect", "write", "read"])
+def test_default_socket_failures_never_log_endpoint_or_raw_provider_error(monkeypatch, caplog, stage):
+    import logging
+    import socket
+    from rtmsf.adapters.gcp import _hms_connection
+    handles = []
+    class Handle:
+        def __init__(self, family, kind):
+            assert (family, kind) == (socket.AF_INET, socket.SOCK_STREAM)
+            self.bounds, self.closed = [], False
+            handles.append(self)
+        def settimeout(self, seconds):
+            self.bounds.append(seconds)
+        def connect(self, address):
+            assert address == ("10.76.0.4", 9083)
+            if stage == "connect":
+                raise OSError("synthetic-provider-private-message")
+        def send(self, data):
+            if stage == "write":
+                raise OSError("synthetic-provider-private-message")
+            return len(data)
+        def recv(self, size):
+            raise TimeoutError("synthetic-provider-private-message")
+        def close(self):
+            self.closed = True
+    monkeypatch.setattr(socket, "socket", Handle)
+    monkeypatch.setattr(socket, "getaddrinfo", lambda *args: [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.76.0.4", 9083))])
+    result, _ = catalog(connection_factory=_hms_connection)
+    with caplog.at_level(logging.INFO):
+        with pytest.raises(RetryableExternalError) as caught:
+            result.resolve_tables((TABLE_ID,))
+        logging.getLogger("unrelated-component").info("unrelated logging remains enabled")
+    assert str(caught.value) == "gcp_hms_transport_failure"
+    assert "synthetic-provider-private-message" not in caplog.text
+    assert "10.76.0.4" not in caplog.text
+    assert "unrelated logging remains enabled" in caplog.text
+    assert len(handles) == 1
+    assert handles[0].closed
+    assert handles[0].bounds == ([15] if stage == "connect" else [15, 15])
+
+
+def test_default_socket_opens_numeric_ipv4_without_resolver_or_address_retries(monkeypatch):
+    import socket
+    from rtmsf.adapters.gcp import _hms_connection
+    calls = []
+    class Handle:
+        def __init__(self, family, kind):
+            calls.append(("socket", family, kind))
+        def settimeout(self, seconds):
+            calls.append(("timeout", seconds))
+        def connect(self, address):
+            calls.append(("connect", address))
+        def close(self):
+            calls.append(("close",))
+    def forbidden_resolve(*args):
+        pytest.fail("approved numeric endpoint must not call a resolver")
+    monkeypatch.setattr(socket, "socket", Handle)
+    monkeypatch.setattr(socket, "getaddrinfo", forbidden_resolve)
+    sock, transport, _ = _hms_connection("10.76.0.4", 9083)
+    sock.setTimeout(2000)
+    transport.open()
+    transport.close()
+    assert calls == [("socket", socket.AF_INET, socket.SOCK_STREAM), ("timeout", 2),
+                     ("connect", ("10.76.0.4", 9083)), ("close",)]
+
+
+def test_socket_timeout_setup_failure_closes_unowned_handle(monkeypatch):
+    import socket
+    from rtmsf.adapters.gcp import _hms_connection
+    handles = []
+    class Handle:
+        def __init__(self, *args):
+            self.closed = False
+            handles.append(self)
+        def settimeout(self, seconds):
+            raise ValueError("synthetic-provider-private-message")
+        def close(self):
+            self.closed = True
+    monkeypatch.setattr(socket, "socket", Handle)
+    monkeypatch.setattr(socket, "getaddrinfo", lambda *args: [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.76.0.4", 9083))])
+    result, _ = catalog(connection_factory=_hms_connection)
+    with pytest.raises(FatalExternalError, match="^gcp_hms_rpc_failure$"):
+        result.resolve_tables((TABLE_ID,))
+    assert len(handles) == 1 and handles[0].closed
