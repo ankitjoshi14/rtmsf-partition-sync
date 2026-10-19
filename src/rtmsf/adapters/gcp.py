@@ -1,8 +1,10 @@
-"""GCP current-live storage truth and one synchronous operation deadline."""
+"""GCP current-live storage/catalog truth and one synchronous operation deadline."""
 
 from collections.abc import Mapping
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
+from copy import deepcopy
 from functools import partial
+import ipaddress
 import math
 import re
 import time
@@ -12,7 +14,12 @@ from google.auth import exceptions as auth_errors
 from google.auth.transport.requests import AuthorizedSession
 from requests.exceptions import RequestException
 
-from rtmsf.interfaces import FatalExternalError, RetryableExternalError
+from pymetastore.hive_metastore import ThriftHiveMetastore, ttypes
+from thrift.protocol import TBinaryProtocol
+from thrift.transport import TSocket, TTransport
+
+from rtmsf.interfaces import FatalExternalError, PartitionCatalog, RetryableExternalError
+from rtmsf.models import TableDefinition
 
 
 STORAGE_ENDPOINT = "https://storage.googleapis.com"
@@ -220,8 +227,231 @@ class GcsObjectStore:
     def location_uri(self, source_id, prefix):
         with self._deadline.operation():
             bucket = self._bucket(source_id)
-            prefix = self._directory(prefix)[:-1]
-            if any(segment in ("", ".", "..") for segment in prefix.split("/")):
-                raise FatalExternalError("gcp_invalid_partition_directory")
-            # Hive/Spark consume unescaped Hadoop Path text; percent escapes change the key.
-            return f"gs://{bucket.name}/{prefix}"
+            return _hadoop_location(bucket.name, prefix)
+
+
+def _hadoop_location(bucket, prefix):
+    prefix = GcsObjectStore._directory(prefix)[:-1]
+    if any(segment in ("", ".", "..") for segment in prefix.split("/")):
+        raise FatalExternalError("gcp_invalid_partition_directory")
+    # Hive/Spark consume unescaped Hadoop Path text; percent escapes change the key.
+    return f"gs://{bucket}/{prefix}"
+
+
+HMS_OWNER_KEY = "gcp_probe_run_id"
+
+
+def _hms_connection(host, port):
+    sock = TSocket.TSocket(host, port)
+    transport = TTransport.TBufferedTransport(sock)
+    client = ThriftHiveMetastore.Client(TBinaryProtocol.TBinaryProtocol(transport))
+    return sock, transport, client
+
+
+class HiveMetastorePartitionCatalog(PartitionCatalog):
+    """Metadata-only mutations of one approved existing run-owned external table.
+
+    Pass the storage adapter's OperationDeadline and enter its outer operation()
+    around PMCP. Connections are dedicated, bounded, and never retried or reused.
+    """
+
+    def __init__(self, endpoint, *, table_id, source_id, bucket, root_prefix,
+                 partition_columns, owner, deadline=None, connection_factory=None):
+        try:
+            match = re.fullmatch(r"thrift://([0-9.]+):9083", _exact_text(endpoint))
+            if match is None:
+                raise ValueError
+            host = match[1]
+            address = ipaddress.IPv4Address(host)
+            if not any(address in ipaddress.IPv4Network(network) for network in
+                       ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")):
+                raise ValueError
+            identity = _exact_text(table_id).split(".")
+            if len(identity) != 2 or not all(re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_]*", part) for part in identity):
+                raise ValueError
+            _exact_text(source_id)
+            _sources({source_id: bucket})
+            _exact_text(owner)
+            root_location = _hadoop_location(bucket, root_prefix)
+            if not isinstance(partition_columns, (tuple, list)) or any(
+                    not isinstance(column, (tuple, list)) for column in partition_columns):
+                raise ValueError
+            columns = tuple(tuple(column) for column in partition_columns)
+            if not columns or any(len(column) != 2 for column in columns):
+                raise ValueError
+            for name, kind in columns:
+                _exact_text(name)
+                _exact_text(kind)
+            definition = TableDefinition(table_id, source_id, root_prefix, tuple(name for name, _ in columns))
+        except (ValueError, TypeError, FatalExternalError):
+            raise ValueError("gcp_hms_invalid_configuration") from None
+        if deadline is not None and not isinstance(deadline, OperationDeadline):
+            raise ValueError("gcp_hms_invalid_deadline")
+        if connection_factory is not None and not callable(connection_factory):
+            raise ValueError("gcp_hms_invalid_connection_factory")
+        self._host, self._identity = host, tuple(identity)
+        self._definition, self._columns = definition, columns
+        self._bucket, self._root_location, self._owner = bucket, root_location, owner
+        self._deadline = OperationDeadline() if deadline is None else deadline
+        self._connection_factory = _hms_connection if connection_factory is None else connection_factory
+        self._descriptor = self._partition_keys = None
+
+    def _rpc(self, sock, operation, *args, expected=()):
+        try:
+            sock.setTimeout(self._deadline.rpc_timeout() * 1000)
+            return operation(*args)
+        except expected:
+            raise
+        except TTransport.TTransportException as error:
+            kind = RetryableExternalError if error.type in (
+                TTransport.TTransportException.UNKNOWN, TTransport.TTransportException.NOT_OPEN,
+                TTransport.TTransportException.TIMED_OUT, TTransport.TTransportException.END_OF_FILE,
+            ) else FatalExternalError
+            raise kind("gcp_hms_transport_failure") from None
+        except OSError:
+            raise RetryableExternalError("gcp_hms_transport_failure") from None
+        except (FatalExternalError, RetryableExternalError):
+            raise
+        except Exception:
+            raise FatalExternalError("gcp_hms_rpc_failure") from None
+        finally:
+            self._deadline.check()
+
+    @contextmanager
+    def _connection(self):
+        self._deadline.check()
+        try:
+            sock, transport, client = self._connection_factory(self._host, 9083)
+        except (TTransport.TTransportException, OSError):
+            raise RetryableExternalError("gcp_hms_transport_failure") from None
+        except Exception:
+            raise FatalExternalError("gcp_hms_invalid_connection") from None
+        try:
+            self._rpc(sock, transport.open)
+            yield sock, client
+        finally:
+            # A failed transport is discarded; close must not mask its original error.
+            with suppress(Exception):
+                transport.close()
+            self._deadline.check()
+
+    def _guard(self, sock, client):
+        db, name = self._identity
+        database = self._rpc(sock, client.get_database, db)
+        table = self._rpc(sock, client.get_table, db, name)
+        try:
+            if (not isinstance(database, ttypes.Database) or database.name != db
+                    or not isinstance(database.parameters, dict) or database.parameters.get(HMS_OWNER_KEY) != self._owner
+                    or not isinstance(table, ttypes.Table) or (table.dbName, table.tableName) != self._identity
+                    or table.tableType != "EXTERNAL_TABLE" or not isinstance(table.parameters, dict)
+                    or table.parameters.get(HMS_OWNER_KEY) != self._owner
+                    or table.parameters.get("EXTERNAL") != "TRUE"
+                    or table.parameters.get("external.table.purge") != "false"
+                    or not isinstance(table.sd, ttypes.StorageDescriptor) or table.sd.location != self._root_location
+                    or not isinstance(table.partitionKeys, list)
+                    or any(not isinstance(key, ttypes.FieldSchema) for key in table.partitionKeys)
+                    or tuple((key.name, key.type) for key in table.partitionKeys) != self._columns):
+                raise ValueError
+            if self._descriptor is not None and (table.sd != self._descriptor or table.partitionKeys != self._partition_keys):
+                raise ValueError
+        except (AttributeError, TypeError, ValueError):
+            raise FatalExternalError("gcp_hms_unapproved_table") from None
+        self._deadline.check()
+        return table
+
+    def resolve_tables(self, table_ids):
+        if not isinstance(table_ids, (list, tuple)) or tuple(table_ids) != (self._definition.table_id,):
+            raise FatalExternalError("gcp_hms_unapproved_table")
+        with self._deadline.operation():
+            with self._connection() as (sock, client):
+                table = self._guard(sock, client)
+                if self._descriptor is None:
+                    self._descriptor = deepcopy(table.sd)
+                    self._partition_keys = deepcopy(table.partitionKeys)
+        return (self._definition,)
+
+    def _partition(self, partition):
+        try:
+            if (self._descriptor is None or partition.table_id != self._definition.table_id
+                    or partition.source_id != self._definition.source_id or not isinstance(partition.values, tuple)
+                    or len(partition.values) != len(self._columns)):
+                raise ValueError
+            for value in partition.values:
+                if "/" in _exact_text(value):
+                    raise ValueError
+            path = "/".join(name + "=" + value for (name, _), value in zip(self._columns, partition.values))
+            prefix = self._definition.root_prefix + path + "/"
+            if partition.partition_path != path or partition.storage_prefix != prefix:
+                raise ValueError
+            return _hadoop_location(self._bucket, prefix)
+        except (AttributeError, TypeError, ValueError, FatalExternalError):
+            raise FatalExternalError("gcp_hms_invalid_partition_identity") from None
+
+    def _get_partition(self, sock, client, partition, location):
+        try:
+            actual = self._rpc(sock, client.get_partition, *self._identity, list(partition.values),
+                               expected=(ttypes.NoSuchObjectException,))
+        except ttypes.NoSuchObjectException:
+            # NoSuchObject can also mean table loss; absence requires trusted guards.
+            self._guard(sock, client)
+            return None
+        self._guard(sock, client)
+        descriptor = deepcopy(self._descriptor)
+        descriptor.location = location
+        if (not isinstance(actual, ttypes.Partition) or (actual.dbName, actual.tableName) != self._identity
+                or actual.values != list(partition.values) or actual.sd != descriptor
+                or not isinstance(actual.parameters, dict) or actual.parameters.get(HMS_OWNER_KEY) != self._owner):
+            raise FatalExternalError("gcp_hms_conflicting_partition")
+        self._deadline.check()
+        return actual
+
+    def _read_partition(self, partition, location):
+        with self._connection() as (sock, client):
+            self._guard(sock, client)
+            return self._get_partition(sock, client, partition, location)
+
+    def partition_exists(self, partition):
+        with self._deadline.operation():
+            location = self._partition(partition)
+            return self._read_partition(partition, location) is not None
+
+    def create_partition(self, partition, location):
+        with self._deadline.operation():
+            if location != self._partition(partition):
+                raise FatalExternalError("gcp_hms_unapproved_partition_location")
+            if self._read_partition(partition, location) is not None:
+                return False
+            descriptor = deepcopy(self._descriptor)
+            descriptor.location = location
+            # Hive 3.1.2 cannot decode the package's newer writeId wire field.
+            outbound = ttypes.Partition(values=list(partition.values), dbName=self._identity[0],
+                                        tableName=self._identity[1], sd=descriptor,
+                                        parameters={HMS_OWNER_KEY: self._owner}, writeId=None)
+            created = True
+            with self._connection() as (sock, client):
+                self._guard(sock, client)
+                try:
+                    self._rpc(sock, client.add_partition, outbound, expected=(ttypes.AlreadyExistsException,))
+                except ttypes.AlreadyExistsException:
+                    created = False
+            if self._read_partition(partition, location) is None:
+                raise RetryableExternalError("gcp_hms_add_readback_missing")
+            return created
+
+    def delete_partition(self, partition):
+        with self._deadline.operation():
+            location = self._partition(partition)
+            with self._connection() as (sock, client):
+                self._guard(sock, client)
+                if self._get_partition(sock, client, partition, location) is None:
+                    return False
+                try:
+                    deleted = self._rpc(sock, client.drop_partition, *self._identity, list(partition.values), False,
+                                        expected=(ttypes.NoSuchObjectException,))
+                except ttypes.NoSuchObjectException:
+                    deleted = False
+                if type(deleted) is not bool:
+                    raise FatalExternalError("gcp_hms_invalid_drop_response")
+            if self._read_partition(partition, location) is not None:
+                raise RetryableExternalError("gcp_hms_drop_readback_present")
+            return deleted
