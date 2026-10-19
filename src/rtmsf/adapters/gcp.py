@@ -1,26 +1,37 @@
-"""GCP current-live storage/catalog truth and one synchronous operation deadline."""
+"""GCP native queue and current-live storage/catalog boundaries."""
 
 from collections.abc import Mapping
 from contextlib import contextmanager, suppress
 from copy import deepcopy
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from functools import partial
+import base64
 import ipaddress
+import json
 import math
+import os
 import re
 import socket
 import time
+from uuid import uuid4
 
 from google.api_core import exceptions as api_errors
 from google.auth import exceptions as auth_errors
 from google.auth.transport.requests import AuthorizedSession
+from google.pubsub_v1.services.publisher import PublisherClient
+from google.pubsub_v1.services.publisher.transports.grpc import PublisherGrpcTransport
+from google.pubsub_v1.services.subscriber import SubscriberClient
+from google.pubsub_v1.services.subscriber.transports.grpc import SubscriberGrpcTransport
+from google.pubsub_v1.types import pubsub
 from requests.exceptions import RequestException
 
 from pymetastore.hive_metastore import ThriftHiveMetastore, ttypes
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TSocket, TTransport
 
-from rtmsf.interfaces import FatalExternalError, PartitionCatalog, RetryableExternalError
-from rtmsf.models import TableDefinition
+from rtmsf.interfaces import Delivery, FatalExternalError, PartitionCatalog, RetryableExternalError
+from rtmsf.models import ObjectEvent, TableDefinition
 
 
 STORAGE_ENDPOINT = "https://storage.googleapis.com"
@@ -107,6 +118,337 @@ def _exact_text(value):
     except UnicodeError:
         raise FatalExternalError("gcp_invalid_object_name") from None
     return value
+
+
+PUBSUB_RESPONSE_BYTES = 10_000_000
+PUBSUB_ACK_BYTES = 512_000
+# Expected initial deadline of the approved subscription; configuration drift fails.
+PUBSUB_INITIAL_ACK_DEADLINE_SECONDS = 180
+GCS_OPERATIONS = {"OBJECT_FINALIZE": "CREATE", "OBJECT_DELETE": "DELETE", "OBJECT_ARCHIVE": "DELETE"}
+
+
+def _notification_configs(sources, notification_configs):
+    if not isinstance(notification_configs, Mapping) or set(notification_configs) != set(sources):
+        raise ValueError("gcp_invalid_notification_configuration")
+    result = dict(notification_configs)
+    for source, bucket in sources.items():
+        value = result[source]
+        if not isinstance(value, str) or not re.fullmatch(
+                re.escape(f"projects/_/buckets/{bucket}/notificationConfigs/") + r"[1-9][0-9]*", value):
+            raise ValueError("gcp_invalid_notification_configuration")
+    return result
+
+
+def _attributes(attributes):
+    if not isinstance(attributes, Mapping) or len(attributes) > 100:
+        raise ValueError("gcp_invalid_notification")
+    for key, value in attributes.items():
+        if (not isinstance(key, str) or not key or not isinstance(value, str)
+                or len(key.encode("utf-8")) > 256 or len(value.encode("utf-8")) > 1024):
+            raise ValueError("gcp_invalid_notification")
+
+
+def _unique_json_object(pairs):
+    document = dict(pairs)
+    if len(document) != len(pairs):
+        raise ValueError("gcp_invalid_notification")
+    return document
+
+
+def _invalid_json_constant(value):
+    raise ValueError("gcp_invalid_notification")
+
+
+def decode_event(data, attributes, sources, notification_configs):
+    """Decode exact native GCS names; event generation never selects storage truth."""
+    configured = _sources(sources)
+    notifications = _notification_configs(configured, notification_configs)
+    try:
+        if not isinstance(data, bytes) or not data or len(data) > PUBSUB_RESPONSE_BYTES:
+            raise ValueError
+        _attributes(attributes)
+        source = next((name for name, bucket in configured.items() if bucket == attributes.get("bucketId")), None)
+        operation = GCS_OPERATIONS.get(attributes.get("eventType"))
+        key = _exact_text(attributes.get("objectId"))
+        generation, event_time = attributes.get("objectGeneration"), attributes.get("eventTime")
+        if (source is None or operation is None or attributes.get("payloadFormat") != "JSON_API_V1"
+                or attributes.get("notificationConfig") != notifications[source]
+                or not isinstance(generation, str) or not re.fullmatch(r"[1-9][0-9]*", generation)
+                or not isinstance(event_time, str) or not re.fullmatch(
+                    r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|\+00:00)", event_time)):
+            raise ValueError
+        source_time = datetime.fromisoformat(event_time.replace("Z", "+00:00"))
+        document = json.loads(data.decode("utf-8"), object_pairs_hook=_unique_json_object,
+                              parse_constant=_invalid_json_constant)
+        if (not isinstance(document, dict) or document.get("kind") != "storage#object"
+                or document.get("bucket") != configured[source] or document.get("name") != key
+                or document.get("generation") != generation):
+            raise ValueError
+        return (ObjectEvent(source, key, operation, datetime.now(timezone.utc), source_time),)
+    except (ValueError, TypeError, UnicodeError, OverflowError, RecursionError, FatalExternalError):
+        raise ValueError("gcp_invalid_notification") from None
+
+
+def _pubsub_client(client, expected):
+    # High-level clients add background batching/lease threads and are not this boundary.
+    transport = SubscriberGrpcTransport if expected is SubscriberClient else PublisherGrpcTransport
+    return (type(client) is expected and not os.environ.get("PUBSUB_EMULATOR_HOST")
+            and type(client.transport) is transport and not client.transport._ignore_credentials
+            and client.transport._host in {"pubsub.googleapis.com:443", "pubsub.mtls.googleapis.com:443"})
+
+
+def _pubsub_identity(value, collection):
+    if not isinstance(value, str) or not re.fullmatch(
+            rf"projects/(?:[a-z][a-z0-9-]{{4,28}}[a-z0-9]|[0-9]+)/{collection}/[A-Za-z][A-Za-z0-9._~+%-]{{2,254}}", value):
+        raise ValueError("gcp_pubsub_invalid_configuration")
+    return value
+
+
+def _protobuf_size(message):
+    return type(message).pb(message).ByteSize()
+
+
+@dataclass(repr=False)
+class _PubSubPending:
+    receipt: str
+    message: pubsub.PubsubMessage
+    retained_bytes: int
+    events: tuple
+    lease_until: float
+    quarantined: bool = False
+
+
+class PubSubEventSource:
+    """SDK-created synchronous gRPC clients; one source budget, stop/replay on uncertainty.
+
+    Standard Pub/Sub ACK/renew success is not fencing or proof of ownership of
+    expired receipts. Local evidence therefore expires from the RPC start.
+    """
+
+    def __init__(self, subscriber, subscription, publisher, quarantine_topic, sources,
+                 notification_configs, *, source_topic, deadline=None, max_pending=20,
+                 max_pending_bytes=20_000_000):
+        try:
+            if not _pubsub_client(subscriber, SubscriberClient) or not _pubsub_client(publisher, PublisherClient):
+                raise ValueError
+            self._subscription = _pubsub_identity(subscription, "subscriptions")
+            self._source_topic = _pubsub_identity(source_topic, "topics")
+            self._quarantine_topic = _pubsub_identity(quarantine_topic, "topics")
+            if source_topic == quarantine_topic:
+                raise ValueError
+            self._sources = _sources(sources)
+            self._notifications = _notification_configs(self._sources, notification_configs)
+            if (type(max_pending) is not int or not 1 <= max_pending <= 20
+                    or type(max_pending_bytes) is not int or not 1 <= max_pending_bytes <= 20_000_000
+                    or deadline is not None and (not isinstance(deadline, OperationDeadline) or deadline.seconds > 30)):
+                raise ValueError
+        except (AttributeError, ValueError, TypeError):
+            raise ValueError("gcp_pubsub_invalid_configuration") from None
+        self._subscriber, self._publisher = subscriber, publisher
+        # The pinned gRPC interceptor logs whole receipts/metadata at DEBUG.
+        for client in (subscriber, publisher):
+            client.transport._interceptor.intercept_unary_unary = (
+                lambda continuation, details, request: continuation(details, request))
+        self._deadline = OperationDeadline(seconds=30) if deadline is None else deadline
+        self._max_pending, self._max_pending_bytes = max_pending, max_pending_bytes
+        self._pending = {}
+        self._last_clock = None
+        with self._deadline.operation():
+            actual = self._rpc(subscriber.get_subscription, pubsub.GetSubscriptionRequest(subscription=subscription))
+            if (not isinstance(actual, pubsub.Subscription) or actual.name != subscription or actual.topic != source_topic
+                    or actual.ack_deadline_seconds != PUBSUB_INITIAL_ACK_DEADLINE_SECONDS):
+                raise FatalExternalError("gcp_pubsub_unapproved_subscription")
+            self._subscription_lease = PUBSUB_INITIAL_ACK_DEADLINE_SECONDS
+
+    def _check(self):
+        self._deadline.check()
+        now = self._deadline._last
+        if self._last_clock is not None and now < self._last_clock:
+            raise RetryableExternalError("gcp_pubsub_clock_reversed")
+        self._last_clock = now
+        if any(now >= item.lease_until for item in self._pending.values()):
+            raise RetryableExternalError("gcp_pubsub_lease_unsafe")
+        return now
+
+    def _rpc(self, operation, request):
+        self._check()
+        if not _pubsub_client(self._subscriber, SubscriberClient) or not _pubsub_client(self._publisher, PublisherClient):
+            raise FatalExternalError("gcp_pubsub_unapproved_endpoint")
+        try:
+            return operation(request=request, retry=None, timeout=self._deadline.rpc_timeout())
+        except (api_errors.TooManyRequests, api_errors.ServerError, api_errors.DeadlineExceeded,
+                auth_errors.TransportError, RequestException, OSError):
+            raise RetryableExternalError("gcp_pubsub_transport_failure") from None
+        except (auth_errors.GoogleAuthError, api_errors.GoogleAPICallError):
+            raise FatalExternalError("gcp_pubsub_auth_or_configuration_failure") from None
+        except (FatalExternalError, RetryableExternalError):
+            raise
+        except Exception:
+            raise FatalExternalError("gcp_pubsub_rpc_failure") from None
+        finally:
+            self._check()
+
+    @staticmethod
+    def _lease(lease_seconds):
+        if type(lease_seconds) is not int or not 1 <= lease_seconds <= 600:
+            raise ValueError("gcp_pubsub_invalid_lease")
+
+    def _owned(self, pending):
+        now = self._check()
+        if any(now >= item.lease_until for item in pending):
+            raise RetryableExternalError("gcp_pubsub_lease_unsafe")
+        return now
+
+    def _entries(self, deliveries):
+        if (not isinstance(deliveries, (tuple, list)) or len(deliveries) > self._max_pending
+                or any(not isinstance(item, Delivery) or not isinstance(item.handle, str) for item in deliveries)):
+            raise ValueError("gcp_invalid_delivery_batch")
+        handles = [item.handle for item in deliveries]
+        if len(set(handles)) != len(handles) or any(
+                item.handle not in self._pending or item.events != self._pending[item.handle].events for item in deliveries):
+            raise ValueError("gcp_invalid_delivery_batch")
+        return [self._pending[handle] for handle in handles]
+
+    def _ack_requests(self, pending, lease_seconds=None):
+        kind = pubsub.AcknowledgeRequest if lease_seconds is None else pubsub.ModifyAckDeadlineRequest
+        kwargs = {} if lease_seconds is None else {"ack_deadline_seconds": lease_seconds}
+        chunks, current = [], []
+        for item in pending:
+            request = kind(subscription=self._subscription, ack_ids=[p.receipt for p in (*current, item)], **kwargs)
+            if _protobuf_size(request) > PUBSUB_ACK_BYTES:
+                if not current:
+                    raise FatalExternalError("gcp_pubsub_ack_request_capacity_exceeded")
+                chunks.append((current, kind(subscription=self._subscription, ack_ids=[p.receipt for p in current], **kwargs)))
+                current = [item]
+                request = kind(subscription=self._subscription, ack_ids=[item.receipt], **kwargs)
+                if _protobuf_size(request) > PUBSUB_ACK_BYTES:
+                    raise FatalExternalError("gcp_pubsub_ack_request_capacity_exceeded")
+            else:
+                current.append(item)
+        if current:
+            chunks.append((current, kind(subscription=self._subscription, ack_ids=[p.receipt for p in current], **kwargs)))
+        return chunks
+
+    def receive(self, max_messages, wait_seconds, lease_seconds):
+        self._lease(lease_seconds)
+        if (type(max_messages) is not int or not 1 <= max_messages <= 1000
+                or type(wait_seconds) not in (int, float) or not math.isfinite(wait_seconds) or not 0 <= wait_seconds <= 30):
+            raise ValueError("gcp_pubsub_invalid_receive_bounds")
+        with self._deadline.operation():
+            capacity = min(max_messages, self._max_pending - len(self._pending))
+            if capacity <= 0:
+                raise FatalExternalError("gcp_pubsub_pending_capacity_exceeded")
+            started = self._check()
+            response = self._rpc(self._subscriber.pull, pubsub.PullRequest(subscription=self._subscription, max_messages=capacity))
+            if (not isinstance(response, pubsub.PullResponse) or _protobuf_size(response) > PUBSUB_RESPONSE_BYTES
+                    or len(response.received_messages) > capacity):
+                raise FatalExternalError("gcp_pubsub_invalid_pull_response")
+            messages = response.received_messages
+            receipts = [item.ack_id for item in messages]
+            if len(set(receipts)) != len(receipts) or set(receipts) & {item.receipt for item in self._pending.values()}:
+                raise FatalExternalError("gcp_pubsub_reused_ack_id")
+            prepared = []
+            for item in messages:
+                try:
+                    _exact_text(item.ack_id)
+                    if not pubsub.ReceivedMessage.pb(item).HasField("message"):
+                        raise ValueError
+                    _exact_text(item.message.message_id)
+                    if not pubsub.PubsubMessage.pb(item.message).HasField("publish_time"):
+                        raise ValueError
+                    item.message.publish_time.astimezone(timezone.utc)
+                    _attributes(item.message.attributes)
+                except (AttributeError, ValueError, TypeError, UnicodeError, FatalExternalError):
+                    raise FatalExternalError("gcp_pubsub_invalid_message") from None
+                prepared.append(_PubSubPending(item.ack_id, pubsub.PubsubMessage(item.message),
+                                               _protobuf_size(item), (), started + self._subscription_lease))
+            if sum(item.retained_bytes for item in (*self._pending.values(), *prepared)) > self._max_pending_bytes:
+                raise FatalExternalError("gcp_pubsub_pending_capacity_exceeded")
+            # Validate both possible receipt request sizes before admitting any input.
+            self._ack_requests(prepared)
+            self._ack_requests(prepared, lease_seconds)
+            deliveries, malformed = [], []
+            for item in prepared:
+                handle = uuid4().hex
+                if handle in self._pending:
+                    raise FatalExternalError("gcp_pubsub_delivery_handle_collision")
+                try:
+                    item.events = decode_event(item.message.data, item.message.attributes, self._sources, self._notifications)
+                except ValueError:
+                    malformed.append(Delivery(handle, ()))
+                else:
+                    deliveries.append(Delivery(handle, item.events))
+                self._pending[handle] = item
+            all_deliveries = tuple(deliveries + malformed)
+            self.renew(all_deliveries, lease_seconds)
+            # Every original receipt must have survived the complete initial renewal.
+            if prepared and self._check() >= started + self._subscription_lease:
+                raise RetryableExternalError("gcp_pubsub_lease_unsafe")
+            if malformed:
+                self.dead_letter(malformed, "gcp_invalid_notification")
+                self.acknowledge(malformed)
+            self._owned(self._entries(deliveries))
+            return tuple(deliveries)
+
+    def renew(self, deliveries, lease_seconds):
+        self._lease(lease_seconds)
+        pending = self._entries(deliveries)
+        with self._deadline.operation():
+            for chunk, request in self._ack_requests(pending, lease_seconds):
+                started = self._owned(pending)
+                result = self._rpc(self._subscriber.modify_ack_deadline, request)
+                self._owned(pending)
+                if result is not None:
+                    raise FatalExternalError("gcp_pubsub_invalid_renew_response")
+                for item in chunk:
+                    item.lease_until = started + lease_seconds
+            self._owned(pending)
+
+    def acknowledge(self, deliveries):
+        pending = self._entries(deliveries)
+        if any(not item.events and not item.quarantined for item in pending):
+            raise FatalExternalError("gcp_pubsub_quarantine_unconfirmed")
+        with self._deadline.operation():
+            for chunk, request in self._ack_requests(pending):
+                self._owned(pending)
+                result = self._rpc(self._subscriber.acknowledge, request)
+                self._owned(pending)
+                if result is not None:
+                    raise FatalExternalError("gcp_pubsub_invalid_ack_response")
+                handles = [delivery.handle for delivery in deliveries if self._pending.get(delivery.handle) in chunk]
+                for handle in handles:
+                    del self._pending[handle]
+
+    def dead_letter(self, deliveries, reason):
+        pending = self._entries(deliveries)
+        try:
+            _exact_text(reason)
+        except FatalExternalError:
+            raise ValueError("gcp_pubsub_invalid_quarantine_reason") from None
+        with self._deadline.operation():
+            outbound = []
+            for item in pending:
+                if not item.quarantined:
+                    envelope = {"data_base64": base64.b64encode(item.message.data).decode("ascii"),
+                                "attributes": dict(item.message.attributes), "reason": reason,
+                                "message_id": item.message.message_id,
+                                "publish_time": item.message.publish_time.isoformat()}
+                    data = json.dumps(envelope, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+                    outbound.append((item, pubsub.PubsubMessage(data=data)))
+            if not outbound:
+                self._owned(pending)
+                return
+            request = pubsub.PublishRequest(topic=self._quarantine_topic, messages=[message for _, message in outbound])
+            if len(outbound) > 1000 or _protobuf_size(request) > PUBSUB_RESPONSE_BYTES:
+                raise FatalExternalError("gcp_pubsub_publish_capacity_exceeded")
+            self._owned(pending)
+            result = self._rpc(self._publisher.publish, request)
+            self._owned(pending)
+            if (not isinstance(result, pubsub.PublishResponse) or len(result.message_ids) != len(outbound)
+                    or any(not value for value in result.message_ids)):
+                raise RetryableExternalError("gcp_pubsub_publish_unconfirmed")
+            for item, _ in outbound:
+                item.quarantined = True
 
 
 class GcsObjectStore:
