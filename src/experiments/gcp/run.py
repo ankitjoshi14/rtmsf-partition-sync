@@ -48,7 +48,7 @@ APPROVED_PIPELINE = {
 BUDGETS = {"pmcp_seconds": 90, "rpc_seconds": 15, "source_seconds": 30,
            "lease_seconds": 180, "lease_safety_margin_ms": 1000,
            "settling_ms": 1000, "maximum_ms": 3000, "poll_size": 10,
-           "max_pending_deliveries": 20, "poll_interval_seconds": 0.25}
+           "max_pending_deliveries": 20, "poll_interval_seconds": 1}
 NOTIFICATION_FIELDS = ("bucketId", "objectId", "objectGeneration", "eventType", "eventTime", "notificationConfig")
 
 
@@ -252,6 +252,7 @@ def main(argv=None):
                             if not stop.is_set():
                                 remaining = until - time.monotonic()
                                 if remaining > 0:
+                                    # Let buffered events settle before a potentially blocking empty pull.
                                     time.sleep(min(BUDGETS["poll_interval_seconds"], remaining))
                         report.update(status="stopped", stop_reason="signal" if stop.is_set() else "duration")
             except Exception as error:

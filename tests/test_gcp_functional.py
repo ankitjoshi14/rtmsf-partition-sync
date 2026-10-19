@@ -420,7 +420,7 @@ def test_main_deadline_sleeps_preserves_pending_and_lock_through_shutdown(monkey
     assert report["configuration"] == state.config
     assert report["started_at"] <= report["finished_at"]
     assert state.boundary.clock[0] >= 1
-    assert 1 < state.boundary.actions().count("pull") <= 10
+    assert state.boundary.actions().count("pull") == 1
     assert "acknowledge" not in state.boundary.actions()
     assert state.http.keys == {OWNER["name"]: OWNER_BYTES}
     assert lock.exists()
@@ -483,9 +483,49 @@ def test_pull_uncertainty_exits_once_and_keeps_safe_pending_evidence(monkeypatch
     assert report["status"] == "failed" and report["error_category"] == "external_retryable"
     assert report["pending_deliveries"] == 1
     assert state.boundary.actions().count("pull") == 2
-    assert len(read_events(root)) == 2
+    records = read_events(root)
+    assert [record["status"] for record in records if record["action"] == "pmcp_result"] == ["RETRY"]
+    assert not any(record["action"] == "message_acknowledged" for record in records)
     assert set(state.closed) == {"storage", "subscriber", "publisher"}
     assert "SENTINEL" not in json.dumps(report) + capsys.readouterr().err
+
+
+def test_single_event_is_mutated_and_acked_before_delayed_empty_pull_uncertainty(monkeypatch, tmp_path):
+    from google.api_core.exceptions import DeadlineExceeded
+
+    key = ROOT + "dt=a/file"
+    app, state = setup(monkeypatch, tmp_path, [message(key=key)])
+    state.http.keys[key] = b"current"
+    monkeypatch.setattr(app, "LOCK_PATH", tmp_path / "worker.lock")
+    monkeypatch.setattr(app.signal, "signal", lambda *_a: None)
+    root = tmp_path / "output"
+    before_empty_pull = []
+
+    def empty_pull(boundary):
+        if boundary.actions().count("pull") == 2:
+            before_empty_pull.append((set(state.server.partitions), read_events(root)))
+            boundary.clock[0] += 15
+            return DeadlineExceeded("AUTH-SENTINEL")
+        return None
+
+    state.boundary.failures["pull"] = empty_pull
+    assert app.main(argv(tmp_path)) == 1
+    partitions, records = before_empty_pull[0]
+    assert partitions == {("a",)}
+    event, = [record for record in records if record["action"] == "event_received"]
+    result, = [record for record in records if record["action"] == "pmcp_result"]
+    ack, = [record for record in records if record["action"] == "message_acknowledged"]
+    assert event["handle"] == ack["handle"] and event["message_id"] == ack["message_id"]
+    assert ack["objectId"] == key and ack["objectGeneration"] == "17"
+    assert result["status"] == "APPLIED" and result["mutation"] == "ADD"
+    assert records.index(event) < records.index(result) < records.index(ack)
+    assert ack["monotonic_seconds"] >= 1
+    assert state.boundary.actions() == ["get_subscription", "pull", "modify_ack_deadline", "acknowledge", "pull"]
+    report = json.loads((root / "worker-report.json").read_text())
+    assert report["status"] == "failed" and report["error_category"] == "external_retryable"
+    assert report["pending_deliveries"] == 0
+    assert "passed" not in report
+    assert state.boundary.clock[0] >= 16
 
 
 def test_shutdown_failure_cannot_leave_a_stopped_report(monkeypatch, tmp_path):
