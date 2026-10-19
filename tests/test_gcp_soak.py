@@ -20,7 +20,7 @@ from google.cloud.storage import Blob
 from pymetastore.hive_metastore import ttypes
 
 from tests.test_gcp_functional import BUCKET, OWNER, OWNER_BYTES, ROOT, RUN, resources, setup, StorageHTTP, no_network_escape
-from tests.test_gcp_pubsub import no_unmocked_gapic_rpc
+from tests.test_gcp_pubsub import message, no_unmocked_gapic_rpc
 
 
 GATES = ("native_add_query", "lifecycle_drop_query", "recovery_before_add", "recovery_after_add",
@@ -997,3 +997,203 @@ def test_signal_during_start_cancels_before_popen_and_closes_streams(monkeypatch
     assert len(state.processes) == expected_starts
     assert state.order == ([("start", 1000), ("wait", 1000)] if replacement else [])
     assert all(stream.closed for stream in opened) and all(process.waited for process in state.processes)
+
+
+def admit_late_own_create(app, state, *, exit_child=False):
+    request = state.http.request
+    admitted = []
+
+    def delayed(method, url, **kwargs):
+        result = request(method, url, **kwargs)
+        if method == "DELETE" and state.http.mutations[-1][1] == app.SOAK_KEY:
+            generation = state.http.mutations[-1][2]
+            item = event("event_received", generation=generation, eventType="OBJECT_FINALIZE",
+                         handle="late-handle", message_id="late-message")
+            process = state.processes[-1]
+            with (process.root / "worker-evidence.jsonl").open("a") as output:
+                output.write(json.dumps(item) + "\n" + json.dumps(pmcp(mutation="ADD", status="RETRY")) + "\n")
+            admitted.append(item)
+            if exit_child:
+                process.exit()
+                path = process.root / "worker-report.json"
+                value = json.loads(path.read_text())
+                value["pending_deliveries"] = 1
+                path.write_text(json.dumps(value))
+        return result
+
+    state.http.request = delayed
+    return admitted
+
+
+def confirm_late_quarantine(process, item, *, redelivery=False):
+    item = {**item, "handle": "redelivered-handle"} if redelivery else item
+    records = [item] if redelivery else []
+    records += [{**item, "action": "quarantine_confirmed", "category": "terminal"},
+                {**item, "action": "message_acknowledged"}]
+    with (process.root / "worker-evidence.jsonl").open("a") as output:
+        output.write("".join(json.dumps(record) + "\n" for record in records))
+
+
+def test_final_delete_ack_does_not_complete_with_late_own_create_pending(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    admitted = admit_late_own_create(app, state)
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["pending_observed"] == 1
+    assert value["unacknowledged_own_messages"] == 1 and value["final_delete_ack"] is not None
+    assert admitted and app.SOAK_KEY not in state.http.keys and ("soak",) not in state.server.partitions
+    assert value["producer"]["pulses"] == 60 and state.boundary.clock[0] <= 301
+    assert all(process.waited for process in state.processes)
+
+
+def test_late_own_retry_can_settle_through_confirmed_quarantine_and_ack(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    admitted = admit_late_own_create(app, state)
+    confirmed = []
+
+    def settle():
+        if admitted and not confirmed and state.boundary.clock[0] >= 6:
+            confirm_late_quarantine(state.processes[-1], admitted[0])
+            confirmed.append(True)
+
+    state.control = settle
+    assert app.main(soak_argv(tmp_path, "1")) == 0
+    value = report(tmp_path)
+    assert confirmed and 6 <= state.boundary.clock[0] < 301
+    assert value["status"] == "completed_with_terminal_events" and value["quarantine"]["terminal"] == 1
+    assert value["pending_observed"] == value["unacknowledged_own_messages"] == 0
+
+
+def test_retryable_restart_cannot_forget_unacknowledged_own_message(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    admitted = admit_late_own_create(app, state, exit_child=True)
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    value = report(tmp_path)
+    assert admitted and value["status"] == "failed" and value["child_restarts"] == value["failed_children"] == 1
+    assert value["pending_observed"] == 0 and value["unacknowledged_own_messages"] == 1
+    assert value["final_delete_ack"] is not None and value["producer"]["pulses"] == 60
+    assert state.order[:3] == [("start", 1000), ("wait", 1000), ("start", 1001)]
+    assert all(process.waited for process in state.processes)
+    first_log = (state.processes[0].root / "worker-evidence.jsonl").read_text()
+    assert "late-message" in first_log
+
+
+def test_redelivery_with_new_handle_ack_clears_observation_from_failed_child(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    admitted = admit_late_own_create(app, state, exit_child=True)
+    confirmed = []
+
+    def redeliver():
+        if admitted and not confirmed and len(state.processes) == 2 and state.boundary.clock[0] >= 6:
+            confirm_late_quarantine(state.processes[-1], admitted[0], redelivery=True)
+            confirmed.append(True)
+
+    state.control = redeliver
+    assert app.main(soak_argv(tmp_path, "1")) == 0
+    value = report(tmp_path)
+    assert confirmed and value["status"] == "completed_with_restarts"
+    assert value["failed_children"] == value["child_restarts"] == value["quarantine"]["terminal"] == 1
+    assert value["pending_observed"] == value["unacknowledged_own_messages"] == 0
+    assert 6 <= state.boundary.clock[0] < 301
+
+
+@pytest.mark.parametrize("key", (ROOT + "dt=soak/part-00000.parquet", ROOT + "_SOAK_PULSE", B_SENTINEL["name"]))
+def test_shutdown_drain_checks_new_own_input_without_requiring_global_empty(monkeypatch, tmp_path, key):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    verify = app.verify_baseline
+    checked = []
+
+    def final_input(storage, objects):
+        verify(storage, objects)
+        checked.append(True)
+        if len(checked) == 2:
+            process = state.processes[-1]
+            with (process.root / "worker-evidence.jsonl").open("a") as output:
+                output.write(json.dumps(event("event_received", key=key, eventType="OBJECT_FINALIZE",
+                                              handle="final-handle", message_id="final-message")) + "\n")
+            terminate = process.terminate
+
+            def report_pending():
+                terminate()
+                path = process.root / "worker-report.json"
+                value = json.loads(path.read_text())
+                value["pending_deliveries"] = 1
+                path.write_text(json.dumps(value))
+
+            process.terminate = report_pending
+
+    monkeypatch.setattr(app, "verify_baseline", final_input)
+    own = key == app.SOAK_KEY
+    assert app.main(soak_argv(tmp_path, "1")) == (1 if own else 0)
+    value = report(tmp_path)
+    assert value["status"] == ("failed" if own else "completed")
+    assert value["unacknowledged_own_messages"] == (1 if own else 0)
+    assert value["latest_child_exit"]["pending_deliveries"] == 1 and value["baseline_final"] == "passed"
+    assert value["child_pid"] is None and all(process.waited for process in state.processes)
+
+
+def test_observed_own_message_ledger_is_bounded_across_child_tails(tmp_path):
+    observed = set()
+    for index in range(64):
+        path = tmp_path / f"child-{index}.jsonl"
+        path.write_text(json.dumps(event("event_received", handle=f"h-{index}", message_id=f"m-{index}")) + "\n")
+        value = {"final_delete_generation": "100", "final_delete_ack": None, "evidence_records": 0,
+                 "quarantine": {"malformed": 0, "terminal": 0}, "pending_observed": 0}
+        harness()._Tail(path, value, observed).read()
+        assert value["unacknowledged_own_messages"] == index + 1
+    assert len(observed) == 64
+    assert {identity[0] for identity in observed} == {f"m-{index}" for index in range(64)}
+    assert all(len(identity) == 4 for identity in observed)
+    path.write_text(json.dumps(event("event_received", handle="overflow-handle", message_id="overflow-message")) + "\n")
+    with pytest.raises(RuntimeError, match="gcp_soak_own_message_limit"):
+        harness()._Tail(path, value, observed).read()
+    assert len(observed) == 64
+    assert "overflow-handle" not in json.dumps(value) and "overflow-message" not in json.dumps(value)
+
+
+def test_real_worker_final_delete_ack_then_delayed_create_leaves_observed_input(monkeypatch, tmp_path):
+    app = harness()
+    native, state = setup(monkeypatch, tmp_path, [message(key=app.SOAK_KEY, kind="OBJECT_DELETE")])
+    path = tmp_path / "real-worker.jsonl"
+    with path.open("x") as output:
+        with native.build_worker(state.config, native.JsonEvidence(output)) as worker:
+            worker.run_once()
+            state.boundary.clock[0] += 1
+            worker.run_once()
+            stale = message("other-private-receipt", key=app.SOAK_KEY, kind="OBJECT_FINALIZE")
+            stale.message.message_id = "late-real-message"
+            state.boundary.messages = [stale]
+            worker.run_once()
+            state.boundary.clock[0] += 1
+            worker.run_once()
+            value = {"final_delete_generation": "17", "final_delete_ack": None, "evidence_records": 0,
+                     "quarantine": {"malformed": 0, "terminal": 0}, "pending_observed": 0}
+            tail = app._Tail(path, value)
+            tail.read()
+            assert value["final_delete_ack"] is not None and tail.reconciliation[1:] == ("ADD", "RETRY")
+            assert value["pending_observed"] == len(worker._source._pending) == 1
+            assert value["unacknowledged_own_messages"] == 1 and not state.server.partitions
+    assert "other-private-receipt" not in path.read_text()
+
+
+@pytest.mark.parametrize("change", ({"message_id": "other-message"}, {"generation": "101"},
+    {"eventType": "OBJECT_FINALIZE"}, {"eventTime": "2026-10-19T22:00:01Z"}))
+def test_redelivery_ack_requires_all_stable_own_identity_fields(tmp_path, change):
+    tail, value, path = tail_setup(tmp_path, [event("event_received", handle="old-handle")])
+    tail.read()
+    assert value["unacknowledged_own_messages"] == 1
+    changed = {"handle": "new-handle", **change}
+    path.write_text(json.dumps(event("event_received", **changed)) + "\n"
+                    + json.dumps(event("message_acknowledged", **changed)) + "\n")
+    new_tail = harness()._Tail(path, value, tail.own_messages)
+    new_tail.read()
+    assert value["pending_observed"] == 0 and value["unacknowledged_own_messages"] == 1
+    assert len(tail.own_messages) == 1
+
+
+def test_quarantine_publication_without_ack_cannot_clear_own_observation(tmp_path):
+    tail, value, _ = tail_setup(tmp_path, [event("event_received"),
+        event("quarantine_confirmed", category="terminal")])
+    tail.read()
+    assert value["quarantine"]["terminal"] == 1
+    assert value["pending_observed"] == value["unacknowledged_own_messages"] == 1

@@ -13,7 +13,9 @@ immutable owner and b sentinel below; all are read back before any mutation.
 Sizes may be 0..1MiB, including empty markers and exact terminal-slash names.
 Only dt=soak/part-00000.parquet and the nonrouted _SOAK_PULSE may be mutated.
 The pulse is retained, every child has its own evidence, and final query proof
-must be supplied independently. No resource cleanup or exactly-once claim.
+must be supplied independently. Completion drains already observed own message
+identities across child exits, with a 64-message limit and the finite settling
+budget. No resource cleanup, global queue-empty, or exactly-once claim.
 """
 
 import hashlib
@@ -161,8 +163,9 @@ def mutate(storage, name, body, owned):
 class _Tail:
     """Incremental child evidence; retain at most the source's 20 pending handles."""
 
-    def __init__(self, path, report):
+    def __init__(self, path, report, own_messages=None):
         self.path, self.report = path, report
+        self.own_messages = set() if own_messages is None else own_messages
         self.offset, self.partial, self.pending = 0, b"", {}
         self.sequence, self.reconciliation = 0, None
 
@@ -186,6 +189,7 @@ class _Tail:
                 raise ValueError("gcp_soak_invalid_evidence") from None
             self._record(record)
         self.report["pending_observed"] = len(self.pending)
+        self.report["unacknowledged_own_messages"] = len(self.own_messages)
 
     def _identity(self, record):
         if (record.get("bucketId") != run.BUCKET or record.get("objectId") != SOAK_KEY
@@ -217,12 +221,18 @@ class _Tail:
                 return
             handle, _, generation, kind, _ = identity
             if action == "event_received":
+                message = identity[1:]
+                if message not in self.own_messages and len(self.own_messages) >= 64:
+                    raise RuntimeError("gcp_soak_own_message_limit")
                 if handle not in self.pending:
                     if len(self.pending) >= 20:
                         raise RuntimeError("gcp_soak_pending_evidence_limit")
                     self.pending[handle] = {"identity": identity, "sequence": self.sequence, "quarantined": False}
+                self.own_messages.add(message)
             else:
                 pending = self.pending.pop(handle, None)
+                if pending is not None and pending["identity"] == identity:
+                    self.own_messages.discard(identity[1:])
                 if (pending is not None and pending["identity"] == identity and not pending["quarantined"]
                         and kind == "OBJECT_DELETE" and generation == self.report["final_delete_generation"]
                         and self.reconciliation is not None and self.reconciliation[0] > pending["sequence"]
@@ -247,6 +257,7 @@ class _Child:
     def __init__(self, args, report, evidence, stop_signal):
         self.args, self.report, self.evidence = args, report, evidence
         self.stop_signal = stop_signal
+        self.own_messages = set()
         self.process, self.files, self.tail = None, [], None
 
     def start(self, until):
@@ -277,7 +288,7 @@ class _Child:
                 output.close()
             self.files = []
             raise
-        self.tail = _Tail(self.root / "worker-evidence.jsonl", self.report)
+        self.tail = _Tail(self.root / "worker-evidence.jsonl", self.report, self.own_messages)
         self.report.update(child_starts=index, child_pid=self.process.pid, pending_observed=0)
         if index > 1:
             self.report["child_restarts"] += 1
@@ -436,7 +447,8 @@ def _soak(args, config, objects, fixture, report, evidence, stop, child):
             if not stop.is_set() and time.monotonic() >= tick and time.monotonic() < until:
                 pulse = _produce(storage, PULSE_KEY, b"soak-pulse", pulse, args, report, evidence)
                 tick += 5
-            if not stop.is_set() and time.monotonic() < until and report["final_delete_ack"] is not None:
+            if (not stop.is_set() and time.monotonic() < until and report["final_delete_ack"] is not None
+                    and report["pending_observed"] == 0 and report["unacknowledged_own_messages"] == 0):
                 report["final_storage_empty"] = not storage.prefix_non_empty("fixtures", SOAK_PREFIX)
                 report["final_catalog_absent"] = not catalog.partition_exists(partition)
                 if report["final_storage_empty"] and report["final_catalog_absent"]:
@@ -480,6 +492,7 @@ def main(argv=None):
                       "current_object": None, "pulse_generation": None, "mutation_pending": None, "producer_uncertain": False,
                       "child_pid": None, "child_starts": 0, "child_exits": 0, "child_restarts": 0, "failed_children": 0,
                       "forced_child_kills": 0, "pending_observed": 0, "evidence_records": 0,
+                      "unacknowledged_own_messages": 0,
                       "quarantine": {"malformed": 0, "terminal": 0}, "latest_progress": "guards",
                       "final_delete_generation": None, "final_delete_ack": None, "final_storage_empty": None,
                       "final_catalog_absent": None, "baseline_initial": "pending", "baseline_final": "pending",
@@ -505,6 +518,8 @@ def main(argv=None):
                 if not complete or stop.is_set():
                     report.update(status="stopped", stop_reason="signal")
                 else:
+                    if report["pending_observed"] or report["unacknowledged_own_messages"]:
+                        raise RuntimeError("gcp_soak_own_input_not_drained")
                     report["status"] = ("completed_with_restarts" if report["child_restarts"]
                                         else "completed_with_terminal_events" if report["failed_children"]
                                         or any(report["quarantine"].values()) else "completed")
