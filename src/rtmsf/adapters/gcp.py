@@ -15,6 +15,7 @@ import re
 import socket
 import time
 from uuid import uuid4
+from weakref import WeakKeyDictionary
 
 from google.api_core import exceptions as api_errors
 from google.auth import exceptions as auth_errors
@@ -189,10 +190,39 @@ def decode_event(data, attributes, sources, notification_configs):
         raise ValueError("gcp_invalid_notification") from None
 
 
+_PUBSUB_CLIENT_PROVENANCE = WeakKeyDictionary()
+
+
+def create_pubsub_clients(*, credentials=None):
+    """Create the two pinned generated clients with SDK default secure gRPC transports.
+
+    No endpoint, transport or channel injection is accepted. Provenance protects
+    trusted Python callers from unsafe configuration, not deliberate SDK/registry
+    monkeypatching. Omit credentials for the SDK's normal VM credential discovery.
+    """
+    if os.environ.get("PUBSUB_EMULATOR_HOST"):
+        raise ValueError("gcp_pubsub_invalid_configuration")
+    try:
+        clients = (SubscriberClient(credentials=credentials), PublisherClient(credentials=credentials))
+        for client in clients:
+            transport = client.transport
+            _PUBSUB_CLIENT_PROVENANCE[client] = (transport, transport.grpc_channel, transport._logged_channel)
+        if not _pubsub_client(clients[0], SubscriberClient) or not _pubsub_client(clients[1], PublisherClient):
+            raise ValueError
+        return clients
+    except Exception:
+        raise ValueError("gcp_pubsub_invalid_configuration") from None
+
+
 def _pubsub_client(client, expected):
     # High-level clients add background batching/lease threads and are not this boundary.
+    if type(client) is not expected:
+        return False
+    provenance = _PUBSUB_CLIENT_PROVENANCE.get(client)
     transport = SubscriberGrpcTransport if expected is SubscriberClient else PublisherGrpcTransport
-    return (type(client) is expected and not os.environ.get("PUBSUB_EMULATOR_HOST")
+    return (provenance is not None and provenance[0] is client.transport
+            and provenance[1] is client.transport.grpc_channel and provenance[2] is client.transport._logged_channel
+            and not os.environ.get("PUBSUB_EMULATOR_HOST")
             and type(client.transport) is transport and not client.transport._ignore_credentials
             and client.transport._host in {"pubsub.googleapis.com:443", "pubsub.mtls.googleapis.com:443"})
 
@@ -219,7 +249,7 @@ class _PubSubPending:
 
 
 class PubSubEventSource:
-    """SDK-created synchronous gRPC clients; one source budget, stop/replay on uncertainty.
+    """Clients from create_pubsub_clients; one source budget, stop/replay on uncertainty.
 
     Standard Pub/Sub ACK/renew success is not fencing or proof of ownership of
     expired receipts. Local evidence therefore expires from the RPC start.
@@ -445,6 +475,7 @@ class PubSubEventSource:
             result = self._rpc(self._publisher.publish, request)
             self._owned(pending)
             if (not isinstance(result, pubsub.PublishResponse) or len(result.message_ids) != len(outbound)
+                    or len(set(result.message_ids)) != len(outbound)
                     or any(not value for value in result.message_ids)):
                 raise RetryableExternalError("gcp_pubsub_publish_unconfirmed")
             for item, _ in outbound:

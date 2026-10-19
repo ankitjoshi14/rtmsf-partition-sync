@@ -9,6 +9,7 @@ import pytest
 from google.api_core import exceptions as api_errors
 from google.auth.credentials import AnonymousCredentials
 from google.pubsub_v1.services.publisher import PublisherClient
+from google.pubsub_v1.services.publisher.transports.grpc import PublisherGrpcTransport
 from google.pubsub_v1.services.subscriber import SubscriberClient
 from google.pubsub_v1.services.subscriber.transports.grpc import SubscriberGrpcTransport
 from google.pubsub_v1.types import pubsub
@@ -60,8 +61,7 @@ class Boundary:
         self.failures = {}
         self.durations = {}
         self.responses = {}
-        self.subscriber = SubscriberClient(credentials=AnonymousCredentials())
-        self.publisher = PublisherClient(credentials=AnonymousCredentials())
+        self.subscriber, self.publisher = gcp.create_pubsub_clients(credentials=AnonymousCredentials())
         for name in ("get_subscription", "pull", "modify_ack_deadline", "acknowledge"):
             setattr(self.subscriber, name, self.operation(name))
         self.publisher.publish = self.operation("publish")
@@ -216,6 +216,16 @@ def test_unconfirmed_publication_never_acknowledges(response):
     with pytest.raises(RetryableExternalError, match="gcp_pubsub_publish_unconfirmed"):
         receive(boundary.source())
     assert "acknowledge" not in boundary.actions()
+
+
+def test_duplicate_quarantine_publication_ids_do_not_confirm_distinct_inputs():
+    boundary = Boundary([message(data=b"bad-one"), message("other-ack", data=b"bad-two")])
+    boundary.responses["publish"] = pubsub.PublishResponse(message_ids=["same-id", "same-id"])
+    source = boundary.source()
+    with pytest.raises(RetryableExternalError, match="gcp_pubsub_publish_unconfirmed"):
+        receive(source, 2)
+    assert "acknowledge" not in boundary.actions()
+    assert len(source._pending) == 2 and not any(item.quarantined for item in source._pending.values())
 
 
 def test_ambiguous_publication_never_acknowledges():
@@ -467,6 +477,92 @@ def test_injected_insecure_channel_is_rejected_even_under_canonical_host():
     boundary.subscriber.get_subscription = boundary.operation("get_subscription")
     with pytest.raises(ValueError, match="gcp_pubsub_invalid_configuration"):
         boundary.source()
+
+
+@pytest.mark.parametrize("client_name,client_type,transport_type", [
+    ("subscriber", SubscriberClient, SubscriberGrpcTransport),
+    ("publisher", PublisherClient, PublisherGrpcTransport)])
+@pytest.mark.parametrize("target", ["localhost:1", "pubsub.googleapis.com:443"])
+def test_supplied_channel_callable_is_rejected_without_invoking_any_rpc(client_name, client_type, transport_type, target):
+    import grpc
+    boundary = Boundary()
+    transport = transport_type(credentials=AnonymousCredentials(),
+                               channel=lambda *args, **kwargs: grpc.insecure_channel(target))
+    client = client_type(transport=transport)
+    if client_name == "subscriber":
+        client.get_subscription = boundary.operation("get_subscription")
+    else:
+        client.publish = boundary.operation("publish")
+    setattr(boundary, client_name, client)
+    with pytest.raises(ValueError, match="gcp_pubsub_invalid_configuration"):
+        boundary.source()
+    assert not boundary.calls
+
+
+@pytest.mark.parametrize("client_name,client_type", [("subscriber", SubscriberClient), ("publisher", PublisherClient)])
+def test_native_clients_constructed_outside_the_secure_helper_are_rejected(client_name, client_type):
+    boundary = Boundary()
+    client = client_type(credentials=AnonymousCredentials())
+    if client_name == "subscriber":
+        client.get_subscription = boundary.operation("get_subscription")
+    else:
+        client.publish = boundary.operation("publish")
+    setattr(boundary, client_name, client)
+    with pytest.raises(ValueError, match="gcp_pubsub_invalid_configuration"):
+        boundary.source()
+    assert not boundary.calls
+
+
+def test_secure_helper_returns_native_clients_and_allows_offline_credentials():
+    subscriber, publisher = gcp.create_pubsub_clients(credentials=AnonymousCredentials())
+    boundary = Boundary(); boundary.subscriber, boundary.publisher = subscriber, publisher
+    subscriber.get_subscription = boundary.operation("get_subscription")
+    boundary.source()
+    assert type(subscriber) is SubscriberClient and type(publisher) is PublisherClient
+    assert boundary.actions() == ["get_subscription"]
+
+
+def test_secure_helper_delegates_default_credentials_to_the_sdk(monkeypatch):
+    import google.auth
+    calls = []
+    def default_credentials(*args, **kwargs):
+        calls.append(True)
+        return AnonymousCredentials(), PROJECT
+    monkeypatch.setattr(google.auth, "default", default_credentials)
+    subscriber, publisher = gcp.create_pubsub_clients()
+    assert type(subscriber) is SubscriberClient and type(publisher) is PublisherClient and len(calls) == 2
+
+
+def test_secure_helper_rejects_emulator_before_constructing_clients(monkeypatch):
+    import google.auth
+    monkeypatch.setenv("PUBSUB_EMULATOR_HOST", "localhost:1")
+    monkeypatch.setattr(google.auth, "default", lambda *args, **kwargs: pytest.fail("must reject before ADC"))
+    with pytest.raises(ValueError, match="gcp_pubsub_invalid_configuration"):
+        gcp.create_pubsub_clients()
+
+
+@pytest.mark.parametrize("client_name", ["subscriber", "publisher"])
+@pytest.mark.parametrize("replacement", ["transport", "channel", "logged_channel"])
+@pytest.mark.parametrize("after_source", [False, True])
+def test_secure_client_transport_and_channel_identity_cannot_change(client_name, replacement, after_source):
+    import grpc
+    boundary = Boundary()
+    boundary.subscriber, boundary.publisher = gcp.create_pubsub_clients(credentials=AnonymousCredentials())
+    boundary.subscriber.get_subscription = boundary.operation("get_subscription")
+    boundary.subscriber.pull = boundary.operation("pull")
+    source = boundary.source() if after_source else None
+    client = getattr(boundary, client_name)
+    if replacement == "transport":
+        other = SubscriberClient(credentials=AnonymousCredentials()) if client_name == "subscriber" else PublisherClient(credentials=AnonymousCredentials())
+        client._transport = other.transport
+    elif replacement == "channel":
+        client.transport._grpc_channel = grpc.insecure_channel("pubsub.googleapis.com:443")
+    else:
+        client.transport._logged_channel = grpc.insecure_channel("pubsub.googleapis.com:443")
+    before = len(boundary.calls)
+    with pytest.raises(FatalExternalError if after_source else ValueError):
+        receive(source) if after_source else boundary.source()
+    assert len(boundary.calls) == before
 
 
 @pytest.mark.parametrize("data", [b'{"kind":"storage#object","kind":"bad"}', notification()[0][:-1] + b',"extra":NaN}',
