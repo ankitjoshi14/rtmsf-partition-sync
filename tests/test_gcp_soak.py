@@ -373,7 +373,7 @@ def soak_argv(tmp_path, duration="12"):
             "--output-dir", str(tmp_path / "soak"), "--duration-seconds", duration]
 
 
-def main_setup(monkeypatch, tmp_path, *, acknowledge=True):
+def main_setup(monkeypatch, tmp_path, *, acknowledge=True, acknowledge_delete=True):
     app, storage, state = storage_setup(monkeypatch, tmp_path)
     monkeypatch.setattr(app, "LOCK_PATH", tmp_path / "soak.lock")
     monkeypatch.setattr(app.run, "LOCK_PATH", tmp_path / "worker.lock")
@@ -381,6 +381,7 @@ def main_setup(monkeypatch, tmp_path, *, acknowledge=True):
     state.control = lambda: None
     state.force_kill = False
     state.acknowledge = acknowledge
+    state.acknowledge_delete = acknowledge_delete
     state.quarantine = None
 
     class Process:
@@ -468,7 +469,7 @@ def main_setup(monkeypatch, tmp_path, *, acknowledge=True):
                     records.append(pmcp(mutation="ADD" if method == "POST" else "DROP"))
                 if state.quarantine is not None:
                     records.append(event("quarantine_confirmed", key=key, generation=generation, eventType=kind, category=state.quarantine))
-                if state.acknowledge or key == app.PULSE_KEY:
+                if (state.acknowledge and (method != "DELETE" or state.acknowledge_delete)) or key == app.PULSE_KEY:
                     records.append(event("message_acknowledged", key=key, generation=generation, eventType=kind))
                 with (process.root / "worker-evidence.jsonl").open("a") as output:
                     output.write("".join(json.dumps(record) + "\n" for record in records))
@@ -503,7 +504,7 @@ def test_finite_producer_final_delete_current_truth_and_baseline_are_checked(mon
     assert storage._client._bucket_metadata_cache is None and set(state.closed) == {"storage"}
     records = [json.loads(line) for line in (tmp_path / "soak" / "soak-evidence.jsonl").read_text().splitlines()]
     attempts = [record for record in records if record["action"] == "producer_attempt" and record["name"] == app.SOAK_KEY]
-    assert [record["monotonic_seconds"] for record in attempts] == [0, 5, 10, 12]
+    assert [record["monotonic_seconds"] for record in attempts] == [0, 5, 10, 15]
 
 
 def test_retryable_child_exit_waits_before_fresh_restart_and_keeps_failure(monkeypatch, tmp_path):
@@ -562,12 +563,14 @@ def test_child_shutdown_kills_only_owned_process_if_term_does_not_finish(monkeyp
     assert report(tmp_path)["forced_child_kills"] == 1 and state.processes[0].waited
 
 
-def test_pulse_acks_cannot_mask_missing_final_delete_ack(monkeypatch, tmp_path):
-    app, _, state = main_setup(monkeypatch, tmp_path, acknowledge=False)
-    assert app.main(soak_argv(tmp_path, "1")) == 1
+@pytest.mark.parametrize("duration", ("1", "17"))
+def test_pulse_acks_cannot_mask_missing_final_delete_ack(monkeypatch, tmp_path, duration):
+    app, _, state = main_setup(monkeypatch, tmp_path, acknowledge_delete=False)
+    assert app.main(soak_argv(tmp_path, duration)) == 1
     value = report(tmp_path)
     assert value["status"] == "failed" and value["final_delete_ack"] is None
-    assert value["producer"]["pulses"] == 60 and state.boundary.clock[0] <= 301
+    assert value["current_add_ack"] is not None and value["producer"]["creates"] == value["producer"]["deletes"] == 1
+    assert value["producer"]["pulses"] == 60 and state.boundary.clock[0] <= int(duration) + 300
     assert app.PULSE_KEY in state.http.keys and all(process.waited for process in state.processes)
 
 
@@ -772,14 +775,16 @@ def test_malformed_provider_metadata_prevents_owned_delete(monkeypatch, tmp_path
     assert state.http.keys[app.SOAK_KEY] == FIXTURE_A and len(state.http.mutations) == 1
 
 
-def test_five_second_cadence_does_not_drift_by_each_sdk_call_time(monkeypatch, tmp_path):
+@pytest.mark.parametrize("delay", (0.1, 1.4))
+def test_minimum_interval_starts_after_actual_sdk_mutation_completion(monkeypatch, tmp_path, delay):
     app, _, state = main_setup(monkeypatch, tmp_path)
-    state.http.delay = 0.1
-    assert app.main(soak_argv(tmp_path, "12")) == 0
+    state.http.delay = delay
+    assert app.main(soak_argv(tmp_path, "40")) == 0
     records = [json.loads(line) for line in (tmp_path / "soak" / "soak-evidence.jsonl").read_text().splitlines()]
     attempts = [record["monotonic_seconds"] for record in records if record["action"] == "producer_attempt" and record["name"] == app.SOAK_KEY]
-    assert attempts[1] - attempts[0] == pytest.approx(5)
-    assert attempts[2] - attempts[1] == pytest.approx(5)
+    completions = [record["monotonic_seconds"] for record in records if record["action"] == "producer_confirmed" and record["name"] == app.SOAK_KEY]
+    assert len(attempts) >= 4
+    assert all(start - completed >= 5 for completed, start in zip(completions, attempts[1:]))
 
 
 def test_exit_evidence_write_failure_still_confirms_child_is_gone(monkeypatch, tmp_path):
@@ -1197,3 +1202,227 @@ def test_quarantine_publication_without_ack_cannot_clear_own_observation(tmp_pat
     tail.read()
     assert value["quarantine"]["terminal"] == 1
     assert value["pending_observed"] == value["unacknowledged_own_messages"] == 1
+
+
+def delayed_native_lifecycle(app, state, *, add_seconds=0, drop_seconds=0):
+    """Delay native catalog/ACK completion; mkdirs leaves a marker if ADD lost its file."""
+    request, control = state.http.request, state.control
+    waiting, completed = [], []
+
+    def delayed(method, url, **kwargs):
+        process = state.processes[-1] if state.processes else None
+        log = process.root / "worker-evidence.jsonl" if process is not None else None
+        before = log.read_text() if log is not None else ""
+        prior_partition = deepcopy(state.server.partitions.get(("soak",)))
+        result = request(method, url, **kwargs)
+        if method not in {"POST", "DELETE"} or state.http.mutations[-1][1] != app.SOAK_KEY:
+            return result
+        delay = add_seconds if method == "POST" else drop_seconds
+        if delay == 0:
+            return result
+        records = [json.loads(line) for line in log.read_text()[len(before):].splitlines()]
+        received = [record for record in records if record["action"] == "event_received"]
+        log.write_text(before + "".join(json.dumps(record) + "\n" for record in received))
+        if method == "POST":
+            partition = state.server.partitions.pop(("soak",))
+        else:
+            partition = prior_partition
+            if partition is not None:
+                state.server.partitions[("soak",)] = partition
+        waiting.append((state.boundary.clock[0] + delay, method, partition, log,
+                        [record for record in records if record["action"] != "event_received"]))
+        return result
+
+    def progress():
+        for pending in waiting[:]:
+            when, method, partition, log, records = pending
+            if state.boundary.clock[0] < when:
+                continue
+            if method == "POST":
+                if app.SOAK_KEY not in state.http.keys:
+                    state.http.keys[app.SOAK_PREFIX] = b""
+                    state.http.generations[app.SOAK_PREFIX] = "999"
+                state.server.partitions[("soak",)] = partition
+            else:
+                state.server.partitions.pop(("soak",), None)
+            with log.open("a") as output:
+                output.write("".join(json.dumps(record) + "\n" for record in records))
+            completed.append((method, state.boundary.clock[0]))
+            waiting.remove(pending)
+        control()
+
+    state.http.request, state.control = delayed, progress
+    return completed
+
+
+def own_attempt_times(tmp_path):
+    records = [json.loads(line) for line in (tmp_path / "soak" / "soak-evidence.jsonl").read_text().splitlines()]
+    return [(record["mutation"], record["monotonic_seconds"]) for record in records
+            if record["action"] == "producer_attempt" and record["name"] == harness().SOAK_KEY]
+
+
+def test_delayed_native_add_keeps_file_until_ack_and_prevents_mkdir_marker(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    completed = delayed_native_lifecycle(app, state, add_seconds=7)
+    assert app.main(soak_argv(tmp_path, "14")) == 0
+    assert app.SOAK_PREFIX not in state.http.keys and not state.server.partitions
+    assert completed == [("POST", 7), ("POST", 19)]
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 7), ("upload", 12), ("delete", 19)]
+    assert report(tmp_path)["current_add_ack"]["generation"] == report(tmp_path)["final_delete_generation"]
+
+
+def test_delayed_native_drop_prevents_next_generation_until_ack_and_truth(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    completed = delayed_native_lifecycle(app, state, drop_seconds=9)
+    assert app.main(soak_argv(tmp_path, "17")) == 0
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 5), ("upload", 14), ("delete", 19)]
+    assert completed == [("DELETE", 14), ("DELETE", 28)]
+    assert report(tmp_path)["final_storage_empty"] and report(tmp_path)["final_catalog_absent"]
+
+
+def test_producer_end_waits_for_add_inside_one_existing_settling_budget(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    delayed_native_lifecycle(app, state, add_seconds=20)
+    assert app.main(soak_argv(tmp_path, "1")) == 0
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 20)]
+    assert 20 <= state.boundary.clock[0] < 301 and app.SOAK_PREFIX not in state.http.keys
+    assert report(tmp_path)["current_add_ack"]["generation"] == report(tmp_path)["final_delete_generation"]
+
+
+def test_add_wait_and_drop_wait_do_not_reset_the_settling_budget(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    delayed_native_lifecycle(app, state, add_seconds=290, drop_seconds=20)
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    assert report(tmp_path)["status"] == "failed" and state.boundary.clock[0] <= 301
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 290)]
+    assert report(tmp_path)["final_delete_ack"] is None
+
+
+@pytest.mark.parametrize("failure", ("missing", "quarantined", "mismatching", "too_late"))
+def test_unconfirmed_add_fails_boundedly_with_file_preserved(monkeypatch, tmp_path, failure):
+    app, _, state = main_setup(monkeypatch, tmp_path, acknowledge=failure != "missing")
+    if failure == "quarantined":
+        state.quarantine = "terminal"
+    elif failure == "too_late":
+        delayed_native_lifecycle(app, state, add_seconds=400)
+    elif failure == "mismatching":
+        request = state.http.request
+
+        def mismatch(method, url, **kwargs):
+            result = request(method, url, **kwargs)
+            if method == "POST" and state.http.mutations[-1][1] == app.SOAK_KEY:
+                log = state.processes[-1].root / "worker-evidence.jsonl"
+                records = [json.loads(line) for line in log.read_text().splitlines()]
+                for item in records:
+                    if item["action"] == "message_acknowledged":
+                        item["objectGeneration"] = "99"
+                log.write_text("".join(json.dumps(item) + "\n" for item in records))
+            return result
+
+        state.http.request = mismatch
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["current_add_ack"] is None
+    assert value["final_storage_empty"] is None and value["final_catalog_absent"] is None
+    assert value["producer"]["creates"] == 1 and value["producer"]["deletes"] == 0 and value["producer"]["pulses"] == 60
+    assert state.http.keys[app.SOAK_KEY] == FIXTURE_A and state.boundary.clock[0] <= 301
+    assert all(process.waited for process in state.processes)
+
+
+@pytest.mark.parametrize("residue", ("marker", "catalog"))
+def test_unexpected_soak_occupancy_is_preserved_and_never_authorizes_next_upload(monkeypatch, tmp_path, residue):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    request = state.http.request
+
+    def leftover(method, url, **kwargs):
+        partition = deepcopy(state.server.partitions.get(("soak",)))
+        result = request(method, url, **kwargs)
+        if method == "DELETE" and state.http.mutations[-1][1] == app.SOAK_KEY:
+            if residue == "marker":
+                state.http.keys[app.SOAK_PREFIX] = b""
+                state.http.generations[app.SOAK_PREFIX] = "999"
+            else:
+                state.server.partitions[("soak",)] = partition
+        return result
+
+    state.http.request = leftover
+    assert app.main(soak_argv(tmp_path, "17")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["producer"]["creates"] == value["producer"]["deletes"] == 1
+    if residue == "marker":
+        assert value["final_storage_empty"] is False and state.http.keys[app.SOAK_PREFIX] == b""
+        assert state.http.generations[app.SOAK_PREFIX] == "999"
+    else:
+        assert value["final_catalog_absent"] is False and ("soak",) in state.server.partitions
+    assert all(key in {app.SOAK_KEY, app.PULSE_KEY} for _, key, _ in state.http.mutations)
+
+
+@pytest.mark.parametrize("status", ("APPLIED", "NOOP"))
+def test_current_add_ack_requires_exact_finalize_after_native_add(tmp_path, status):
+    records = [event("event_received", eventType="OBJECT_FINALIZE"), pmcp(mutation="ADD", status=status),
+               event("message_acknowledged", eventType="OBJECT_FINALIZE")]
+    tail, value, _ = tail_setup(tmp_path, records)
+    value.update(current_generation="100", current_add_ack=None)
+    tail.read()
+    assert value["current_add_ack"] == {"object_key": harness().SOAK_KEY, "generation": "100",
+                                        "event_type": "OBJECT_FINALIZE", "after_reconciliation": True}
+
+
+@pytest.mark.parametrize("failure", ("no_receive", "prior_add", "retry", "wrong_mutation", "wrong_partition",
+    "generation", "message_id", "handle", "eventTime", "eventType", "bucketId", "objectId", "notificationConfig", "quarantined"))
+def test_current_add_ack_rejects_unreconciled_or_mismatching_input(tmp_path, failure):
+    receive = event("event_received", eventType="OBJECT_FINALIZE")
+    result = pmcp(mutation="ADD")
+    ack = event("message_acknowledged", eventType="OBJECT_FINALIZE")
+    records = [receive, result, ack]
+    if failure == "no_receive":
+        records.remove(receive)
+    elif failure == "prior_add":
+        records = [result, receive, ack]
+    elif failure in {"retry", "wrong_mutation", "wrong_partition"}:
+        result.update({"retry": {"status": "RETRY"}, "wrong_mutation": {"mutation": "DROP"},
+                       "wrong_partition": {"partition": "dt=b"}}[failure])
+    elif failure == "quarantined":
+        records.insert(2, event("quarantine_confirmed", category="terminal"))
+    else:
+        ack[{"generation": "objectGeneration"}.get(failure, failure)] = "other" if failure != "generation" else "101"
+    tail, value, _ = tail_setup(tmp_path, records)
+    value.update(current_generation="100", current_add_ack=None)
+    tail.read()
+    assert value["current_add_ack"] is None
+
+
+@pytest.mark.parametrize("interruption", ("duration", "signal"))
+def test_fresh_drop_truth_cannot_start_upload_after_duration_or_signal(monkeypatch, tmp_path, interruption):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    ready = app._drop_ready
+
+    def interrupt_readback(*args):
+        result = ready(*args)
+        if args[-1]["final_delete_ack"] is not None:
+            if interruption == "duration":
+                state.boundary.clock[0] += 20
+            else:
+                state.handlers[signal.SIGTERM](signal.SIGTERM, None)
+        return result
+
+    monkeypatch.setattr(app, "_drop_ready", interrupt_readback)
+    assert app.main(soak_argv(tmp_path, "12")) == (0 if interruption == "duration" else 1)
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 5)]
+    assert app.SOAK_KEY not in state.http.keys
+
+
+def test_signal_while_waiting_for_native_add_preserves_file(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    delayed_native_lifecycle(app, state, add_seconds=20)
+    progress = state.control
+
+    def stop_wait():
+        progress()
+        if state.boundary.clock[0] >= 6:
+            state.handlers[signal.SIGTERM](signal.SIGTERM, None)
+
+    state.control = stop_wait
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    assert report(tmp_path)["status"] == "stopped" and report(tmp_path)["producer"]["deletes"] == 0
+    assert state.http.keys[app.SOAK_KEY] == FIXTURE_A and all(process.waited for process in state.processes)
