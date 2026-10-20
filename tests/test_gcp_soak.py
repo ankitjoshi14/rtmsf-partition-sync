@@ -1280,6 +1280,142 @@ def test_delayed_native_drop_prevents_next_generation_until_ack_and_truth(monkey
     assert report(tmp_path)["final_storage_empty"] and report(tmp_path)["final_catalog_absent"]
 
 
+@pytest.mark.parametrize("stage", ("storage", "catalog"))
+@pytest.mark.parametrize("duration", ("17", "1"))
+def test_transient_post_drop_truth_read_does_not_end_supervisor(monkeypatch, tmp_path, stage, duration):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    failures, storage_reads = [], []
+    request = state.http.request
+
+    def fail_once(*_args):
+        if not failures and any(method == "DELETE" for method, _, _ in state.http.mutations):
+            failures.append(state.boundary.clock[0])
+            raise TimeoutError("AUTH-AND-RECEIPT-SENTINEL")
+
+    def observe_storage(method, url, **kwargs):
+        if method == "GET" and urlsplit(url).path.endswith("/o"):
+            storage_reads.append(state.boundary.clock[0])
+            if stage == "storage":
+                fail_once()
+        return request(method, url, **kwargs)
+
+    if stage == "catalog":
+        state.server.hooks["get_partition"] = fail_once
+    state.http.request = observe_storage
+    result = app.main(soak_argv(tmp_path, duration))
+    value = report(tmp_path)
+    failure_at = 10 if duration == "17" else 6
+    assert failures == [failure_at]
+    assert value["mutation_pending"] is None and value["producer_uncertain"] is False
+    assert result == 0, value
+    attempts = [("upload", 0), ("delete", 5)]
+    if duration == "17":
+        attempts += [("upload", 11), ("delete", 16)]
+    assert own_attempt_times(tmp_path) == attempts
+    assert failure_at in storage_reads and failure_at + 1 in storage_reads
+    assert value["final_storage_empty"] and value["final_catalog_absent"]
+    assert value["read_only_retries"] == 1
+    assert all(process.waited for process in state.processes)
+    stream = (tmp_path / "soak" / "soak-evidence.jsonl").read_text()
+    retries = [json.loads(line) for line in stream.splitlines() if json.loads(line)["action"] == "read_only_retry"]
+    assert [{key: item[key] for key in ("stage", "category", "count")} for item in retries] == [
+        {"stage": "post_drop_" + stage + "_truth", "category": "external_retryable", "count": 1}]
+    assert "SENTINEL" not in json.dumps(value) + stream
+
+
+@pytest.mark.parametrize("duration", ("1", "17"))
+def test_persistent_post_drop_read_failure_uses_existing_phase_budgets(monkeypatch, tmp_path, duration):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    failures = []
+
+    def fail(*_args):
+        if any(method == "DELETE" for method, _, _ in state.http.mutations):
+            failures.append(state.boundary.clock[0])
+            raise OSError("AUTH-AND-RECEIPT-SENTINEL")
+
+    state.server.hooks["get_partition"] = fail
+    assert app.main(soak_argv(tmp_path, duration)) == 1
+    value = report(tmp_path)
+    until = int(duration) + 300
+    assert value["status"] == "failed" and state.boundary.clock[0] == until
+    assert failures == list(range(6 if duration == "1" else 10, until))
+    assert value["read_only_retries"] == len(failures)
+    assert value["final_storage_empty"] is None and value["final_catalog_absent"] is None
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 5)]
+    assert value["producer"]["pulses"] == 60 and all(process.waited for process in state.processes)
+
+
+@pytest.mark.parametrize("failure", ("ownership", "occupancy_with_transient_catalog"))
+def test_post_drop_ownership_or_known_occupancy_is_never_retried(monkeypatch, tmp_path, failure):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    request = state.http.request
+
+    def fail_catalog(*_args):
+        raise OSError("AUTH-AND-RECEIPT-SENTINEL")
+
+    def change_after_delete(method, url, **kwargs):
+        result = request(method, url, **kwargs)
+        if method == "DELETE":
+            if failure == "ownership":
+                state.server.table.parameters["gcp_probe_run_id"] = "other"
+            else:
+                state.http.keys[app.SOAK_PREFIX] = b""
+                state.http.generations[app.SOAK_PREFIX] = "999"
+                state.server.hooks["get_partition"] = fail_catalog
+        return result
+
+    state.http.request = change_after_delete
+    assert app.main(soak_argv(tmp_path, "17")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["read_only_retries"] == 0
+    assert value["error_category"] == ("external_fatal" if failure == "ownership" else "configuration")
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 5)]
+    assert all(process.waited for process in state.processes)
+
+
+@pytest.mark.parametrize("interruption", ("signal", "duration"))
+def test_retryable_truth_read_cannot_write_after_signal_or_phase_expiry(monkeypatch, tmp_path, interruption):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+
+    def fail(*_args):
+        if any(method == "DELETE" for method, _, _ in state.http.mutations):
+            if interruption == "signal":
+                state.handlers[signal.SIGTERM](signal.SIGTERM, None)
+            else:
+                state.boundary.clock[0] += 300
+            raise OSError("AUTH-AND-RECEIPT-SENTINEL")
+
+    state.server.hooks["get_partition"] = fail
+    assert app.main(soak_argv(tmp_path, "1")) == 1
+    value = report(tmp_path)
+    assert value["status"] == ("stopped" if interruption == "signal" else "failed")
+    assert own_attempt_times(tmp_path) == [("upload", 0), ("delete", 5)]
+    assert value["producer"]["pulses"] == 2 and value["read_only_retries"] == 1
+    assert all(process.waited for process in state.processes)
+
+
+def test_retry_evidence_failure_still_stops_before_next_upload(monkeypatch, tmp_path):
+    app, _, state = main_setup(monkeypatch, tmp_path)
+    emit = app.run.JsonEvidence.emit
+
+    def fail_read(*_args):
+        if any(method == "DELETE" for method, _, _ in state.http.mutations):
+            raise OSError("AUTH-AND-RECEIPT-SENTINEL")
+
+    def fail_evidence(self, record):
+        if record["action"] == "read_only_retry":
+            raise OSError("AUTH-AND-RECEIPT-SENTINEL")
+        return emit(self, record)
+
+    state.server.hooks["get_partition"] = fail_read
+    monkeypatch.setattr(app.run.JsonEvidence, "emit", fail_evidence)
+    assert app.main(soak_argv(tmp_path, "17")) == 1
+    value = report(tmp_path)
+    assert value["status"] == "failed" and value["error_category"] == "runtime"
+    assert value["read_only_retries"] == 1 and own_attempt_times(tmp_path) == [("upload", 0), ("delete", 5)]
+    assert all(process.waited for process in state.processes)
+
+
 def test_producer_end_waits_for_add_inside_one_existing_settling_budget(monkeypatch, tmp_path):
     app, _, state = main_setup(monkeypatch, tmp_path)
     delayed_native_lifecycle(app, state, add_seconds=20)
@@ -1399,7 +1535,7 @@ def test_fresh_drop_truth_cannot_start_upload_after_duration_or_signal(monkeypat
 
     def interrupt_readback(*args):
         result = ready(*args)
-        if args[-1]["final_delete_ack"] is not None:
+        if args[3]["final_delete_ack"] is not None:
             if interruption == "duration":
                 state.boundary.clock[0] += 20
             else:

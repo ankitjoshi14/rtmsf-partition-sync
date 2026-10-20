@@ -40,6 +40,7 @@ from google.cloud.storage import Client as StorageClient
 
 from experiments.gcp import run
 from rtmsf.adapters.gcp import GcsObjectStore, HiveMetastorePartitionCatalog, OperationDeadline, _unique_json_object
+from rtmsf.interfaces import RetryableExternalError
 from rtmsf.models import PartitionRef
 
 
@@ -408,12 +409,24 @@ def _produce(storage, name, body, owned, args, report, evidence):
     return result
 
 
-def _drop_ready(storage, catalog, partition, report):
+def _drop_ready(storage, catalog, partition, report, evidence):
     if report["final_delete_generation"] is not None and report["final_delete_ack"] is None:
         return False
-    report["final_storage_empty"] = not storage.prefix_non_empty("fixtures", SOAK_PREFIX)
-    report["final_catalog_absent"] = not catalog.partition_exists(partition)
-    if not report["final_storage_empty"] or not report["final_catalog_absent"]:
+    report.update(final_storage_empty=None, final_catalog_absent=None)
+    stage = "post_drop_storage_truth"
+    try:
+        report["final_storage_empty"] = not storage.prefix_non_empty("fixtures", SOAK_PREFIX)
+        if not report["final_storage_empty"]:
+            raise ValueError("gcp_soak_post_drop_state_not_empty")
+        stage = "post_drop_catalog_truth"
+        report["final_catalog_absent"] = not catalog.partition_exists(partition)
+    except RetryableExternalError:
+        report.update(final_storage_empty=None, final_catalog_absent=None)
+        report["read_only_retries"] += 1
+        evidence.emit({"action": "read_only_retry", "stage": stage, "category": "external_retryable",
+                       "count": report["read_only_retries"]})
+        return False
+    if not report["final_catalog_absent"]:
         raise ValueError("gcp_soak_post_drop_state_not_empty")
     return True
 
@@ -453,7 +466,7 @@ def _soak(args, config, objects, fixture, report, evidence, stop, child):
         while not stop.is_set() and time.monotonic() < until:
             child.check(until + 300)
             if not stop.is_set() and time.monotonic() >= tick and time.monotonic() < until:
-                ready = (_drop_ready(storage, catalog, partition, report) if owned is None
+                ready = (_drop_ready(storage, catalog, partition, report, evidence) if owned is None
                          else report["current_add_ack"] is not None)
                 if ready and not stop.is_set() and time.monotonic() < until:
                     owned = _produce(storage, SOAK_KEY, fixture if owned is None else None, owned, args, report, evidence)
@@ -476,7 +489,7 @@ def _soak(args, config, objects, fixture, report, evidence, stop, child):
                 owned = _produce(storage, SOAK_KEY, None, owned, args, report, evidence)
             if (owned is None and not stop.is_set() and time.monotonic() < until and report["final_delete_ack"] is not None
                     and report["pending_observed"] == 0 and report["unacknowledged_own_messages"] == 0):
-                if _drop_ready(storage, catalog, partition, report):
+                if _drop_ready(storage, catalog, partition, report, evidence):
                     report["phase"] = "final_checks"
                     verify_baseline(storage, objects)
                     if not stop.is_set() and time.monotonic() < until:
@@ -516,6 +529,7 @@ def main(argv=None):
                       "producer": {"creates": 0, "deletes": 0, "pulses": 0}, "current_generation": None,
                       "current_object": None, "current_add_ack": None, "pulse_generation": None,
                       "mutation_pending": None, "producer_uncertain": False,
+                      "read_only_retries": 0,
                       "child_pid": None, "child_starts": 0, "child_exits": 0, "child_restarts": 0, "failed_children": 0,
                       "forced_child_kills": 0, "pending_observed": 0, "evidence_records": 0,
                       "unacknowledged_own_messages": 0,
