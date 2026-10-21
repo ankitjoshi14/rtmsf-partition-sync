@@ -61,8 +61,10 @@ src/experiments/   Saved-result reporting and evidence export
   azure/           Bounded fault harness for the real single-VM proof
   gcp/             Finite native worker, crash harness and serialized soak
 tests/             Local verification
-docs/              System behavior, experiment specification, and AWS guide
+docs/              System behavior, experiment specification, and provider guides
+  figures/         Shared architecture and AWS, OCI, Azure, GCP deployment SVGs
 evidence/          AWS paper measurements and selected Azure/GCP functional evidence
+  azure/, gcp/     Provider results, observations, scripts and fingerprints
 runs/              Original local execution records; generated and Git-ignored
 ```
 

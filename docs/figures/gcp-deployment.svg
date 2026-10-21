@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">RTMSF deployment architecture on GCP</title>
+  <desc id="description">Cloud Storage sends native FINALIZE, DELETE and ARCHIVE notifications to Pub/Sub. One active finite RTMSF worker on a private Compute Engine VM runs Routing, WOERA and PMCP through GCP adapters. Routing reads existing owned Hive tables. PMCP checks generation and bounded storage listings, then adds or drops metadata partitions through the private Dataproc Metastore Thrift endpoint. The worker renews delivery leases and acknowledges successful reconciliation; terminal input requires confirmed quarantine publication before acknowledgment. A finite fixture producer and supervisor are lab support. A separate fresh Spark JVM on the VM queries the named Hive table and reads Parquet files independently of the worker. Ordinary VM service-account credentials grant cloud access; proof files preserve retries and actual process exits. All symbols are generic drawings, not official service icons.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0072B2"/></marker>
+    <marker id="witness-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7550a5"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#203142}
+      .title{font-size:34px;font-weight:700}.sub{font-size:21px;fill:#526477}
+      .name{font-size:24px;font-weight:700}.body{font-size:20px}.small{font-size:18px;fill:#526477}
+      .service{fill:#fff;stroke:#c6d0da;stroke-width:2}.core{fill:#e8f4fa;stroke:#0072B2;stroke-width:2}
+      .wire{fill:none;stroke:#526477;stroke-width:2.5;stroke-linejoin:round;marker-end:url(#arrow)}
+      .flow{fill:none;stroke:#0072B2;stroke-width:3;marker-end:url(#blue-arrow)}
+      .support{fill:none;stroke:#8999a8;stroke-width:2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .witness{fill:none;stroke:#7550a5;stroke-width:2.5;stroke-linejoin:round;marker-end:url(#witness-arrow)}
+      .icon{fill:none;stroke:#fff;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#fff"/>
+  <text x="60" y="63" class="title">RTMSF deployment architecture on GCP</text>
+  <text x="60" y="101" class="sub">Private VM worker · Native catalog lifecycle and finite 24-hour serialized run verified</text>
+  <rect x="35" y="137" width="1530" height="800" rx="20" fill="#fafcfe" stroke="#c6d0da" stroke-width="2"/>
+  <text x="60" y="173" class="small">GCP lab project · us-east1 · rtmsf-probe-vm in us-east1-b</text>
+
+  <rect x="590" y="190" width="430" height="100" rx="12" class="service"/>
+  <rect x="606" y="209" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M615 220h28v24h-28zM621 227h16M621 234h10"/>
+  <text x="669" y="221" class="name">Finite producer + supervisor</text>
+  <text x="669" y="248" class="small">Lab support · one child at a time</text>
+  <text x="669" y="274" class="small">Serialized writes · preserve actual exits</text>
+  <path class="support" d="M730 290V325"/>
+  <path class="support" d="M590 240H445"/>
+
+  <rect x="1060" y="190" width="465" height="100" rx="12" class="service"/>
+  <rect x="1076" y="210" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M1087 228v-4a12 12 0 0 1 24 0v4M1085 228h28v19h-28zM1099 235v5"/>
+  <text x="1139" y="221" class="name">VM service account</text>
+  <text x="1139" y="250" class="small">Application default credentials</text>
+  <text x="1139" y="276" class="small">Storage / Pub/Sub access · private Thrift</text>
+  <path class="support" d="M1140 290V325"/>
+
+  <rect x="85" y="215" width="360" height="140" rx="14" class="service"/>
+  <rect x="105" y="241" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M115 255q13-7 26 0l-3 24q-10 6-20 0zM115 255q13 7 26 0"/>
+  <text x="173" y="249" class="name">Cloud Storage</text>
+  <text x="173" y="279" class="body">Partitioned Parquet fixtures</text>
+  <text x="173" y="309" class="small">Generation-pinned storage truth</text>
+  <text x="173" y="335" class="small">Owner marker / retained versions</text>
+  <path class="wire" d="M265 355V460"/>
+  <text x="282" y="388" class="small">Native notifications</text>
+  <text x="282" y="414" class="small">FINALIZE / DELETE / ARCHIVE</text>
+
+  <rect x="85" y="460" width="360" height="165" rx="14" class="service"/>
+  <rect x="105" y="485" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M115 495h26v26h-26zM121 502h6M133 502h3M121 514h15"/>
+  <text x="173" y="495" class="name">Pub/Sub ingress</text>
+  <text x="173" y="527" class="body">Topic + pull subscription</text>
+  <text x="173" y="557" class="small">Durable pending notifications</text>
+  <text x="173" y="588" class="small">Event + generation identity</text>
+  <text x="173" y="614" class="small">Delivery leases / redelivery</text>
+
+  <rect x="590" y="325" width="570" height="445" rx="16" fill="#fff" stroke="#0072B2" stroke-width="2.5"/>
+  <rect x="608" y="344" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M618 355h26v19h-26zM631 374v7M623 381h16"/>
+  <text x="673" y="357" class="name">Compute Engine · RTMSF worker</text>
+  <text x="673" y="389" class="small">Private VM / VPC · one active finite child</text>
+  <rect x="630" y="410" width="490" height="70" rx="11" class="core"/>
+  <text x="875" y="440" class="name" text-anchor="middle">Routing</text>
+  <text x="875" y="468" class="small" text-anchor="middle">Resolve owned tables and match ordered object paths</text>
+  <path class="flow" d="M875 480V505"/>
+  <rect x="630" y="507" width="490" height="70" rx="11" class="core"/>
+  <text x="875" y="537" class="name" text-anchor="middle">WOERA</text>
+  <text x="875" y="565" class="small" text-anchor="middle">Group partition observations within Q / T_max</text>
+  <path class="flow" d="M875 577V602"/>
+  <rect x="630" y="604" width="490" height="100" rx="11" class="core"/>
+  <text x="875" y="636" class="name" text-anchor="middle">PMCP</text>
+  <text x="875" y="665" class="small" text-anchor="middle">Verify storage and reconcile catalog membership</text>
+  <text x="875" y="694" class="small" text-anchor="middle">Owned ADD / metadata-only DROP · bounded calls</text>
+  <text x="615" y="748" class="small">Existing Python core · GCP adapters · ACK after reconciliation</text>
+  <path class="wire" d="M445 505H540V440H630"/>
+  <text x="483" y="426" class="small">Pull</text>
+  <path class="wire" d="M590 737H515V590H445"/>
+  <text x="456" y="784" class="small">Renew / ACK</text>
+
+  <rect x="1230" y="395" width="295" height="255" rx="14" class="service"/>
+  <rect x="1354" y="415" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M1363 429q14-7 28 0v23q-14 7-28 0zM1363 429q14 7 28 0M1363 440q14 7 28 0"/>
+  <text x="1377" y="496" class="name" text-anchor="middle">Dataproc Metastore</text>
+  <text x="1377" y="527" class="body" text-anchor="middle">Hive Thrift · rtmsf-probe-hms</text>
+  <text x="1377" y="558" class="small" text-anchor="middle">Private 10.76.0.4:9083</text>
+  <text x="1377" y="589" class="small" text-anchor="middle">Existing external Parquet tables</text>
+  <text x="1377" y="620" class="small" text-anchor="middle">Schema + partition membership</text>
+  <path class="wire" d="M1120 440H1230"/>
+  <text x="1377" y="374" class="small" text-anchor="middle">get_table at startup</text>
+  <path class="wire" d="M1120 657H1188V573H1230"/>
+  <text x="1377" y="691" class="small" text-anchor="middle">get_partition / add_partition</text>
+  <text x="1377" y="716" class="small" text-anchor="middle">drop_partition · deleteData=false</text>
+  <path class="wire" d="M1110 704V817H62V285H85"/>
+  <text x="830" y="842" class="body" text-anchor="middle">Generation reads / bounded paginated LIST</text>
+
+  <rect x="85" y="705" width="360" height="105" rx="14" class="service"/>
+  <rect x="105" y="730" width="46" height="46" rx="7" fill="#4285F4"/>
+  <path class="icon" d="M115 740h26v26h-26zM121 747h14M121 754h14M121 761h8"/>
+  <text x="173" y="741" class="name">Pub/Sub quarantine</text>
+  <text x="173" y="771" class="small">Publication confirmed before ACK</text>
+  <text x="173" y="797" class="small">Terminal input retained</text>
+  <path class="wire" d="M590 678H488V757H445"/>
+
+  <rect x="85" y="850" width="430" height="70" rx="12" class="service"/>
+  <text x="105" y="879" class="name">Fresh independent Spark JVM</text>
+  <text x="105" y="907" class="small">Named Hive table SQL + Parquet rows · same VM</text>
+  <path class="witness" d="M240 850V833H48V315H85"/>
+  <path class="witness" d="M490 920V931H1540V620H1525"/>
+
+  <rect x="1060" y="850" width="465" height="70" rx="12" class="service"/>
+  <text x="1080" y="879" class="name">VM proof logs + wrapper files</text>
+  <text x="1080" y="907" class="small">Worker / supervisor retries · actual exits · preserved</text>
+  <path class="support" d="M1160 747H1200V837H1290V850"/>
+  <text x="760" y="872" class="small" text-anchor="middle">Gray: runtime · dashed: lab support</text>
+  <text x="760" y="902" class="small" text-anchor="middle">Purple: independent query witness</text>
+  <text x="60" y="965" class="small">Observed: 12 native gates + 24 hours / 7,477 serialized cycles, with restarts. Concurrent writers and performance unmeasured.</text>
+  <text x="60" y="989" class="small">Generic service symbols · Core flow shared with AWS / Azure · Spark query process is separate from the RTMSF worker.</text>
+</svg>

@@ -8,7 +8,8 @@ The reviewed native GCP experiment is complete. The final serialized run,
 04:18:41 UTC (October 20 Pacific).
 
 [The GCP guide](../../docs/gcp.md) records the architecture, schema and operating
-limits. [report_inputs.json](report_inputs.json) collects the saved outcomes.
+limits; [the deployment diagram](../../docs/figures/gcp-deployment.svg) follows
+the AWS/Azure visual layout. [report_inputs.json](report_inputs.json) collects the saved outcomes.
 [export-provenance.json](export-provenance.json) preserves original source and
 exported hashes. [SHA256SUMS](SHA256SUMS) checks the shared bundle.
 
@@ -65,6 +66,13 @@ and selected recovery proofs remain in `observations/` alongside successful
 outcomes.
 
 ## Evidence selection
+
+`observations/` preserves selected proof records; [scripts/](scripts/README.md)
+preserves the exact Spark witness, its local self-check, the offline raw-evidence
+checker and the independent storage/catalog checker. Worker, crash and producer
+logic remains in [src/experiments/gcp/](../../src/experiments/gcp/), matching the
+provider implementation layout. These helpers do not provision a new deployment
+or reproduce the full experiment by themselves.
 
 The selected source records include the gate evidence index and its
 source proofs, the final independent correlations/read-only/query checks,

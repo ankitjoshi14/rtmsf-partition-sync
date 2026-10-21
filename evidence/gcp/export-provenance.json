@@ -548,6 +548,30 @@
       "source_sha256": "1d476d691f8a79177d592e7c3bfdc963b4d639d61eb450d03b860e6e051655df",
       "exported_path": "observations/gcp-storage-live-check-20261019T2058.json",
       "exported_sha256": "8089ae8f19c7eab9f1d68aa46da9d1a97ff5aced2a8407452923f04697f7b60e"
+    },
+    {
+      "source_relative_path": "work/gcp-query-witness.sh",
+      "source_sha256": "747acb238400d6770c84faf6ecb16f3b61fb286e6ca163ec85b4c4e58a358c51",
+      "exported_path": "scripts/gcp-query-witness.sh",
+      "exported_sha256": "747acb238400d6770c84faf6ecb16f3b61fb286e6ca163ec85b4c4e58a358c51"
+    },
+    {
+      "source_relative_path": "work/gcp-query-witness-test.sh",
+      "source_sha256": "364a201b6c81263049a95ab78ec8cf753b61fc359c9f3da6e336c056b5f36b66",
+      "exported_path": "scripts/gcp-query-witness-test.sh",
+      "exported_sha256": "364a201b6c81263049a95ab78ec8cf753b61fc359c9f3da6e336c056b5f36b66"
+    },
+    {
+      "source_relative_path": "work/gcp-soak-evidence-check.py",
+      "source_sha256": "0fe953f8143a3b8478bce225f1ed2758d3c9887d66ba2a67155103fc892a33ee",
+      "exported_path": "scripts/gcp-soak-evidence-check.py",
+      "exported_sha256": "0fe953f8143a3b8478bce225f1ed2758d3c9887d66ba2a67155103fc892a33ee"
+    },
+    {
+      "source_relative_path": "work/gcp-soak-independent-check.py",
+      "source_sha256": "4696daa96d1a858d9119c13076f977a54c7ddf0a2d34000ba2ec2fe9e8340262",
+      "exported_path": "scripts/gcp-soak-independent-check.py",
+      "exported_sha256": "4696daa96d1a858d9119c13076f977a54c7ddf0a2d34000ba2ec2fe9e8340262"
     }
   ]
 }

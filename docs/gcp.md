@@ -6,22 +6,11 @@ Thrift endpoint. A separate Spark JVM verifies the named Hive table and its
 Parquet rows. The [saved results](../evidence/gcp/README.md) cover twelve live
 gates and a completed 24-hour serialized lifecycle run.
 
-## Architecture
+## GCP deployment
 
-```mermaid
-flowchart LR
-    Producer[Finite fixture producer] --> GCS[Cloud Storage fixture bucket]
-    GCS -->|Native object notifications| Ingress[Pub/Sub ingress topic and pull subscription]
-    Ingress -->|Delivery and lease| Worker[One active RTMSF worker on a private VM]
-    Worker --> WOERA[WOERA partition grouping]
-    WOERA --> PMCP[PMCP reconciliation]
-    PMCP -->|Bounded storage truth reads| GCS
-    PMCP -->|Owned partition ADD or DROP| HMS[Dataproc Metastore: Hive Thrift]
-    Worker -->|ACK after successful reconciliation| Ingress
-    Worker -->|Confirmed terminal handling| Quarantine[Pub/Sub quarantine topic]
-    Spark[Fresh independent Spark SQL JVM] -->|Schema and partition lookup| HMS
-    Spark -->|Parquet reads| GCS
-```
+![RTMSF deployment architecture on GCP](figures/gcp-deployment.svg)
+
+The diagram follows the AWS and Azure layout, with generic service symbols.
 
 The producer and supervisor are experiment tools. The supervisor starts one
 finite worker at a time and records actual child exits before replacements.
@@ -87,6 +76,32 @@ Unicode object filenames passed; the Unicode partition-value Thrift lookup
 timed out and is excluded. Sustainable throughput, arbitrary concurrent
 writers, uninterrupted runtime, exactly-once delivery and actual billed cost
 were not established. AWS performance graphs remain AWS measurements.
+
+## Saved experiment layout
+
+GCP follows the same provider guide, deployment figure and evidence-bundle
+structure used for AWS and Azure:
+
+```text
+docs/gcp.md                         Deployment, schema, validation and limits
+docs/figures/gcp-deployment.svg      Standalone architecture diagram
+src/rtmsf/adapters/gcp.py            Storage, Pub/Sub and Hive adapters
+src/experiments/gcp/                Finite worker, crash harness and soak
+evidence/gcp/
+  README.md                         Outcomes, failures and evidence scope
+  report_inputs.json                Saved results
+  schema.sql                        Captured table and partition DDL
+  observations/                     Native gates, recoveries and final proofs
+  scripts/                          Preserved query and verification helpers
+  export-provenance.json             Original/exported file fingerprints
+  SHA256SUMS                        Shared bundle fingerprints
+  build-validation.json             Saved tests and package validation
+  metastore-backup.json             Private metadata export reference
+```
+
+The [helper index](../evidence/gcp/scripts/README.md) distinguishes offline
+checks from live read-only witnesses and records their prerequisites. Original
+run archives and the full private metadata dump remain outside the shared bundle.
 
 ## Preservation and shutdown
 
