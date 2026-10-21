@@ -1,0 +1,11 @@
+{
+  "source": "/home/joshi_ankit1492_gmail_com/gcp-soak-24h-7688fd5-20261020T040757Z",
+  "archive": "/home/joshi_ankit1492_gmail_com/gcp-soak-final-evidence-20261021T041236Z.tar.gz",
+  "started_at": "2026-10-21T04:12:41.055928+00:00",
+  "finished_at": "2026-10-21T04:12:44.691721+00:00",
+  "sha256": "765eb65a6b06309e0dab2d4408779e8f8656c34840438d38b9547b11d0006102",
+  "bytes": 2431888,
+  "scope": "completed finite run; entire run directory and six outside-directory wrapper files",
+  "local_archive_sha256_verified": true,
+  "safe_extraction_verified": true
+}

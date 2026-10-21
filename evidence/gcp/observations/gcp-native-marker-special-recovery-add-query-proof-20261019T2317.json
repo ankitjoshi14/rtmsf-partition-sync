@@ -1,0 +1,111 @@
+{
+  "status": "passed",
+  "scope": "fresh named-Hive-table marker/special/recovery ADD query",
+  "partitions": [
+    "dt=a",
+    "dt=b",
+    "dt=burst_left",
+    "dt=burst_one",
+    "dt=burst_right",
+    "dt=marker_drop",
+    "dt=marker_keep",
+    "dt=marker_only",
+    "dt=marker_slash",
+    "dt=nested_marker",
+    "dt=raw+%2520 space%23%3F",
+    "dt=recovery_add_after",
+    "dt=recovery_add_before",
+    "dt=recovery_drop_after",
+    "dt=recovery_drop_before"
+  ],
+  "rows": [
+    [
+      "probe-a",
+      "a"
+    ],
+    [
+      "probe-b",
+      "b"
+    ],
+    [
+      "probe-a",
+      "burst_left"
+    ],
+    [
+      "probe-a",
+      "burst_left"
+    ],
+    [
+      "probe-a",
+      "burst_left"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_right"
+    ],
+    [
+      "probe-a",
+      "burst_right"
+    ],
+    [
+      "probe-a",
+      "burst_right"
+    ],
+    [
+      "probe-a",
+      "marker_keep"
+    ],
+    [
+      "probe-a",
+      "raw+%20 space#?"
+    ],
+    [
+      "probe-a",
+      "recovery_add_after"
+    ],
+    [
+      "probe-a",
+      "recovery_add_before"
+    ],
+    [
+      "probe-a",
+      "recovery_drop_after"
+    ],
+    [
+      "probe-a",
+      "recovery_drop_before"
+    ]
+  ],
+  "marker_only_no_rows": [
+    "marker_only",
+    "marker_drop",
+    "marker_slash",
+    "nested_marker"
+  ],
+  "unicode_partition_value": "unverified timeout; Unicode object filename verified",
+  "evidence": "outputs/gcp-query-native-markers-special-recovery-add-20261019T2313"
+}

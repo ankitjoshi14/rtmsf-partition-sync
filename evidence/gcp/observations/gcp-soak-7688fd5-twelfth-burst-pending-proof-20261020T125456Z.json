@@ -1,0 +1,21 @@
+{
+  "verdict": "interrupted_DELETE_pending_in_partial_live_archive_no_following_producer_mutation",
+  "snapshot": "outputs/gcp-soak-live-archive-snapshot-20261020T125411Z",
+  "failed_child": 104,
+  "failed_worker_pid": 61487,
+  "finished_at": "2026-10-20T12:52:39.841993+00:00",
+  "retry_DROP_utc": "2026-10-20T12:52:24.815670+00:00",
+  "target_generation": "1792500723224409",
+  "own_identity_ACK_absent_at_snapshot": true,
+  "target_ADD_ACK_before_DELETE_attempt": true,
+  "upload_confirmation_to_DELETE_attempt_seconds": 5.00794451800175,
+  "no_producer_mutation_after_target_delete_confirmation_at_snapshot": true,
+  "recorded_failed_children": 109,
+  "all_recorded_finishes_exits_before_replacements": true,
+  "all_recorded_old_pids_independently_absent": true,
+  "old_process_witness": "outputs/gcp-soak-old-child-process-witness-20261020T125417Z.json",
+  "original_VM_archive_retained": "/home/joshi_ankit1492_gmail_com/gcp-soak-evidence-snapshot-20261020T125411Z.tar.gz",
+  "archive_SHA256_verified": true,
+  "cause": "unproven",
+  "not_final_verification": true
+}

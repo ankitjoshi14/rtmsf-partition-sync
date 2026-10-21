@@ -1,0 +1,17 @@
+{
+  "creation_time": "2026-10-19T05:01:11+0000",
+  "default_storage_class": "STANDARD",
+  "generation": 1792386071673768373,
+  "location": "US-CENTRAL1",
+  "location_type": "region",
+  "metageneration": 8,
+  "name": "rtmsf-gcp-lab-20261018-e504-fixtures",
+  "public_access_prevention": "enforced",
+  "soft_delete_policy": {
+    "retentionDurationSeconds": "0"
+  },
+  "storage_url": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/",
+  "uniform_bucket_level_access": true,
+  "update_time": "2026-10-19T23:24:04+0000",
+  "versioning_enabled": false
+}

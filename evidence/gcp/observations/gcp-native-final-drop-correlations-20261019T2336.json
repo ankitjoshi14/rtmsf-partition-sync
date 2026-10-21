@@ -1,0 +1,235 @@
+{
+  "status": "passed",
+  "scope": "9 conditioned DELETE events -> PMCP -> exact ACK; after-DROP same-message NOOP replay; actual current-v2 ARCHIVE -> DROP",
+  "objects": [
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=recovery_drop_after/part-00000.parquet",
+        "generation": "1792451300691077",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22059541858800254",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=recovery_drop_after",
+            "status": "NOOP",
+            "mutation": "DROP",
+            "observation_count": 1,
+            "utc": "2026-10-19T23:29:24.706196+00:00",
+            "monotonic_seconds": 14359.261436211
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=marker_keep/part-00000.parquet",
+        "generation": "1792451301470005",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22415029875591182",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=marker_keep",
+            "status": "NOOP",
+            "mutation": "DROP",
+            "observation_count": 1,
+            "utc": "2026-10-19T23:29:30.374691+00:00",
+            "monotonic_seconds": 14364.929928552
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=marker_drop/_SUCCESS",
+        "generation": "1792451302207302",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "correlations": [
+        {
+          "message_id": "22413567403802325",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=marker_drop",
+            "status": "APPLIED",
+            "mutation": "DROP",
+            "observation_count": 1,
+            "utc": "2026-10-19T23:29:25.390591+00:00",
+            "monotonic_seconds": 14359.945835347
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_left/part-00000.parquet",
+        "generation": "1792451305494797",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22414165775492878",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=burst_left",
+            "status": "APPLIED",
+            "mutation": "DROP",
+            "observation_count": 3,
+            "utc": "2026-10-19T23:29:26.151940+00:00",
+            "monotonic_seconds": 14360.707201701
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_left/part-00001.parquet",
+        "generation": "1792451305749155",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22414585304676715",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=burst_left",
+            "status": "APPLIED",
+            "mutation": "DROP",
+            "observation_count": 3,
+            "utc": "2026-10-19T23:29:26.151940+00:00",
+            "monotonic_seconds": 14360.707201701
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_left/part-00002.parquet",
+        "generation": "1792451305992402",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22415061155144345",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=burst_left",
+            "status": "APPLIED",
+            "mutation": "DROP",
+            "observation_count": 3,
+            "utc": "2026-10-19T23:29:26.151940+00:00",
+            "monotonic_seconds": 14360.707201701
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_right/part-00000.parquet",
+        "generation": "1792451306249366",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22413461489030842",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=burst_right",
+            "status": "APPLIED",
+            "mutation": "DROP",
+            "observation_count": 2,
+            "utc": "2026-10-19T23:29:26.807209+00:00",
+            "monotonic_seconds": 14361.362455038
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_right/part-00001.parquet",
+        "generation": "1792451306496370",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22415997429958378",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=burst_right",
+            "status": "NOOP",
+            "mutation": "DROP",
+            "observation_count": 1,
+            "utc": "2026-10-19T23:29:29.370338+00:00",
+            "monotonic_seconds": 14363.925583151
+          }
+        }
+      ]
+    },
+    {
+      "object": {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_right/part-00002.parquet",
+        "generation": "1792451306856634",
+        "size": 438,
+        "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+      },
+      "correlations": [
+        {
+          "message_id": "22414989983732547",
+          "pmcp": {
+            "action": "pmcp_result",
+            "partition": "dt=burst_right",
+            "status": "APPLIED",
+            "mutation": "DROP",
+            "observation_count": 2,
+            "utc": "2026-10-19T23:29:26.807209+00:00",
+            "monotonic_seconds": 14361.362455038
+          }
+        }
+      ]
+    }
+  ],
+  "after_drop_recovery": {
+    "message_id": "22059541858800254",
+    "new_handle": "d77e66ee1b8a4d47bcd04458e52f1986",
+    "pmcp": {
+      "action": "pmcp_result",
+      "partition": "dt=recovery_drop_after",
+      "status": "NOOP",
+      "mutation": "DROP",
+      "observation_count": 1,
+      "utc": "2026-10-19T23:29:24.706196+00:00",
+      "monotonic_seconds": 14359.261436211
+    }
+  },
+  "archive_current_drop": {
+    "message_id": "22414636586964075",
+    "pmcp": {
+      "action": "pmcp_result",
+      "partition": "dt=versions",
+      "status": "APPLIED",
+      "mutation": "DROP",
+      "observation_count": 1,
+      "utc": "2026-10-19T23:29:30.105378+00:00",
+      "monotonic_seconds": 14364.660622455
+    }
+  },
+  "worker_lifetime": {
+    "status": "failed",
+    "category": "external_retryable",
+    "pending": 0
+  },
+  "query": "pending"
+}

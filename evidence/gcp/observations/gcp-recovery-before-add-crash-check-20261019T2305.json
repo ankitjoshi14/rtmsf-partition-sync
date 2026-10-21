@@ -1,0 +1,52 @@
+{
+  "old_application_exited": true,
+  "host_lock_available": true,
+  "exit_status": "137",
+  "marker": {
+    "point": "before_add",
+    "pid": 10261,
+    "utc": "2026-10-19T22:59:46.043729+00:00",
+    "monotonic_seconds": 12580.598970493,
+    "intent": {
+      "source_id": "fixtures",
+      "table_id": "gcp_native_r20261019n1.native_events",
+      "partition_path": "dt=recovery_add_before",
+      "values": [
+        "recovery_add_before"
+      ],
+      "storage_prefix": "gcp-native/native-r20261019n1/data/dt=recovery_add_before/",
+      "mutation": "ADD"
+    },
+    "pending_events": [
+      {
+        "handle": "617351da3a334d4594244ee52e2ca20a",
+        "message_id": "22416276679933756",
+        "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+        "objectId": "gcp-native/native-r20261019n1/data/dt=recovery_add_before/part-00000.parquet",
+        "objectGeneration": "1792450761870541",
+        "eventType": "OBJECT_FINALIZE",
+        "eventTime": "2026-10-19T22:59:21.879615Z",
+        "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3"
+      }
+    ]
+  },
+  "catalog_at_crash": null,
+  "fixture": {
+    "name": "gcp-native/native-r20261019n1/data/dt=recovery_add_before/part-00000.parquet",
+    "generation": "1792450761870541",
+    "size": 438,
+    "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3"
+  },
+  "owner": {
+    "name": "gcp-native/native-r20261019n1/data/_OWNER.json",
+    "generation": "1792445543821304",
+    "size": 103,
+    "sha256": "32e03b825a089d8d1d2992de3fe373b5db72c39bb8a809f6c3c1cfdd8c1190e6"
+  },
+  "b": {
+    "name": "gcp-native/native-r20261019n1/data/dt=b/part-00000.parquet",
+    "generation": "1792448993562638",
+    "size": 438,
+    "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f"
+  }
+}

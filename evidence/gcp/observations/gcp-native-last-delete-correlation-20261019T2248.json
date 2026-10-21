@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "scope": "last-object deletion -> metadata DROP -> exact ACK",
+  "message_id": "22413825312419734",
+  "generation": "1792449260083115",
+  "pmcp": {
+    "action": "pmcp_result",
+    "partition": "dt=a",
+    "status": "APPLIED",
+    "mutation": "DROP",
+    "observation_count": 1,
+    "utc": "2026-10-19T22:49:28.067912+00:00",
+    "monotonic_seconds": 11962.623167462
+  },
+  "ack_after_reconciliation": true,
+  "pending_at_exit": 0,
+  "query_visibility": "pending"
+}

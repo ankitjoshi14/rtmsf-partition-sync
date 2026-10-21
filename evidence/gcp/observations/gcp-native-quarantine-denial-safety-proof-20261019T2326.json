@@ -1,0 +1,11 @@
+{
+  "status": "negative_safety_passed",
+  "source_message_id": "22410346337097557",
+  "publication_failed": true,
+  "no_source_ack": true,
+  "pending": 1,
+  "failure_category": "external_fatal",
+  "failure_evidence": "outputs/gcp-native-quarantine-denial-20261019T2324",
+  "same_message_recovery": "pending",
+  "exact_API_status": "sanitized by adapter; not emitted"
+}

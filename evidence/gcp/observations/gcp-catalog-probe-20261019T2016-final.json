@@ -1,0 +1,1063 @@
+{
+  "schema": 1,
+  "status": "catalog_gate_passed",
+  "scope": "catalog_safety_only",
+  "endpoint": "10.76.0.4:9083",
+  "bucket": "rtmsf-gcp-lab-20261018-e504-fixtures",
+  "run_id": "r20261019-p1",
+  "prefix_freshness": "parent must retain empty-prefix evidence before uploading",
+  "steps": [
+    {
+      "name": "database_absent",
+      "status": "passed",
+      "started_at": "2026-10-19T20:15:47.091609+00:00",
+      "result": {
+        "database": "gcp_probe_r20261019_p1",
+        "absent": true
+      },
+      "finished_at": "2026-10-19T20:15:47.158234+00:00"
+    },
+    {
+      "name": "gcs_before",
+      "status": "passed",
+      "started_at": "2026-10-19T20:15:47.159188+00:00",
+      "result": {
+        "gcp-live-probe/r20261019-p1/_OWNER.json": {
+          "generation": "1792440629711439",
+          "size": 520,
+          "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+          "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+          "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+          "crc32c": "d3fyqA=="
+        },
+        "gcp-live-probe/r20261019-p1/_SENTINEL": {
+          "generation": "1792440631616885",
+          "size": 37,
+          "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+          "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+          "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+          "crc32c": "lCIeNA=="
+        },
+        "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+          "generation": "1792440633397947",
+          "size": 438,
+          "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+          "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+          "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+          "crc32c": "2TwZ3A=="
+        },
+        "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+          "generation": "1792440635635258",
+          "size": 438,
+          "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+          "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+          "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+          "crc32c": "8Ti2Aw=="
+        }
+      },
+      "finished_at": "2026-10-19T20:15:48.714691+00:00"
+    },
+    {
+      "name": "fixture_ownership",
+      "status": "passed",
+      "started_at": "2026-10-19T20:15:48.716775+00:00",
+      "result": {
+        "objects": {
+          "_SENTINEL": {
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "size": 37
+          },
+          "dt=a/part-00000.parquet": {
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "size": 438
+          },
+          "dt=b/part-00000.parquet": {
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "size": 438
+          }
+        },
+        "prefix": "gcp-live-probe/r20261019-p1/",
+        "run_id": "r20261019-p1",
+        "schema": 1
+      },
+      "finished_at": "2026-10-19T20:15:48.718028+00:00"
+    },
+    {
+      "name": "create_database",
+      "status": "passed",
+      "started_at": "2026-10-19T20:15:48.718918+00:00",
+      "result": null,
+      "finished_at": "2026-10-19T20:16:02.276216+00:00"
+    },
+    {
+      "name": "create_table",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:02.277765+00:00",
+      "result": null,
+      "finished_at": "2026-10-19T20:16:03.899249+00:00"
+    },
+    {
+      "name": "get_table",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:03.900475+00:00",
+      "result": {
+        "tableName": "catalog_probe",
+        "dbName": "gcp_probe_r20261019_p1",
+        "owner": "gcp_catalog_probe",
+        "createTime": 1792440963,
+        "lastAccessTime": 0,
+        "retention": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "partitionKeys": [
+          {
+            "name": "dt",
+            "type": "string",
+            "comment": "ordered partition value"
+          }
+        ],
+        "parameters": {
+          "external.table.purge": "false",
+          "EXTERNAL": "TRUE",
+          "gcp_probe_run_id": "r20261019-p1",
+          "transient_lastDdlTime": "1792440963"
+        },
+        "viewOriginalText": null,
+        "viewExpandedText": null,
+        "tableType": "EXTERNAL_TABLE",
+        "privileges": null,
+        "temporary": false,
+        "rewriteEnabled": false,
+        "creationMetadata": null,
+        "catName": "hive",
+        "ownerType": 1,
+        "writeId": 2
+      },
+      "finished_at": "2026-10-19T20:16:04.451345+00:00"
+    },
+    {
+      "name": "missing_partition_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:04.453193+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[a]')"
+      },
+      "finished_at": "2026-10-19T20:16:04.786772+00:00"
+    },
+    {
+      "name": "missing_partition_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:04.788421+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[b]')"
+      },
+      "finished_at": "2026-10-19T20:16:05.140530+00:00"
+    },
+    {
+      "name": "add_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:05.142632+00:00",
+      "result": {
+        "values": [
+          "a"
+        ],
+        "dbName": "gcp_probe_r20261019_p1",
+        "tableName": "catalog_probe",
+        "createTime": 1792440966,
+        "lastAccessTime": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=a",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "parameters": {
+          "transient_lastDdlTime": "1792440966",
+          "totalSize": "438",
+          "gcp_probe_run_id": "r20261019-p1",
+          "numFiles": "1"
+        },
+        "privileges": null,
+        "catName": "hive",
+        "writeId": -1
+      },
+      "finished_at": "2026-10-19T20:16:07.046748+00:00"
+    },
+    {
+      "name": "fresh_readback_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:07.048404+00:00",
+      "result": {
+        "values": [
+          "a"
+        ],
+        "dbName": "gcp_probe_r20261019_p1",
+        "tableName": "catalog_probe",
+        "createTime": 1792440966,
+        "lastAccessTime": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=a",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "parameters": {
+          "totalSize": "438",
+          "gcp_probe_run_id": "r20261019-p1",
+          "numFiles": "1",
+          "transient_lastDdlTime": "1792440966"
+        },
+        "privileges": null,
+        "catName": "hive",
+        "writeId": -1
+      },
+      "finished_at": "2026-10-19T20:16:07.508523+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_add_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:07.510164+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:08.409717+00:00"
+    },
+    {
+      "name": "repeat_add_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:08.411443+00:00",
+      "result": {
+        "expected_exception": "AlreadyExistsException",
+        "message": "AlreadyExistsException(message='Partition already exists: Partition(values:[a], dbName:gcp_probe_r20261019_p1, tableName:catalog_probe, createTime:0, lastAccessTime:0, sd:StorageDescriptor(cols:[FieldSchema(name:value, type:string, comment:tiny probe fixture)], location:gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=a, inputFormat:org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat, outputFormat:org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat, compressed:false, numBuckets:-1, serdeInfo:SerDeInfo(name:catalog_probe, serializationLib:org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe, parameters:{}), bucketCols:[], sortCols:[], parameters:{}, skewedInfo:SkewedInfo(skewedColNames:[], skewedColValues:[], skewedColValueLocationMaps:{}), storedAsSubDirectories:false), parameters:{gcp_probe_run_id=r20261019-p1}, catName:hive)')"
+      },
+      "finished_at": "2026-10-19T20:16:09.119873+00:00"
+    },
+    {
+      "name": "fresh_readback_after_repeat_add_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:09.122144+00:00",
+      "result": {
+        "values": [
+          "a"
+        ],
+        "dbName": "gcp_probe_r20261019_p1",
+        "tableName": "catalog_probe",
+        "createTime": 1792440966,
+        "lastAccessTime": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=a",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "parameters": {
+          "totalSize": "438",
+          "gcp_probe_run_id": "r20261019-p1",
+          "numFiles": "1",
+          "transient_lastDdlTime": "1792440966"
+        },
+        "privileges": null,
+        "catName": "hive",
+        "writeId": -1
+      },
+      "finished_at": "2026-10-19T20:16:09.635453+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_repeat_add_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:09.637737+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:10.685067+00:00"
+    },
+    {
+      "name": "add_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:10.687459+00:00",
+      "result": {
+        "values": [
+          "b"
+        ],
+        "dbName": "gcp_probe_r20261019_p1",
+        "tableName": "catalog_probe",
+        "createTime": 1792440971,
+        "lastAccessTime": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=b",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "parameters": {
+          "transient_lastDdlTime": "1792440971",
+          "totalSize": "438",
+          "gcp_probe_run_id": "r20261019-p1",
+          "numFiles": "1"
+        },
+        "privileges": null,
+        "catName": "hive",
+        "writeId": -1
+      },
+      "finished_at": "2026-10-19T20:16:11.347723+00:00"
+    },
+    {
+      "name": "fresh_readback_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:11.350095+00:00",
+      "result": {
+        "values": [
+          "b"
+        ],
+        "dbName": "gcp_probe_r20261019_p1",
+        "tableName": "catalog_probe",
+        "createTime": 1792440971,
+        "lastAccessTime": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=b",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "parameters": {
+          "totalSize": "438",
+          "gcp_probe_run_id": "r20261019-p1",
+          "numFiles": "1",
+          "transient_lastDdlTime": "1792440971"
+        },
+        "privileges": null,
+        "catName": "hive",
+        "writeId": -1
+      },
+      "finished_at": "2026-10-19T20:16:12.052311+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_add_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:12.055392+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:12.813154+00:00"
+    },
+    {
+      "name": "repeat_add_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:12.815650+00:00",
+      "result": {
+        "expected_exception": "AlreadyExistsException",
+        "message": "AlreadyExistsException(message='Partition already exists: Partition(values:[b], dbName:gcp_probe_r20261019_p1, tableName:catalog_probe, createTime:0, lastAccessTime:0, sd:StorageDescriptor(cols:[FieldSchema(name:value, type:string, comment:tiny probe fixture)], location:gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=b, inputFormat:org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat, outputFormat:org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat, compressed:false, numBuckets:-1, serdeInfo:SerDeInfo(name:catalog_probe, serializationLib:org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe, parameters:{}), bucketCols:[], sortCols:[], parameters:{}, skewedInfo:SkewedInfo(skewedColNames:[], skewedColValues:[], skewedColValueLocationMaps:{}), storedAsSubDirectories:false), parameters:{gcp_probe_run_id=r20261019-p1}, catName:hive)')"
+      },
+      "finished_at": "2026-10-19T20:16:13.141922+00:00"
+    },
+    {
+      "name": "fresh_readback_after_repeat_add_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:13.144343+00:00",
+      "result": {
+        "values": [
+          "b"
+        ],
+        "dbName": "gcp_probe_r20261019_p1",
+        "tableName": "catalog_probe",
+        "createTime": 1792440971,
+        "lastAccessTime": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=b",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "parameters": {
+          "totalSize": "438",
+          "gcp_probe_run_id": "r20261019-p1",
+          "numFiles": "1",
+          "transient_lastDdlTime": "1792440971"
+        },
+        "privileges": null,
+        "catName": "hive",
+        "writeId": -1
+      },
+      "finished_at": "2026-10-19T20:16:13.508398+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_repeat_add_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:13.510987+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:14.251034+00:00"
+    },
+    {
+      "name": "drop_a_deleteData_false",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:14.253880+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:16:15.135035+00:00"
+    },
+    {
+      "name": "drop_a_result",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:15.140546+00:00",
+      "result": null,
+      "finished_at": "2026-10-19T20:16:15.143931+00:00"
+    },
+    {
+      "name": "fresh_absence_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:15.147062+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[a]')"
+      },
+      "finished_at": "2026-10-19T20:16:15.434067+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_drop_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:15.437524+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:16.582645+00:00"
+    },
+    {
+      "name": "repeat_drop_a_deleteData_false",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:16.586942+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[a]')"
+      },
+      "finished_at": "2026-10-19T20:16:16.760295+00:00"
+    },
+    {
+      "name": "final_absence_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:16.763762+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[a]')"
+      },
+      "finished_at": "2026-10-19T20:16:16.932143+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_repeat_drop_a",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:16.935393+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:18.027668+00:00"
+    },
+    {
+      "name": "drop_b_deleteData_false",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:18.031234+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:16:19.015183+00:00"
+    },
+    {
+      "name": "drop_b_result",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:19.019158+00:00",
+      "result": null,
+      "finished_at": "2026-10-19T20:16:19.023065+00:00"
+    },
+    {
+      "name": "fresh_absence_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:19.026599+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[b]')"
+      },
+      "finished_at": "2026-10-19T20:16:19.128077+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_drop_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:19.131638+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:20.215663+00:00"
+    },
+    {
+      "name": "repeat_drop_b_deleteData_false",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:20.219489+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[b]')"
+      },
+      "finished_at": "2026-10-19T20:16:20.387458+00:00"
+    },
+    {
+      "name": "final_absence_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:20.391141+00:00",
+      "result": {
+        "expected_exception": "NoSuchObjectException",
+        "message": "NoSuchObjectException(message='partition values=[b]')"
+      },
+      "finished_at": "2026-10-19T20:16:20.554226+00:00"
+    },
+    {
+      "name": "gcs_unchanged_after_repeat_drop_b",
+      "status": "passed",
+      "started_at": "2026-10-19T20:16:20.558029+00:00",
+      "result": {
+        "unchanged": true,
+        "objects": {
+          "gcp-live-probe/r20261019-p1/_OWNER.json": {
+            "generation": "1792440629711439",
+            "size": 520,
+            "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+            "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+            "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+            "crc32c": "d3fyqA=="
+          },
+          "gcp-live-probe/r20261019-p1/_SENTINEL": {
+            "generation": "1792440631616885",
+            "size": 37,
+            "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+            "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+            "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+            "crc32c": "lCIeNA=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+            "generation": "1792440633397947",
+            "size": 438,
+            "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+            "crc32c": "2TwZ3A=="
+          },
+          "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+            "generation": "1792440635635258",
+            "size": 438,
+            "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+            "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+            "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+            "crc32c": "8Ti2Aw=="
+          }
+        }
+      },
+      "finished_at": "2026-10-19T20:16:21.659258+00:00"
+    }
+  ],
+  "leftovers": {
+    "database": "gcp_probe_r20261019_p1",
+    "table": "gcp_probe_r20261019_p1.catalog_probe",
+    "table_location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1",
+    "database_state": "present",
+    "table_state": "present",
+    "partition_state": {
+      "a": "absent",
+      "b": "absent"
+    },
+    "object_uris": [
+      "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/_OWNER.json",
+      "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/_SENTINEL",
+      "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet",
+      "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet"
+    ],
+    "cleanup": "parent-owned; this probe performs no cleanup"
+  },
+  "gcs_after": {
+    "gcp-live-probe/r20261019-p1/_OWNER.json": {
+      "generation": "1792440629711439",
+      "size": 520,
+      "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+      "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+      "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+      "crc32c": "d3fyqA=="
+    },
+    "gcp-live-probe/r20261019-p1/_SENTINEL": {
+      "generation": "1792440631616885",
+      "size": 37,
+      "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+      "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+      "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+      "crc32c": "lCIeNA=="
+    },
+    "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+      "generation": "1792440633397947",
+      "size": 438,
+      "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+      "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+      "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+      "crc32c": "2TwZ3A=="
+    },
+    "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+      "generation": "1792440635635258",
+      "size": 438,
+      "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+      "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+      "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+      "crc32c": "8Ti2Aw=="
+    }
+  },
+  "gcs_before": {
+    "gcp-live-probe/r20261019-p1/_OWNER.json": {
+      "generation": "1792440629711439",
+      "size": 520,
+      "sha256": "8ebd57a4877dbf552cd2f51494c0604baddbd87f8a8be5fe33c3ba533a679c72",
+      "bytes_base64": "ewogICJvYmplY3RzIjogewogICAgIl9TRU5USU5FTCI6IHsKICAgICAgInNoYTI1NiI6ICI1YTY3ZjJlNGQ1YjA0MGUwZWRhMzY5NjJmYTY1MDY5NDZmZGY3YTlkMzkwYmY5YWNhNzM1MGM1Y2Y3ODQ4MWIzIiwKICAgICAgInNpemUiOiAzNwogICAgfSwKICAgICJkdD1hL3BhcnQtMDAwMDAucGFycXVldCI6IHsKICAgICAgInNoYTI1NiI6ICJhZWU1OTYxNzA0MGQ4MDg1NWNjY2UwZGY0MzU0OTIxMjk5ZGE3YjFjNGM4YjA5MGM3MDM4NzBjYmIwYjE5ZWIzIiwKICAgICAgInNpemUiOiA0MzgKICAgIH0sCiAgICAiZHQ9Yi9wYXJ0LTAwMDAwLnBhcnF1ZXQiOiB7CiAgICAgICJzaGEyNTYiOiAiZTgyNGY1MmRiNjVhNWY4ZTFjYmEzZTM2ZGMwOTQzMDIxYzYyMGRmZWViZmYyNDBkNGI0ZjY0OWMzMmViYjMwZiIsCiAgICAgICJzaXplIjogNDM4CiAgICB9CiAgfSwKICAicHJlZml4IjogImdjcC1saXZlLXByb2JlL3IyMDI2MTAxOS1wMS8iLAogICJydW5faWQiOiAicjIwMjYxMDE5LXAxIiwKICAic2NoZW1hIjogMQp9Cg==",
+      "md5_hash": "fKBCkarCBXObXzZu5y+R1Q==",
+      "crc32c": "d3fyqA=="
+    },
+    "gcp-live-probe/r20261019-p1/_SENTINEL": {
+      "generation": "1792440631616885",
+      "size": 37,
+      "sha256": "5a67f2e4d5b040e0eda36962fa6506946fdf7a9d390bf9aca7350c5cf78481b3",
+      "bytes_base64": "Y2F0YWxvZyBzYWZldHkgc2VudGluZWwgcjIwMjYxMDE5LXAxCg==",
+      "md5_hash": "gX6ADVpZ06IZJR2WrXD8ow==",
+      "crc32c": "lCIeNA=="
+    },
+    "gcp-live-probe/r20261019-p1/dt=a/part-00000.parquet": {
+      "generation": "1792440633397947",
+      "size": 438,
+      "sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+      "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWEVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWEYB3Byb2JlLWEAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWEYB3Byb2JlLWEAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+      "md5_hash": "nAtpw5T/M9w+LzuO7chSlg==",
+      "crc32c": "2TwZ3A=="
+    },
+    "gcp-live-probe/r20261019-p1/dt=b/part-00000.parquet": {
+      "generation": "1792440635635258",
+      "size": 438,
+      "sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+      "bytes_base64": "UEFSMRUEFRYVFkwVAhUEEgAABwAAAHByb2JlLWIVABUSFRIsFQIVBBUGFQYcNgAoB3Byb2JlLWIYB3Byb2JlLWIAAAACAAAAAgEBAgAVAhksNQAYBnNjaGVtYRUCABUMJQIYBXZhbHVlJQBMHAAAABYCGRwZHCYAHBUMGSUEBhkYBXZhbHVlFQAWAhaSARaSASY6JggcNgAoB3Byb2JlLWIYB3Byb2JlLWIAGSwVBBUEFQIAFQAVBBUCADwWDhkGGSYAAgAAABaSARYCJggWkgEAGRwYDEFSUk9XOnNjaGVtYRigAS8vLy8vM0FBQUFBUUFBQUFBQUFLQUF3QUJnQUZBQWdBQ2dBQUFBQUJCQUFNQUFBQUNBQUlBQUFBQkFBSUFBQUFCQUFBQUFFQUFBQVVBQUFBRUFBVUFBZ0FCZ0FIQUF3QUFBQVFBQkFBQUFBQUFBRUZFQUFBQUJ3QUFBQUVBQUFBQUFBQUFBVUFBQUIyWVd4MVpRQUFBQVFBQkFBRUFBQUEAGCBwYXJxdWV0LWNwcC1hcnJvdyB2ZXJzaW9uIDIxLjAuMBkcHAAAAGEBAABQQVIx",
+      "md5_hash": "JEvpESoru9UTOBQFXfy9vg==",
+      "crc32c": "8Ti2Aw=="
+    }
+  }
+}

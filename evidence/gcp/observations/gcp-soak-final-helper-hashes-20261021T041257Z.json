@@ -1,0 +1,17 @@
+{
+  "gcp-query-witness.sh": {
+    "exists": true,
+    "sha256": "747acb238400d6770c84faf6ecb16f3b61fb286e6ca163ec85b4c4e58a358c51",
+    "local_sha256": "747acb238400d6770c84faf6ecb16f3b61fb286e6ca163ec85b4c4e58a358c51"
+  },
+  "gcp-soak-independent-check.py": {
+    "exists": true,
+    "sha256": "4696daa96d1a858d9119c13076f977a54c7ddf0a2d34000ba2ec2fe9e8340262",
+    "local_sha256": "4696daa96d1a858d9119c13076f977a54c7ddf0a2d34000ba2ec2fe9e8340262"
+  },
+  "gcp-soak-baseline-r20261019n1-20261019T2343.json": {
+    "exists": true,
+    "sha256": "836713f9f9298782d9604f15a57513778343561dbe60db63b2724e196172e35d",
+    "local_sha256": "836713f9f9298782d9604f15a57513778343561dbe60db63b2724e196172e35d"
+  }
+}

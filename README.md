@@ -22,6 +22,7 @@ The core uses provider-neutral interfaces. AWS supplies catalog adapters and the
 An OCI Compute worker passed lifecycle, burst-coalescing, and process-restart checks through OCI Object Storage, Events/Function, and Queue using the unchanged core and an in-memory catalog.
 Real OCI catalog integration and multi-worker operation remain unvalidated.
 The Azure VM worker passed a real ADLS/Event Grid/Service Bus/Databricks catalog lifecycle, a 12-file burst, and crash/replay before processing and after DROP. Four stale synthetic create hints were quarantined in the native DLQ. Azure performance remains unmeasured.
+The GCP VM worker passed twelve native GCS/Pub/Sub/Hive Metastore gates and a fresh 24-hour serialized lifecycle run with 7,477 create/delete cycles. Independent final event, fixture, process-exit and Spark checks passed; the run completed with restarts and underlying retryable RPC causes remain unproven. [The GCP guide](docs/gcp.md) records its schema, architecture and limits.
 
 ## Choose your task
 
@@ -30,6 +31,7 @@ The Azure VM worker passed a real ADLS/Event Grid/Service Bus/Databricks catalog
 | Understand the algorithm, guarantees, and limits | [System behavior](docs/system-behavior.md) |
 | Inspect the OCI adapters, functional proof, and remaining catalog work | [OCI guide](docs/oci.md) |
 | Inspect the Azure VM implementation, functional proof, and limits | [Azure guide](docs/azure.md) |
+| Inspect the GCP architecture, schema, native gates and 24-hour results | [GCP guide](docs/gcp.md) |
 | Run the AWS worker with existing tables | [AWS worker setup](docs/aws.md#run-the-normal-aws-worker) |
 | Provision AWS resources and reproduce experiments | [AWS experiment setup](docs/aws.md#aws-experiment-setup) |
 | Understand the five graphs, recovery table, and supporting checks | [Experiment specification](docs/experiments.md) |
@@ -52,14 +54,15 @@ Local tests use fakes and SDK stubs. They need no cloud account.
 
 ```text
 src/rtmsf/          Core algorithm, interfaces, and worker
-  adapters/        AWS, OCI, Azure ingress/storage, and Databricks catalog
+  adapters/        AWS, OCI, Azure/Databricks, and GCP GCS/Pub/Sub/Hive
 src/experiments/   Saved-result reporting and evidence export
   aws/             AWS provisioning, workloads, and measurement collection
   oci/             Finite OCI functional check with a test catalog
   azure/           Bounded fault harness for the real single-VM proof
+  gcp/             Finite native worker, crash harness and serialized soak
 tests/             Local verification
 docs/              System behavior, experiment specification, and AWS guide
-evidence/          AWS paper measurements and selected Azure functional evidence
+evidence/          AWS paper measurements and selected Azure/GCP functional evidence
 runs/              Original local execution records; generated and Git-ignored
 ```
 

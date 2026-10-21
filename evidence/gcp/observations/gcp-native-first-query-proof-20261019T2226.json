@@ -1,0 +1,15 @@
+{
+  "verified": true,
+  "scope": "fresh named Hive table SHOW PARTITIONS and SELECT",
+  "partitions": [
+    "dt=a"
+  ],
+  "rows": [
+    [
+      "probe-a",
+      "a"
+    ]
+  ],
+  "maximum_rss_kib": 458368,
+  "evidence": "outputs/gcp-query-native-first-20261019T2226"
+}

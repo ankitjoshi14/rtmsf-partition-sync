@@ -1,0 +1,94 @@
+{
+  "status": "passed",
+  "before_drop_replay": {
+    "same_message_id": "22413888088858637",
+    "new_handle": "101ba3fd51f048adb2a5f0b0c3e47b37",
+    "pmcp": {
+      "action": "pmcp_result",
+      "partition": "dt=recovery_drop_before",
+      "status": "APPLIED",
+      "mutation": "DROP",
+      "observation_count": 1,
+      "utc": "2026-10-19T23:18:04.764745+00:00",
+      "monotonic_seconds": 13679.319995244
+    }
+  },
+  "versions": {
+    "events": [
+      {
+        "action": "message_acknowledged",
+        "handle": "2cee279283cd4294ab1c50007ec7daff",
+        "message_id": "22413693099107354",
+        "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+        "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+        "objectGeneration": "1792451791581814",
+        "eventType": "OBJECT_FINALIZE",
+        "eventTime": "2026-10-19T23:16:31.588335Z",
+        "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+        "utc": "2026-10-19T23:17:49.990622+00:00",
+        "monotonic_seconds": 13664.545872076
+      },
+      {
+        "action": "message_acknowledged",
+        "handle": "963cd63f26cd4defaf4550bb95c291d4",
+        "message_id": "22413554511411401",
+        "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+        "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+        "objectGeneration": "1792451791947494",
+        "eventType": "OBJECT_FINALIZE",
+        "eventTime": "2026-10-19T23:16:31.968659Z",
+        "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+        "utc": "2026-10-19T23:17:50.010013+00:00",
+        "monotonic_seconds": 13664.565261727
+      },
+      {
+        "action": "message_acknowledged",
+        "handle": "d0672b9090614b2c96d72b397cd425ee",
+        "message_id": "22414654269825309",
+        "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+        "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+        "objectGeneration": "1792451791581814",
+        "eventType": "OBJECT_ARCHIVE",
+        "eventTime": "2026-10-19T23:16:31.968659Z",
+        "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+        "utc": "2026-10-19T23:17:50.031579+00:00",
+        "monotonic_seconds": 13664.586828745
+      },
+      {
+        "action": "message_acknowledged",
+        "handle": "59944ad1a6c64083b8b62843e21540b1",
+        "message_id": "22413456922749234",
+        "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+        "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+        "objectGeneration": "1792451791581814",
+        "eventType": "OBJECT_DELETE",
+        "eventTime": "2026-10-19T23:16:32.487867Z",
+        "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+        "utc": "2026-10-19T23:17:50.068683+00:00",
+        "monotonic_seconds": 13664.623937015
+      }
+    ],
+    "live_current_generation": "1792451791947494",
+    "pmcp": {
+      "action": "pmcp_result",
+      "partition": "dt=versions",
+      "status": "APPLIED",
+      "mutation": "ADD",
+      "observation_count": 4,
+      "utc": "2026-10-19T23:17:49.953966+00:00",
+      "monotonic_seconds": 13664.509213618
+    }
+  },
+  "malformed": {
+    "source_message_id": "22415492984750472",
+    "quarantine_message_id": "22735136601773892",
+    "payload_attributes_reason_exact": true,
+    "confirmed_before_source_ack": true
+  },
+  "worker_lifetime": {
+    "status": "failed",
+    "error_category": "external_retryable",
+    "pending": 0
+  },
+  "query": "pending"
+}

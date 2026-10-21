@@ -1,0 +1,6 @@
+Result=success
+MemoryMax=infinity
+MemorySwapMax=infinity
+LoadState=not-found
+ActiveState=inactive
+SubState=dead

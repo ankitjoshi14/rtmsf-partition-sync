@@ -1,0 +1,92 @@
+{
+  "status": "passed",
+  "scope": "read_only_gcs_boundary",
+  "steps": [
+    {
+      "name": "original_fixture_head",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:51.954190+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:52.123529+00:00"
+    },
+    {
+      "name": "fresh_fixture_head",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.124253+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:52.276177+00:00"
+    },
+    {
+      "name": "original_fixture_prefix",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.276719+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:52.359073+00:00"
+    },
+    {
+      "name": "absent_head_with_bucket_confirmation",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.359624+00:00",
+      "result": false,
+      "finished_at": "2026-10-19T20:57:52.525382+00:00"
+    },
+    {
+      "name": "empty_live_prefix",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.526000+00:00",
+      "result": false,
+      "finished_at": "2026-10-19T20:57:52.687643+00:00"
+    },
+    {
+      "name": "exact_special_marker_head",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.688259+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:52.762274+00:00"
+    },
+    {
+      "name": "special_marker_only_occupancy",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.762904+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:52.915358+00:00"
+    },
+    {
+      "name": "marker_only_occupancy",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:52.916030+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:53.000075+00:00"
+    },
+    {
+      "name": "slash_object_head",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:53.000689+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:53.144663+00:00"
+    },
+    {
+      "name": "slash_object_occupancy",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:53.145331+00:00",
+      "result": true,
+      "finished_at": "2026-10-19T20:57:53.225721+00:00"
+    },
+    {
+      "name": "raw_hadoop_location",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:53.226398+00:00",
+      "result": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/storage-boundary-20261019T2037/dt=a+% 雪",
+      "finished_at": "2026-10-19T20:57:53.227419+00:00"
+    },
+    {
+      "name": "hadoop_directory_alias_rejected",
+      "status": "passed",
+      "started_at": "2026-10-19T20:57:53.228144+00:00",
+      "result": {
+        "rejected": true
+      },
+      "finished_at": "2026-10-19T20:57:53.229384+00:00"
+    }
+  ]
+}

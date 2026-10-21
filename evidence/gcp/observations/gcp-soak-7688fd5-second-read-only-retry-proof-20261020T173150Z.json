@@ -1,0 +1,58 @@
+{
+  "run": "gcp-soak-24h-7688fd5-20261020T040757Z",
+  "partial_live_snapshot": "outputs/gcp-soak-live-archive-snapshot-20261020T173014Z",
+  "archive_metadata": "outputs/gcp-soak-live-archive-snapshot-20261020T173014Z/capture-metadata.json",
+  "archive_SHA256_verified": true,
+  "original_VM_archive_retained": "/home/joshi_ankit1492_gmail_com/gcp-soak-evidence-snapshot-20261020T173014Z.tar.gz",
+  "retry_count": 2,
+  "retry_utc": "2026-10-20T17:27:18.240498+00:00",
+  "retry_stage": "post_drop_catalog_truth",
+  "category": "external_retryable",
+  "worker_child": 151,
+  "worker_pid": 79739,
+  "failed_children": 150,
+  "child_restarts": 150,
+  "forced_child_kills": 0,
+  "same_worker_and_no_mutation_during_retry_gap": true,
+  "cycles": [
+    {
+      "generation": "1792517217609415",
+      "ADD_ACK_utc": "2026-10-20T17:26:59.761250+00:00",
+      "DELETE_attempt_utc": "2026-10-20T17:27:02.795029+00:00",
+      "DELETE_ACK_utc": "2026-10-20T17:27:04.909713+00:00",
+      "next_creation_attempt_utc": "2026-10-20T17:27:19.488361+00:00",
+      "reconciliation_statuses": {
+        "ADD": "APPLIED",
+        "DROP": "APPLIED"
+      },
+      "mutation_intervals_seconds": [
+        5.008996037999168,
+        16.32741964100569
+      ],
+      "receipt_reconciliation_ACK_identity_matches": true,
+      "ADD_ACK_before_DELETE_and_DELETE_ACK_before_next_creation": true
+    },
+    {
+      "generation": "1792517239573183",
+      "ADD_ACK_utc": "2026-10-20T17:27:21.879547+00:00",
+      "DELETE_attempt_utc": "2026-10-20T17:27:24.763236+00:00",
+      "DELETE_ACK_utc": "2026-10-20T17:27:26.874977+00:00",
+      "next_creation_attempt_utc": "2026-10-20T17:27:30.352985+00:00",
+      "reconciliation_statuses": {
+        "ADD": "APPLIED",
+        "DROP": "APPLIED"
+      },
+      "mutation_intervals_seconds": [
+        5.010130234004464,
+        5.234581786004128
+      ],
+      "receipt_reconciliation_ACK_identity_matches": true,
+      "ADD_ACK_before_DELETE_and_DELETE_ACK_before_next_creation": true
+    }
+  ],
+  "fresh_truth_basis": "Reviewed deployed7688fd5 control flow clears incomplete truth on classified retry and requires successful fresh storage/catalog absence before creation. Successful reads at that historical instant were not separately logged; no independent historical truth measurement is claimed.",
+  "cause": "unproven",
+  "code_changes": false,
+  "infrastructure_changes": false,
+  "scope": "two completed cycles around a live read-only retry; not final drainage, fixtures, exits, or query verification"
+}

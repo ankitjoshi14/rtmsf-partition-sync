@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "supervisor_status": "completed_with_restarts",
+  "creates": 7477,
+  "deletes": 7477,
+  "own_receipts": 14980,
+  "own_acknowledgments": 14954,
+  "own_terminal_events": 0,
+  "own_unacknowledged": 0,
+  "restarts": 243,
+  "failed_children": 244,
+  "all_child_exits_recorded": true,
+  "final_delete_correlated": true,
+  "serialized_ack_barriers_and_minimum_interval": true,
+  "baseline_report_preserved": true
+}

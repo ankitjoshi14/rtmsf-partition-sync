@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "scope": "captured native v3 FINALIZE original message redelivered and ACKed after NOOP, all current object/captured replay witnesses complete",
+  "original_source_message_id": "22059331589820225",
+  "current_generation": "1792452731177862",
+  "pmcp": {
+    "action": "pmcp_result",
+    "partition": "dt=versions",
+    "status": "NOOP",
+    "mutation": "ADD",
+    "observation_count": 1,
+    "utc": "2026-10-19T23:36:19.572101+00:00",
+    "monotonic_seconds": 14774.127345139
+  },
+  "worker_lifetime": {
+    "status": "failed",
+    "category": "external_retryable",
+    "pending": 0
+  },
+  "source_evidence": "outputs/gcp-native-original-v3-redelivery-20261019T2347"
+}
