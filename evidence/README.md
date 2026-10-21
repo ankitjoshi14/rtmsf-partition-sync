@@ -4,6 +4,9 @@ This folder contains selected reports from saved experiment runs. It belongs in 
 The exporter copies measurement CSVs unchanged and generates reports from saved inputs.
 Original execution records remain separate under `runs/` and are Git-ignored.
 Start with [SUMMARY.md](SUMMARY.md) for settings and outcomes.
+The separate [OCI functional proof](oci/README.md) preserves selected original
+local/Compute reports, failures and deployed-source fingerprints; its catalog
+was an in-memory test double.
 The separate [Azure functional proof](azure/README.md) contains real catalog/storage/queue observations and process-recovery evidence; it is not part of the AWS performance measurements.
 The separate [GCP functional proof](gcp/README.md) records twelve native gates, the completed 24-hour serialized lifecycle, preserved schema and independent final verification. The GCP guide includes its architecture and limits.
 

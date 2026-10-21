@@ -216,6 +216,15 @@ def test_control_paths_cannot_count_as_observed_or_listed_file_evidence(key):
     assert blobs.calls == []
 
 
+@pytest.mark.parametrize("value", ["_a", ".a"])
+def test_hidden_prefix_in_partition_value_remains_file_evidence(value):
+    prefix = f"table/dt={value}/"
+    key = prefix + "file.parquet"
+    adapter = store(Blobs({key: ("file", None)}), Filesystem([[path(key)]]))
+    assert adapter.head_exists("proof", key) is True
+    assert adapter.prefix_non_empty("proof", prefix) is True
+
+
 @pytest.mark.parametrize("failure", [ServiceRequestError("connection failed"), ServiceResponseError("read failed")])
 def test_transport_failure_is_never_negative_evidence(failure):
     adapter = store(Blobs({PREFIX + "file": failure}), Filesystem([failure]))

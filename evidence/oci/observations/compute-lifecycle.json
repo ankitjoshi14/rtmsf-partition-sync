@@ -1,0 +1,276 @@
+{
+  "provider": "OCI",
+  "region": "us-sanjose-1",
+  "catalog": "in-memory test double",
+  "cloud_pipeline": "Object Storage -> Events -> Function -> Queue -> real RTMSF core",
+  "prefix": "compute-life-20261015T055635/",
+  "authentication": "instance principal",
+  "checks": [
+    {
+      "case": "first_object_add",
+      "status": "passed",
+      "partitions": [
+        "dt=a"
+      ],
+      "acknowledged_total": 1
+    },
+    {
+      "case": "additional_object_keeps_partition",
+      "status": "passed",
+      "partitions": [
+        "dt=a"
+      ],
+      "acknowledged_total": 2
+    },
+    {
+      "case": "overwrite_keeps_partition",
+      "status": "passed",
+      "partitions": [
+        "dt=a"
+      ],
+      "acknowledged_total": 3
+    },
+    {
+      "case": "second_partition_add",
+      "status": "passed",
+      "partitions": [
+        "dt=a",
+        "dt=b"
+      ],
+      "acknowledged_total": 4
+    },
+    {
+      "case": "partial_delete_keeps_partition",
+      "status": "passed",
+      "partitions": [
+        "dt=a",
+        "dt=b"
+      ],
+      "acknowledged_total": 5
+    },
+    {
+      "case": "last_delete_removes_only_a",
+      "status": "passed",
+      "partitions": [
+        "dt=b"
+      ],
+      "acknowledged_total": 6
+    },
+    {
+      "case": "recreate_adds_a",
+      "status": "passed",
+      "partitions": [
+        "dt=a",
+        "dt=b"
+      ],
+      "acknowledged_total": 7
+    },
+    {
+      "case": "replayed_stale_delete_preserves_live_a",
+      "status": "passed",
+      "partitions": [
+        "dt=a",
+        "dt=b"
+      ],
+      "acknowledged_total": 8
+    },
+    {
+      "case": "exact_storage_readback",
+      "status": "passed",
+      "a_exists": true,
+      "b_exists": true
+    }
+  ],
+  "passed": true,
+  "observed_event_types": [
+    "com.oraclecloud.objectstorage.createobject",
+    "com.oraclecloud.objectstorage.deleteobject",
+    "com.oraclecloud.objectstorage.updateobject"
+  ],
+  "worker_records": [
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "ADD",
+      "status": "APPLIED",
+      "reason": "created"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "ADD",
+      "status": "NOOP",
+      "reason": "already_exists_verified"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "ADD",
+      "status": "NOOP",
+      "reason": "already_exists_verified"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=b",
+      "observation_count": 1,
+      "mutation": "ADD",
+      "status": "APPLIED",
+      "reason": "created"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "DROP",
+      "status": "NOOP",
+      "reason": "still_non_empty"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "DROP",
+      "status": "APPLIED",
+      "reason": "deleted"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "ADD",
+      "status": "APPLIED",
+      "reason": "created"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "source_id": "demo",
+      "table_id": "demo.table",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "DROP",
+      "status": "NOOP",
+      "reason": "still_non_empty"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    }
+  ]
+}

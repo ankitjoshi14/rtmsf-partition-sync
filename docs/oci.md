@@ -6,6 +6,12 @@ The `oci` branch adds OCI Object Storage and Queue adapters and a Function bridg
 
 The diagram shows the tested OCI services and the worker deployed on OCI Compute. The cloud test resources were removed after validation; the diagram documents the tested deployment. Its service symbols are generic rather than official Oracle icons. External catalog integration is outside this validation; PMCP used an in-memory catalog test double for the live checks.
 
+Selected original reports, failures and deployed-source fingerprints are now
+shared in [evidence/oci/](../evidence/oci/README.md). References below to
+`runs/oci-validation/` describe the original private archive; that directory is
+not part of this clone. The current `deploy/oci/` Function packaging was
+relocated after validation and has not been redeployed.
+
 A small live proof on October 12, 2026 in `us-sanjose-1` passed nine cases through Object Storage → Events → Function → Queue → unchanged routing/WOERA/PMCP/worker. The worker used an in-memory catalog and ran locally. Queue receipt renewal and redelivery also passed across separate processes. An additional live burst run grouped 27 notifications into six reconciliations, with all 27 acknowledged afterward. The recorded outcomes are summarized below; original logs are retained locally under `runs/oci-validation/`.
 
 ## OCI Compute validation — October 14, 2026
@@ -27,11 +33,13 @@ Published pay-as-you-go rates give approximately $0.0159/hour for this VM and bo
 From the repository root, using Python 3.12+:
 
 ```sh
-uv sync --frozen --extra dev --extra oci
-uv run --frozen --extra dev --extra oci pytest -q
+uv sync --frozen --extra dev --extra oci --extra azure --extra gcp
+uv run --frozen --extra dev --extra oci --extra azure --extra gcp pytest -q
 ```
 
-The OCI extra pins SDK 2.187.2 and FDK 0.1.126; `uv.lock` records resolved dependencies. Without the extra, OCI-specific tests skip and the existing suite remains available. Local tests make no cloud calls.
+The OCI extra pins SDK 2.187.2 and FDK 0.1.126; `uv.lock` records resolved dependencies.
+The full local suite imports Azure and GCP SDKs too, so install all provider
+extras as in CI. Local tests make no cloud calls.
 
 ## Components
 
@@ -120,4 +128,7 @@ All four burst cases passed, with 27 notifications acknowledged after reconcilia
 
 Original records, initial failures, final resource snapshots, deployed bridge source, and the additional Compute records are preserved under Git-ignored `runs/oci-validation/`. That local directory is not distributed by Git. Key files are `live-report.json`, `live-raw-events.json`, `burst-report.json`, `burst-raw-events.json`, `restart-stage1.json`, and `restart-stage2.json`. Its README describes the recorded checks. Future runs should also write to `runs/`; publication bundles belong in `evidence/` only when selected for the paper.
 
-The repository's `evidence/` folder, AWS graph inputs, report generators, provenance, and export fingerprints are unchanged. OCI checks produce their own JSON records and do not enter AWS plots. Real catalog writes and query visibility, sustained load, long polling, and billed cost remain unverified.
+OCI's selected publication bundle is in [evidence/oci/](../evidence/oci/README.md),
+separate from the AWS graph inputs, report generators and measurement provenance.
+OCI checks do not enter AWS plots. Real catalog writes and query visibility,
+sustained load, long polling and billed cost remain unverified.

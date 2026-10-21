@@ -572,6 +572,31 @@
       "source_sha256": "4696daa96d1a858d9119c13076f977a54c7ddf0a2d34000ba2ec2fe9e8340262",
       "exported_path": "scripts/gcp-soak-independent-check.py",
       "exported_sha256": "4696daa96d1a858d9119c13076f977a54c7ddf0a2d34000ba2ec2fe9e8340262"
+    },
+    {
+      "source_relative_path": "work/gcp-fixture-r20261018-e504/dt=a/part-00000.parquet",
+      "source_sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+      "exported_path": "fixtures/dt=a/part-00000.parquet",
+      "exported_sha256": "aee59617040d80855ccce0df4354921299da7b1c4c8b090c703870cbb0b19eb3",
+      "size": 438
+    },
+    {
+      "source_relative_path": "work/gcp-fixture-r20261018-e504/dt=b/part-00000.parquet",
+      "source_sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+      "exported_path": "fixtures/dt=b/part-00000.parquet",
+      "exported_sha256": "e824f52db65a5f8e1cba3e36dc0943021c620dfeebff240d4b4f649c32ebb30f",
+      "size": 438
+    }
+  ],
+  "derived_references": [
+    {
+      "exported_path": "schema.sql",
+      "original_exported_sha256": "4d8a9763b26efb141e4cec32cebe5dbe1d69e08c07b6b8b3b53adb975fa61499",
+      "exported_sha256": "816a9e991b2b59ee05d8aaf9be009faa222194b10617676b451133453615774d",
+      "source_exported_path": "observations/catalog-schema.json",
+      "source_sha256": "194046fab1f9c4676642d86024c7d2abb5c1a2749de02aa476286960da1d33e8",
+      "change": "Added captured database ownership properties and explicit partition restore prerequisites; original observation unchanged.",
+      "restoration_tested": false
     }
   ]
 }

@@ -65,7 +65,7 @@ class AppConfig:
             for part in identity:
                 _text(part)
             prefix = _text(self.root_prefix)
-            if not prefix.endswith("/") or any(part in {"", ".", ".."} for part in prefix[:-1].split("/")):
+            if not prefix.endswith("/") or any(not part or part.startswith((".", "_")) for part in prefix[:-1].split("/")):
                 raise ValueError("invalid_root_prefix")
             patterns = (
                 (self.service_bus_namespace, r"[a-z0-9][a-z0-9-]{4,48}[a-z0-9]\.servicebus\.windows\.net"),

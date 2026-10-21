@@ -32,9 +32,13 @@ exported hashes. [SHA256SUMS](SHA256SUMS) checks the shared bundle.
 
 The captured schema includes three owned external tables with `value STRING`
 and partition key `dt STRING`: two empty catalog-probe tables and the native
-table with eleven retained partitions. [schema.sql](schema.sql) records the
-database/table definitions and exact partition locations from a fresh read-only
-pre-shutdown observation.
+table with eleven retained partitions. [schema.sql](schema.sql) is a logical
+reconstruction reference derived from the fresh read-only pre-shutdown
+[catalog observation](observations/catalog-schema.json). It includes captured
+database/table ownership; partition parameters and descriptors require the
+[Thrift restoration steps](scripts/README.md#metadata-reconstruction-reference).
+The original schema fingerprint is retained in `export-provenance.json`.
+Restoration remains untested.
 
 The final source report remains `completed_with_restarts` and records
 244 failed children, 243 restarts, zero forced kills and two read-only retries.
@@ -71,8 +75,11 @@ outcomes.
 preserves the exact Spark witness, its local self-check, the offline raw-evidence
 checker and the independent storage/catalog checker. Worker, crash and producer
 logic remains in [src/experiments/gcp/](../../src/experiments/gcp/), matching the
-provider implementation layout. These helpers do not provision a new deployment
-or reproduce the full experiment by themselves.
+provider implementation layout. The exact 438-byte synthetic Parquet inputs
+are preserved in [fixtures/dt=a/](fixtures/dt=a/part-00000.parquet) and
+[fixtures/dt=b/](fixtures/dt=b/part-00000.parquet), with original/exported hashes.
+The helper index documents input and approval prerequisites. These helpers do
+not provision a new deployment or reproduce the full experiment by themselves.
 
 The selected source records include the gate evidence index and its
 source proofs, the final independent correlations/read-only/query checks,

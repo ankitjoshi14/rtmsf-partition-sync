@@ -305,7 +305,12 @@ uv run --frozen --extra experiment python -m experiments.figures \
 - Keep Q=10 seconds and T_max=31 seconds. No settling-window or scheduler-interval
   sweep. Report actual delays; neither setting is an end-to-end latency guarantee
   or a claim of universally acceptable freshness.
-- AWS supplies the measured implementation. The core uses provider-neutral interfaces; other cloud implementations remain unvalidated.
+- AWS supplies the comparative performance measurements. OCI has functional
+  event/storage checks with an in-memory catalog; Azure and GCP exercised real
+  catalog integration. GCP also completed a serialized 24-hour lifecycle with
+  worker failures and restarts. See the [OCI](oci.md), [Azure](azure.md) and
+  [GCP](gcp.md) guides for their distinct evidence and limits; these checks do
+  not establish cross-provider performance comparisons.
 - These outputs measure membership, maintenance work, and processing behavior. They do not measure downstream consumer performance.
 - Independent reruns should support similar conclusions, not identical seconds.
   Investigate disagreements. Keep setup work out of maintenance measurements,

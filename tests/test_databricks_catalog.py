@@ -175,6 +175,31 @@ def test_resolves_databricks_location_without_trailing_slash(tmp_path):
     assert result.resolve_tables((TABLE,)) == (TableDefinition(TABLE, SOURCE, ROOT_PREFIX, ("dt", "region")),)
 
 
+@pytest.mark.parametrize("prefix", ["_worker_probe/", ".worker_probe/", "worker_probe/_data/", "worker_probe/.data/"])
+def test_hidden_root_stops_before_catalog_access(tmp_path, prefix):
+    http = HTTP([])
+    with pytest.raises(FatalExternalError, match="databricks_invalid_approved_table"):
+        adapter_module().DatabricksPartitionCatalog(
+            sql_client(tmp_path, http), table_id=TABLE, source_id=SOURCE,
+            root_prefix=prefix, root_location=ROOT_LOCATION.replace(ROOT_PREFIX, prefix),
+        )
+    assert http.calls == []
+
+
+@pytest.mark.parametrize("name", ["_dt", ".dt", "_region", ".region"])
+def test_hidden_partition_column_stops_before_catalog_mutation(tmp_path, name):
+    document = metadata()
+    index = 0 if name.endswith("dt") else 1
+    document["partition_columns"][index] = name
+    document["columns"][index + 1]["name"] = name
+    http = HTTP([describe(document)])
+    _, result = catalog(tmp_path, http)
+    with pytest.raises(FatalExternalError, match="databricks_unsupported_table_metadata"):
+        result.resolve_tables((TABLE,))
+    assert http.mutations == []
+    assert http.statements == ["DESCRIBE TABLE EXTENDED `proof`.`default`.`worker_probe` AS JSON"]
+
+
 @pytest.mark.parametrize("change", [
     {"catalog_name": "other"}, {"type": "MANAGED"}, {"provider": "delta"},
     {"location": ROOT_LOCATION + "other/"}, {"location": ROOT_LOCATION + "/"},

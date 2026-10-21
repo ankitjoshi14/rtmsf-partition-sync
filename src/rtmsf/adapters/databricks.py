@@ -427,7 +427,7 @@ class DatabricksPartitionCatalog(PartitionCatalog):
             self._quoted_table = ".".join(_identifier(part) for part in identity)
             _text(source_id)
             _text(root_prefix)
-            if not root_prefix.endswith("/") or any(part in {"", ".", ".."} for part in root_prefix[:-1].split("/")):
+            if not root_prefix.endswith("/") or any(not part or part.startswith((".", "_")) for part in root_prefix[:-1].split("/")):
                 raise ValueError("invalid_root_prefix")
             location = urlsplit(_text(root_location))
             if (location.scheme != "abfss" or location.query or location.fragment
@@ -471,6 +471,8 @@ class DatabricksPartitionCatalog(PartitionCatalog):
                         _text(column["type"]["name"])
                         columns[name] = column["type"]
                     for name in partition_columns:
+                        if _text(name).startswith((".", "_")):
+                            raise ValueError("hidden_partition_column")
                         kind = columns[_text(name)]
                         if kind["name"] != "string" or kind.get("collation", "UTF8_BINARY") != "UTF8_BINARY":
                             raise ValueError("nonbinary_string_partition")

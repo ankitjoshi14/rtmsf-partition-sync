@@ -57,6 +57,13 @@ Directory rename, recursive directory deletion, SFTP mutations, and version/unde
 
 Validate external table type, Parquet provider, explicit partition metadata, approved storage location, and complete partition columns at startup. Quote identifiers and literals safely. Never use PURGE or a partial partition specification. The disposable `worker_probe` table and its storage prefix remain separate from the catalog-only proof.
 
+Storage evidence excludes directories and files with any path segment beginning
+with `.` or `_`, including `_SUCCESS` and `_temporary`. To keep accepted table
+paths visible to both HEAD and LIST, startup rejects table-root segments and
+partition-column names beginning with either character. Ordinary values such as
+`dt=_a` and `dt=.a` remain valid. Eligible files establish membership without
+checking their format; marker-only directories do not.
+
 Bound pending messages, retained bytes, storage listing time, catalog statement time, and settlement/renewal calls. The configured queue lease must cover those bounds. A lost lease or uncertain settlement ends the run without prematurely acknowledging unfinished input; the live recovery proof must demonstrate convergence after replay.
 
 ## Execution and access checkpoints

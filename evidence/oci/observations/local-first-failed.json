@@ -1,0 +1,19 @@
+{
+  "provider": "OCI",
+  "region": "us-sanjose-1",
+  "catalog": "in-memory test double",
+  "cloud_pipeline": "Object Storage -> Events -> Function -> Queue -> real RTMSF core",
+  "checks": [],
+  "passed": false,
+  "observed_event_types": [
+    "com.oraclecloud.objectstorage.createobject"
+  ],
+  "worker_records": [
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "dead_lettered": false
+    }
+  ]
+}

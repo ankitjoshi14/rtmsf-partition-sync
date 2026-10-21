@@ -1,0 +1,4 @@
+{
+  "failure": "unsupported 0-VPU boot-volume setting; provider terminated provisioning",
+  "temporary_iam_removed": true
+}

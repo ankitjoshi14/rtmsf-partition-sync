@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "shape": "VM.Standard.A1.Flex",
+  "ocpus": 1,
+  "memory_gb": 2,
+  "boot_gb": 50,
+  "boot_vpus": 10,
+  "catalog": "in-memory test double",
+  "started_at": "2026-10-15T05:56:35.130936+00:00",
+  "finished_at": "2026-10-15T06:03:54.965998+00:00",
+  "stages": [
+    {
+      "case": "lifecycle",
+      "checks": 9,
+      "passed": true
+    },
+    {
+      "case": "bursts",
+      "checks": 4,
+      "notifications": 27,
+      "reconciliations": 6,
+      "acknowledgements": 27,
+      "passed": true
+    },
+    {
+      "case": "worker_restart",
+      "same_event_redelivered": true,
+      "replay_summary": {
+        "notifications": 1,
+        "reconciliations": 1,
+        "acknowledgements": 1
+      },
+      "cleanup_delete_reconciled": true,
+      "passed": true
+    }
+  ],
+  "lifecycle_prefix": "compute-life-20261015T055635/",
+  "restart_prefix": "compute-restart-20261015T055635/",
+  "burst_prefix": "burst-20261015T055951/",
+  "queue_before": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "quarantine_before": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "queue_final": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "quarantine_final": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "source_archive_sha256": "988a5c8b4c5d2710d6fa547dc9628012cf28708f95fe6284301d3dacc7b574a6",
+  "rule_disabled": true,
+  "temporary_compute_termination_requested": true,
+  "temporary_iam_removed": true,
+  "interruption": {
+    "signal": "SIGKILL",
+    "buffered_without_ack": true,
+    "renewal_confirmed": true,
+    "old_process_stopped_before_replacement": true
+  }
+}

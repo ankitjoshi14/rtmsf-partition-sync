@@ -1,0 +1,82 @@
+{
+  "passed": false,
+  "shape": "VM.Standard.A1.Flex",
+  "ocpus": 1,
+  "memory_gb": 2,
+  "boot_gb": 50,
+  "boot_vpus": 10,
+  "catalog": "in-memory test double",
+  "started_at": "2026-10-15T05:45:57.465384+00:00",
+  "finished_at": "2026-10-15T05:48:39.794068+00:00",
+  "stages": [
+    {
+      "case": "lifecycle",
+      "checks": 9,
+      "passed": true
+    }
+  ],
+  "lifecycle_prefix": "compute-life-20261015T054557/",
+  "restart_prefix": "compute-restart-20261015T054557/",
+  "queue_before": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "quarantine_before": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "queue_final": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "quarantine_final": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "source_archive_sha256": "51361bddcea70dc9b1964d3509ad2e5fd31a50d204936fb0da9a999e3545ece6",
+  "rule_disabled": true,
+  "temporary_compute_termination_requested": true,
+  "temporary_iam_removed": true,
+  "error_type": "RuntimeError",
+  "error": "bursts_exit_1"
+}

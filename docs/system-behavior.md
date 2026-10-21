@@ -51,14 +51,24 @@ a later notification can open another window for the same partition.
 
 WOERA uses ADD dominance within a window; the intent remains a candidate. PMCP
 checks actual storage. A DELETE observation can repair an absent catalog entry
-when surviving data proves that the partition should exist. Empty-partition
-checks consider any object under the partition prefix, including marker files.
+when surviving data proves that the partition should exist. Membership follows
+the provider's storage evidence contract:
 
-Deleting the last Parquet file while `_SUCCESS` remains keeps the registration;
-deleting `_SUCCESS` then triggers removal. A marker alone can also cause registration,
-because membership means any stored object, not queryable data. This does not inspect
-schemas or validate file formats. Events outside a fully matched configured partition
-path remain ignored; initial alignment and delivery of relevant events are required.
+- AWS and GCP count any object under the partition prefix, including markers.
+  Deleting the last Parquet file while `_SUCCESS` remains keeps registration;
+  deleting `_SUCCESS` then triggers removal. A marker alone can cause registration.
+- Azure counts eligible files, excluding directories and any path segment
+  beginning with `.` or `_`, including `_SUCCESS` and temporary control paths.
+  It rejects table-root segments and partition-column names with those prefixes
+  at startup. Values such as `dt=_a` remain eligible. Marker-only directories
+  do not preserve registration.
+- OCI's live checks exercised object membership with an in-memory catalog;
+  external catalog integration remains unvalidated.
+
+Storage evidence does not inspect schemas or validate file formats, and
+registration does not imply queryable data. Events outside a fully matched
+configured partition path remain ignored; initial alignment and delivery of
+relevant events are required.
 
 An ADD whose observed data is absent is retried with a bounded policy. If the
 objects were created and then deleted before reconciliation, this can end in a

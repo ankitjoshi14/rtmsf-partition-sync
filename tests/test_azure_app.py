@@ -162,6 +162,8 @@ def test_config_has_one_source_one_table_and_exact_derived_root():
     {"RTMSF_TABLE_ID": "proof.default.worker_probe.extra"}, {"RTMSF_TABLE_ID": "proof.default.worker\nprobe"},
     {"RTMSF_ROOT_PREFIX": "worker_probe"}, {"RTMSF_ROOT_PREFIX": "/worker_probe/"},
     {"RTMSF_ROOT_PREFIX": "worker_probe/../"}, {"RTMSF_ROOT_PREFIX": "worker_probe//"},
+    {"RTMSF_ROOT_PREFIX": "_worker_probe/"}, {"RTMSF_ROOT_PREFIX": ".worker_probe/"},
+    {"RTMSF_ROOT_PREFIX": "worker_probe/_data/"}, {"RTMSF_ROOT_PREFIX": "worker_probe/.data/"},
     {"RTMSF_ROOT_PREFIX": "worker_probe/\u202e/"},
     {"AZURE_SERVICE_BUS_NAMESPACE": "https://proof-worker.servicebus.windows.net"},
     {"AZURE_SERVICE_BUS_NAMESPACE": "proof-worker.servicebus.windows.net:443"},

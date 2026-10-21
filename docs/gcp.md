@@ -103,7 +103,8 @@ src/experiments/gcp/                Finite worker, crash harness and soak
 evidence/gcp/
   README.md                         Outcomes, failures and evidence scope
   report_inputs.json                Saved results
-  schema.sql                        Captured table and partition DDL
+  schema.sql                        Logical DDL and ownership restore reference
+  fixtures/                         Exact synthetic Parquet input bytes
   observations/                     Native gates, recoveries and final proofs
   scripts/                          Preserved query and verification helpers
   export-provenance.json             Original/exported file fingerprints

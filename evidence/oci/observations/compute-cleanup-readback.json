@@ -1,0 +1,40 @@
+{
+  "instance_state": "TERMINATED",
+  "boot_state": "TERMINATED",
+  "rule_enabled": false,
+  "policy_removed": true,
+  "dynamic_group_removed": true,
+  "queue": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "quarantine": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "queues_empty": true,
+  "all_temporary_instances_terminated": true,
+  "all_temporary_boot_volumes_terminated": true,
+  "all_temporary_iam_removed": true,
+  "cleanup_verified": true
+}

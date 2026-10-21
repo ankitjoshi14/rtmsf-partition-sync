@@ -44,10 +44,11 @@ Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/getting-started/install
 ```bash
 git clone https://github.com/ankitjoshi14/rtmsf-partition-sync.git
 cd rtmsf-partition-sync
-uv sync --frozen --extra dev
-uv run --frozen --extra dev pytest -q
+uv sync --frozen --extra dev --extra oci --extra azure --extra gcp
+uv run --frozen --extra dev --extra oci --extra azure --extra gcp pytest -q
 ```
 
+The full suite imports provider SDKs, so install all three provider extras as in CI.
 Local tests use fakes and SDK stubs. They need no cloud account.
 
 ## Repository layout
