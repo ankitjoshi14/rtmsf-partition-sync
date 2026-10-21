@@ -10,7 +10,11 @@ gates and a completed 24-hour serialized lifecycle run.
 
 ![RTMSF deployment architecture on GCP](figures/gcp-deployment.svg)
 
-The diagram follows the AWS and Azure layout, with generic service symbols.
+The diagram follows the AWS and Azure layout, using current official Google
+Cloud symbols. Storage and Compute Engine have product icons; Pub/Sub and
+Metastore use Google's prescribed Data Analytics category icon, and IAM uses
+Security Identity. [Icon sources and mappings](figures/gcp-icons.md) record the
+official packages and fingerprints. The experiment tools use plain cards.
 
 The producer and supervisor are experiment tools. The supervisor starts one
 finite worker at a time and records actual child exits before replacements.
@@ -79,12 +83,21 @@ were not established. AWS performance graphs remain AWS measurements.
 
 ## Saved experiment layout
 
-GCP follows the same provider guide, deployment figure and evidence-bundle
-structure used for AWS and Azure:
+GCP uses the same provider code and guide structure as AWS, OCI and Azure.
+Its selected evidence bundle follows Azure's layout. The existing differences
+are explicit:
+
+| Provider | Experiment code | Guide / deployment SVG | Saved evidence |
+|---|---|---|---|
+| AWS | `src/experiments/aws/` | `docs/aws.md`, `docs/figures/aws-deployment.svg` | Shared `evidence/figures/`, `activity/`, `buffer/`; no `evidence/aws/`. |
+| OCI | `src/experiments/oci/` | `docs/oci.md`, `docs/figures/oci-deployment.svg` | Guide references private, Git-ignored `runs/oci-validation/`; no `evidence/oci/`. |
+| Azure | `src/experiments/azure/` | `docs/azure.md`, `docs/figures/azure-deployment.svg` | `evidence/azure/` with observations, scripts, report inputs and fingerprints. |
+| GCP | `src/experiments/gcp/` | `docs/gcp.md`, `docs/figures/gcp-deployment.svg` | `evidence/gcp/` with the same bundle layout, plus schema and preservation records. |
 
 ```text
 docs/gcp.md                         Deployment, schema, validation and limits
 docs/figures/gcp-deployment.svg      Standalone architecture diagram
+docs/figures/gcp-icons.md            Official icon sources and mappings
 src/rtmsf/adapters/gcp.py            Storage, Pub/Sub and Hive adapters
 src/experiments/gcp/                Finite worker, crash harness and soak
 evidence/gcp/
