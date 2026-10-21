@@ -13,6 +13,10 @@ The core algorithm and report format stay separate from this provider's deployme
 
 ![RTMSF deployment on AWS](figures/aws-deployment.svg)
 
+The diagram uses official AWS architecture service and resource icons.
+[Icon sources and fingerprints](figures/aws-icons.md) record the July 31, 2026
+package and exact mappings, including separate ECS and Fargate symbols.
+
 S3 notifications enter SQS. One Fargate task runs routing, WOERA, and PMCP through AWS adapters.
 Routing loads Glue table definitions. PMCP checks S3 and reads, creates, or deletes Glue partitions.
 The worker renews queue visibility, acknowledges completed input, and sends terminal failures to a separate queue.
