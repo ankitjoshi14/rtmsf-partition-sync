@@ -76,9 +76,45 @@ Generate and enter any new OAuth credential through a user browser handoff into 
 
 ## Worker service
 
+Set the ingress Service Bus queue's **Lock duration to 5 minutes (`PT5M`, 300 seconds)** before starting the worker. The supplied application requires a 280-second delivery lease, leaving 20 seconds of margin. A queue with a 60-second lock fails receipt validation with `azure_broker_lease_too_short`; automatic renewal does not make that initial lock sufficient.
+
 Install a verified release under `/opt/rtmsf/releases/`, with `/opt/rtmsf/current` pointing to it, and the supplied [systemd service](../deploy/azure/rtmsf.service) at `/etc/systemd/system/rtmsf.service`. The restricted `rtmsf` user must be able to read and execute the release. Only `/var/lib/rtmsf` is writable by the service; it contains the fixed host lock and durable Databricks mutation journal. Preserve both files across upgrades, stop the old service, and confirm `MainPID=0` before changing the release link.
 
-Place the credential-free configuration in `/etc/rtmsf/azure.env`, owned by `root:rtmsf` with mode `0640`. Set `RTMSF_SOURCES` to the one approved account/container/full ARM topic mapping; set `RTMSF_TABLE_ID`, `RTMSF_ROOT_PREFIX`, `AZURE_SERVICE_BUS_NAMESPACE`, `AZURE_SERVICE_BUS_QUEUE`, `AZURE_KEY_VAULT_URL`, `DATABRICKS_HOST`, `DATABRICKS_WAREHOUSE_ID`, and `DATABRICKS_CLIENT_ID`. The application retrieves only `databricks-client-secret` from Key Vault in memory.
+On the approved Linux VM, place the verified source, `pyproject.toml` and `uv.lock` in the new release directory. With uv and the `rtmsf` system account already installed, create its dependency environment there. Run these commands sequentially and stop if one fails:
+
+```sh
+set -eu
+cd /opt/rtmsf/releases/REPLACE_WITH_VERIFIED_RELEASE
+sudo "$(command -v uv)" sync --frozen --no-dev --extra azure \
+  --python /usr/bin/python3.12 --no-python-downloads
+sudo -u rtmsf .venv/bin/python -c 'import rtmsf.azure_app'
+```
+
+This creates the release's `.venv` used by the service; the import check makes no cloud calls. The example assumes system Python 3.12 at `/usr/bin/python3.12`. Adjust that path for the VM, keeping the interpreter readable/executable by `rtmsf` outside any home directory because the service uses `ProtectHome=true`. Build the environment at its final release path; do not move a prepared `.venv` from another directory or machine.
+
+Using VM Run Command, write `/etc/rtmsf/azure.env` **on the VM** with the following noninteractive block. Replace every example resource value with its approved counterpart before submitting it:
+
+```sh
+set -eu
+sudo install -d -o root -g rtmsf -m 0750 /etc/rtmsf
+sudo tee /etc/rtmsf/azure.env >/dev/null <<'RTMSF_AZURE_ENV'
+RTMSF_SOURCES='{"orders":{"account":"yourstorageaccount","container":"your-container","topic":"/subscriptions/YOUR_SUBSCRIPTION_ID/resourceGroups/YOUR_RESOURCE_GROUP/providers/Microsoft.Storage/storageAccounts/yourstorageaccount"}}'
+RTMSF_TABLE_ID=your_catalog.your_schema.orders
+RTMSF_ROOT_PREFIX=orders/
+AZURE_SERVICE_BUS_NAMESPACE=your-namespace.servicebus.windows.net
+AZURE_SERVICE_BUS_QUEUE=your-event-queue
+AZURE_KEY_VAULT_URL=https://your-vault.vault.azure.net
+DATABRICKS_HOST=https://adb-1234567890123456.7.azuredatabricks.net
+DATABRICKS_WAREHOUSE_ID=YOUR_WAREHOUSE_ID
+DATABRICKS_CLIENT_ID=YOUR_CLIENT_ID
+RTMSF_AZURE_ENV
+sudo chown root:rtmsf /etc/rtmsf/azure.env
+sudo chmod 0640 /etc/rtmsf/azure.env
+```
+
+`RTMSF_SOURCES` maps one logical source ID to an object with exactly `account`, `container` and `topic`; `topic` is the full storage-account ARM ID and must name the same account. `RTMSF_TABLE_ID` is an existing `catalog.schema.table`. `RTMSF_ROOT_PREFIX` is its container-relative root and must end in `/`; the example requires table location `abfss://your-container@yourstorageaccount.dfs.core.windows.net/orders/`. The namespace is a hostname; the Key Vault and Databricks endpoints include `https://`.
+
+The configuration contains resource identifiers only. The application retrieves `databricks-client-secret` from Key Vault in memory; keep that OAuth secret out of the file and Git.
 
 The service runs the [worker app](../src/rtmsf/azure_app.py) with `python -m rtmsf.azure_app` from the release's Azure dependency environment. Automatic restart is disabled so an uncertain mutation or settlement remains visible for reconciliation. Start it only after the approved table metadata, permissions, event filters, queue retention, and live-session budget are verified. Use `systemctl stop rtmsf` and confirm the process has exited before deallocating the VM.
 
