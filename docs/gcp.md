@@ -53,10 +53,12 @@ All three tables use Parquet storage descriptors and `EXTERNAL_TABLE`.
 `gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data`.
 Its immutable `_OWNER.json` object is also checked before mutation.
 
-[schema.sql](../evidence/gcp/schema.sql) records the captured database/table DDL
-and exact retained partition locations. The fresh catalog JSON in the evidence
-bundle preserves the actual descriptors, parameters and partition values.
-The DDL is a reference for reconstruction and does not recreate the data files.
+[schema.sql](../evidence/gcp/schema.sql) is a logical reconstruction reference
+derived from captured database/table metadata and exact retained partition
+locations. The fresh catalog JSON preserves actual descriptors, parameters and
+partition values. Follow the [ownership/descriptor restoration guidance](../evidence/gcp/scripts/README.md#metadata-reconstruction-reference)
+before starting a restored worker. Restoration is untested and the DDL does not
+recreate data files.
 
 ## Implementation and validation
 
@@ -90,7 +92,7 @@ are explicit:
 | Provider | Experiment code | Guide / deployment SVG | Saved evidence |
 |---|---|---|---|
 | AWS | `src/experiments/aws/` | `docs/aws.md`, `docs/figures/aws-deployment.svg` | Shared `evidence/figures/`, `activity/`, `buffer/`; no `evidence/aws/`. |
-| OCI | `src/experiments/oci/` | `docs/oci.md`, `docs/figures/oci-deployment.svg` | Guide references private, Git-ignored `runs/oci-validation/`; no `evidence/oci/`. |
+| OCI | `src/experiments/oci/` | `docs/oci.md`, `docs/figures/oci-deployment.svg` | [Selected reports, failures and source fingerprints](../evidence/oci/README.md) in `evidence/oci/`; full original records remain private. |
 | Azure | `src/experiments/azure/` | `docs/azure.md`, `docs/figures/azure-deployment.svg` | `evidence/azure/` with observations, scripts, report inputs and fingerprints. |
 | GCP | `src/experiments/gcp/` | `docs/gcp.md`, `docs/figures/gcp-deployment.svg` | `evidence/gcp/` with the same bundle layout, plus schema and preservation records. |
 

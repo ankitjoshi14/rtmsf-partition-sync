@@ -97,7 +97,9 @@
       "source_relative_path": "outputs/oci-compute/source-manifest.json",
       "source_sha256": "2787c127e182bfad8381b6e16d5873575e3a4cd5325f32cbccea3c092a7dc97e",
       "exported_path": "source-provenance.json",
-      "exported_sha256": "72221ced42fa64957c03febbec8414636051ba4a6222ce386d3ec84877c34adf"
+      "exported_sha256": "e48aff0f0b402fd8d6c5416f7240c3a1835efa5bb883b280345ee6c8e01b949e",
+      "previous_exported_sha256": "72221ced42fa64957c03febbec8414636051ba4a6222ce386d3ec84877c34adf",
+      "correction": "Corrected the source-layout description to reference the existing Function handler and manual ZIP instructions; no original source fingerprints or observations changed."
     },
     {
       "source_relative_path": "outputs/oci-compute/run-20261015T054557/bursts.log",

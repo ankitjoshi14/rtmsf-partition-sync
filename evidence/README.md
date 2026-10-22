@@ -1,9 +1,9 @@
 # Experiment evidence
 
-This folder contains selected reports from saved experiment runs. It belongs in Git alongside the source code.
-The exporter copies measurement CSVs unchanged and generates reports from saved inputs.
+This folder contains selected AWS measurements and OCI/Azure/GCP functional proof records. It belongs in Git alongside the source code.
+The AWS exporter copies measurement CSVs unchanged and generates reports from saved inputs.
 Original execution records remain separate under `runs/` and are Git-ignored.
-Start with [SUMMARY.md](SUMMARY.md) for settings and outcomes.
+Start with [SUMMARY.md](SUMMARY.md) for AWS settings and outcomes; use the separate provider bundles below for functional evidence.
 The separate [OCI functional proof](oci/README.md) preserves selected original
 local/Compute reports, failures and deployed-source fingerprints; its catalog
 was an in-memory test double.

@@ -40,6 +40,10 @@ has the same schema and one `probe-b` row; SHA256
 These are exact original bytes, not regenerated Parquet with new writer metadata.
 `experiments.gcp.soak.load_fixture` validates a's size and hash before cloud access.
 
+The [finite worker](../../../src/experiments/gcp/run.py) requires `--resources`,
+`--output-dir` and `--duration-seconds`. The [soak supervisor](../../../src/experiments/gcp/soak.py)
+requires those three plus `--gates`, `--baseline` and `--fixture-a`.
+
 | Input | Required content and source |
 |---|---|
 | `--resources` | Private deployment record accepted by `experiments.gcp.run.load_resources`: approved project/account, private Thrift endpoint, passed catalog gate, `native_run` and `native_pipeline_setup` matching the pinned constants. It is intentionally not a portable deployment config. |
@@ -47,6 +51,7 @@ These are exact original bytes, not regenerated Parquet with new writer metadata
 | `--baseline` | A fresh pre-run object inventory containing exactly `name`, `generation`, `size`, `sha256` for each protected object, including the pinned owner and b sentinel. It must exclude `dt=soak/` and `_SOAK_PULSE`. A final post-run inventory is not an interchangeable baseline. |
 | `--fixture-a` | The preserved a file above. |
 | `--output-dir` | Fresh private run directory; preserve parent/child records plus the independent wrapper PID/start/finish/exit records outside that directory. |
+| `--duration-seconds` | Required integer from 1 through 86,400 for both launchers. The recorded full soak used 86,400 seconds. This selects finite runtime; native settling/retry/cleanup can extend process elapsed time beyond the producer duration. |
 
 The finite worker requires the Linux host locks, reviewed dependencies and
 private storage/Pub/Sub/Hive access described in [the GCP guide](../../../docs/gcp.md).

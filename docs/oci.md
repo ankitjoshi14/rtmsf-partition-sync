@@ -1,6 +1,6 @@
 # OCI event/storage integration
 
-The `oci` branch adds OCI Object Storage and Queue adapters and a Function bridge to the existing provider-neutral core. The core algorithm and AWS adapters are unchanged. The catalog adapter is deferred.
+The OCI implementation supplies Object Storage and Queue adapters and a Function bridge to the existing provider-neutral core. The core algorithm and AWS adapters are unchanged. The catalog adapter is deferred.
 
 ![RTMSF validated integration with OCI](figures/oci-deployment.svg)
 
@@ -9,8 +9,9 @@ The diagram shows the tested OCI services and the worker deployed on OCI Compute
 Selected original reports, failures and deployed-source fingerprints are now
 shared in [evidence/oci/](../evidence/oci/README.md). References below to
 `runs/oci-validation/` describe the original private archive; that directory is
-not part of this clone. The current `deploy/oci/` Function packaging was
-relocated after validation and has not been redeployed.
+not part of this clone. The current [Function handler](../src/rtmsf/oci_function.py)
+was relocated into the package after validation. The manual ZIP layout below
+has not been redeployed from this source layout.
 
 A small live proof on October 12, 2026 in `us-sanjose-1` passed nine cases through Object Storage → Events → Function → Queue → unchanged routing/WOERA/PMCP/worker. The worker used an in-memory catalog and ran locally. Queue receipt renewal and redelivery also passed across separate processes. An additional live burst run grouped 27 notifications into six reconciliations, with all 27 acknowledged afterward. The recorded outcomes are summarized below; original logs are retained locally under `runs/oci-validation/`.
 
@@ -43,9 +44,9 @@ extras as in CI. Local tests make no cloud calls.
 
 ## Components
 
-- `src/rtmsf/adapters/oci.py`: `decode_event`, `enqueue_event`, `OciQueueEventSource`, and `OciObjectStore`.
-- `src/rtmsf/oci_function.py`: resource-principal Function handler; succeeds only after Queue publication is confirmed.
-- `src/experiments/oci/run.py`, `bursts.py`, `restart.py`: finite lifecycle, grouping, and two-process restart checks, with a clearly labelled `MemoryCatalog` test double.
+- [OCI adapters](../src/rtmsf/adapters/oci.py): `decode_event`, `enqueue_event`, `OciQueueEventSource`, and `OciObjectStore`.
+- [Function handler](../src/rtmsf/oci_function.py): resource-principal event bridge; succeeds only after Queue publication is confirmed. The Function does not run the synchronization worker.
+- [Lifecycle](../src/experiments/oci/run.py), [burst](../src/experiments/oci/bursts.py), and [restart](../src/experiments/oci/restart.py) runners: finite worker checks, with a clearly labelled `MemoryCatalog` test double.
 - `tests/test_oci_adapters.py`, `tests/test_oci_functional.py`, `tests/test_oci_bursts.py`: contract, failure, worker, and report tests.
 
 Map logical source IDs to `(namespace, bucket)` for both adapters. The parser accepts documented `objectstorage` and observed `ObjectStorage`, maps create/update to CREATE and delete to DELETE, and preserves exact object keys. Namespace and bucket must match together. Storage authorization errors must not imply absence.
@@ -97,6 +98,12 @@ Live coalescing is verified by the four burst cases, but real catalog writes, qu
 ## Live burst runner
 
 The separate finite runner tests concurrent production/consumption with one consumer: six creates in one partition, six across two partitions, three intentionally replayed duplicates, and twelve deletes. It uses a fresh timestamped prefix in the dedicated bucket and the existing bridge/rule/queues. By default it refuses an enabled rule or nonempty primary Queue/DLQ at startup, enables the dedicated rule for testing, and disables it in a finally block with API readback. On Compute, use `--instance-principal --external-rule-control`; a separate controller must own rule enable/disable and cleanup, so the guest requires no Events administration permission. Check the printed shutdown status and report if the process is interrupted or network access fails.
+
+Use the lifecycle runner's resource JSON fields above. Default runner-controlled
+mode additionally requires `resources.rule.id`, identifying the dedicated Events
+rule named `rtmsf-object-events-20261012`, and permission to read/update that rule.
+With `--external-rule-control`, the runner does not read `resources.rule.id`;
+the controller must enable the rule before the run and disable it afterward.
 
 ```sh
 uv run --frozen --extra oci python -m experiments.oci.bursts \

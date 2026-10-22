@@ -47,7 +47,7 @@ The VM service uses no public IP or inbound ports, `Restart=no`, a fixed host lo
 | Databricks Access Connector | Authorize the SQL engine's governed storage reads. It does not authenticate the RTMSF worker to SQL. |
 | VM journal / proof evidence | Record processing, settlement, and recovery evidence. Export the bounded proof logs before deallocating compute. |
 
-The user selected a single VM on October 15, 2026, to match AWS EC2 ownership. Container Apps Single revision mode and maximum one replica do not guarantee one active process during replacement or platform prewarming, so they are insufficient for the unchanged core. The VM path avoids adding distributed worker ownership to this first port.
+The user selected a single VM on October 15, 2026, to preserve single-worker ownership. The supplied AWS experiment uses one ECS/Fargate worker. Container Apps Single revision mode and maximum one replica do not guarantee one active process during replacement or platform prewarming, so they are insufficient for the unchanged core. The VM path avoids adding distributed worker ownership to this first port.
 
 ## First functional contract
 
@@ -76,11 +76,11 @@ Generate and enter any new OAuth credential through a user browser handoff into 
 
 ## Worker service
 
-Install a verified release under `/opt/rtmsf/releases/`, with `/opt/rtmsf/current` pointing to it, and the service file at `/etc/systemd/system/rtmsf.service`. The restricted `rtmsf` user must be able to read and execute the release. Only `/var/lib/rtmsf` is writable by the service; it contains the fixed host lock and durable Databricks mutation journal. Preserve both files across upgrades, stop the old service, and confirm `MainPID=0` before changing the release link.
+Install a verified release under `/opt/rtmsf/releases/`, with `/opt/rtmsf/current` pointing to it, and the supplied [systemd service](../deploy/azure/rtmsf.service) at `/etc/systemd/system/rtmsf.service`. The restricted `rtmsf` user must be able to read and execute the release. Only `/var/lib/rtmsf` is writable by the service; it contains the fixed host lock and durable Databricks mutation journal. Preserve both files across upgrades, stop the old service, and confirm `MainPID=0` before changing the release link.
 
 Place the credential-free configuration in `/etc/rtmsf/azure.env`, owned by `root:rtmsf` with mode `0640`. Set `RTMSF_SOURCES` to the one approved account/container/full ARM topic mapping; set `RTMSF_TABLE_ID`, `RTMSF_ROOT_PREFIX`, `AZURE_SERVICE_BUS_NAMESPACE`, `AZURE_SERVICE_BUS_QUEUE`, `AZURE_KEY_VAULT_URL`, `DATABRICKS_HOST`, `DATABRICKS_WAREHOUSE_ID`, and `DATABRICKS_CLIENT_ID`. The application retrieves only `databricks-client-secret` from Key Vault in memory.
 
-The service runs `python -m rtmsf.azure_app` from the release's Azure dependency environment. Automatic restart is disabled so an uncertain mutation or settlement remains visible for reconciliation. Start it only after the approved table metadata, permissions, event filters, queue retention, and live-session budget are verified. Use `systemctl stop rtmsf` and confirm the process has exited before deallocating the VM.
+The service runs the [worker app](../src/rtmsf/azure_app.py) with `python -m rtmsf.azure_app` from the release's Azure dependency environment. Automatic restart is disabled so an uncertain mutation or settlement remains visible for reconciliation. Start it only after the approved table metadata, permissions, event filters, queue retention, and live-session budget are verified. Use `systemctl stop rtmsf` and confirm the process has exited before deallocating the VM.
 
 ## Completion evidence
 

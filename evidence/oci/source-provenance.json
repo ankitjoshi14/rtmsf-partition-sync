@@ -412,5 +412,5 @@
       "bytes": 9981
     }
   ],
-  "scope": "Guest archive digest agrees with source manifest and successful Compute report. Archive remains outside Git; per-file fingerprints identify the uncommitted deployed source. Current deploy/oci packaging has not been redeployed."
+  "scope": "Guest archive digest agrees with source manifest and successful Compute report. Archive remains outside Git; per-file fingerprints identify the uncommitted deployed source. The current src/rtmsf/oci_function.py handler was relocated into the package after Function validation; the documented manual Function ZIP layout has not been redeployed from this source layout."
 }

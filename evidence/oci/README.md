@@ -65,8 +65,9 @@ report and source manifest; the selected [guest digest record](observations/gues
 provides the independent on-VM checksum observation.
 Its core and OCI implementation files match repository commit
 `de9789ea5130a8315163defdccd34dc8820743b1`. The retained original Function source
-copies have separate fingerprints; the current `deploy/oci/` packaging was
-relocated after validation and has not been redeployed.
+copies have separate fingerprints; the current [Function handler](../../src/rtmsf/oci_function.py)
+was relocated into the package after validation. Its [manual ZIP layout](../../docs/oci.md#live-resources-and-authentication)
+has not been redeployed from this source layout.
 
 [export-provenance.json](export-provenance.json) records the original path/hash
 and exported hash for each selected report or terminal exception. Selection

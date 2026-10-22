@@ -9,8 +9,11 @@ Independent ingestion and cleanup jobs can change data files directly in object 
 RTMSF centralizes partition-membership maintenance for these existing tables.
 It processes notifications and checks affected partitions without rescanning the complete table.
 
-The first object triggers registration; intermediate changes preserve occupied entries; final deletion triggers removal after storage verification.
+The first eligible stored object triggers registration; intermediate changes preserve occupied entries; final deletion triggers removal after storage verification.
 These updates follow the configured processing window. Membership does not establish batch readiness.
+The [provider storage contracts](docs/system-behavior.md#routing-and-processing)
+define eligible evidence: Azure excludes hidden/control files and directories;
+AWS and GCP count markers.
 
 WOERA groups events by partition. PMCP verifies storage and updates catalog membership.
 Tables and their schemas already exist; RTMSF does not discover tables or infer schemas.
@@ -36,6 +39,18 @@ The GCP VM worker passed twelve native GCS/Pub/Sub/Hive Metastore gates and a fr
 | Provision AWS resources and reproduce experiments | [AWS experiment setup](docs/aws.md#aws-experiment-setup) |
 | Understand the five graphs, recovery table, and supporting checks | [Experiment specification](docs/experiments.md) |
 | Inspect results or redraw saved graphs without cloud access | [Evidence guide](evidence/README.md) |
+
+### Cloud entry points
+
+All four paths use the shared synchronization core. Their launchers and validated
+catalog boundaries differ; OCI and GCP supply finite proof runners.
+
+| Provider | Code entry point | Deployment / validation path | Saved evidence |
+|---|---|---|---|
+| [AWS](docs/aws.md) | [Worker app](src/rtmsf/aws_app.py) | [ECS/Fargate experiment setup](docs/aws.md#aws-experiment-setup) and [benchmark runners](src/experiments/aws/) | [AWS measurements](evidence/SUMMARY.md) |
+| [OCI](docs/oci.md) | [Function event bridge](src/rtmsf/oci_function.py) and [finite worker checks](src/experiments/oci/run.py) | [Manual Function packaging](docs/oci.md#live-resources-and-authentication); [burst/restart runners](src/experiments/oci/) use an in-memory catalog | [OCI proof](evidence/oci/README.md) |
+| [Azure](docs/azure.md) | [Worker app](src/rtmsf/azure_app.py) | [VM systemd service](deploy/azure/rtmsf.service) and [crash harness](src/experiments/azure/crash_worker.py), with real Databricks integration | [Azure proof](evidence/azure/README.md) |
+| [GCP](docs/gcp.md) | [Finite worker](src/experiments/gcp/run.py) and [soak supervisor](src/experiments/gcp/soak.py) | [Approved lab inputs](evidence/gcp/scripts/README.md#inputs-and-approval-prerequisites), with real Hive integration | [GCP proof](evidence/gcp/README.md) |
 
 ## Install and test locally
 
@@ -64,19 +79,21 @@ src/experiments/   Saved-result reporting and evidence export
 tests/             Local verification
 docs/              System behavior, experiment specification, and provider guides
   figures/         Shared architecture and AWS, OCI, Azure, GCP deployment SVGs
-evidence/          AWS paper measurements and selected Azure/GCP functional evidence
-  azure/, gcp/     Provider results, observations, scripts and fingerprints
+deploy/azure/      Supplied Azure VM systemd service
+evidence/          AWS paper measurements and selected OCI/Azure/GCP functional evidence
+  oci/             Selected reports, failures and deployed-source fingerprints
+  azure/, gcp/     Provider results, observations, scripts, inputs and fingerprints
 runs/              Original local execution records; generated and Git-ignored
 ```
 
 Cloud-specific setup belongs in its provider guide and implementation folder.
-AWS experiment runners share the benchmark report format. OCI functional checks write separate JSON records under Git-ignored `runs/`; their outcomes are summarized in the OCI guide.
+AWS experiment runners share the benchmark report format. OCI functional checks write separate JSON records under Git-ignored `runs/`; selected outcomes and provenance are shared in [evidence/oci/](evidence/oci/README.md).
 The [experiment specification](docs/experiments.md) defines that format and the measurements.
 
 Experiment runners save measurements and generate reports under `runs/`.
-The offline exporter creates selected, verified bundles for sharing in `evidence/`.
+The AWS offline exporter creates selected, verified measurement bundles for sharing in `evidence/`.
 That folder belongs in Git; raw runs remain separate. Exporting does not rerun an experiment.
-Current evidence covers up to 10K starting partitions. Larger extensions remain unmeasured.
+Current AWS measurements cover up to 10K starting partitions. Larger extensions remain unmeasured.
 
 ## Contributing and citation
 
