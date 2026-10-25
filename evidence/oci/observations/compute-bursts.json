@@ -1,0 +1,558 @@
+{
+  "provider": "OCI",
+  "region": "us-sanjose-1",
+  "catalog": "in-memory test double",
+  "prefix": "burst-20261015T055951/",
+  "authentication": "instance principal",
+  "checks": [
+    {
+      "case": "six_creates_one_partition",
+      "status": "passed",
+      "producer_seconds": 0.119,
+      "partitions": [
+        "dt=a"
+      ],
+      "notifications": 6,
+      "reconciliations": 1,
+      "acknowledgements": 6,
+      "observations_per_partition": {
+        "dt=a": 6
+      }
+    },
+    {
+      "case": "six_creates_two_partitions",
+      "status": "passed",
+      "producer_seconds": 0.242,
+      "partitions": [
+        "dt=a",
+        "dt=b"
+      ],
+      "notifications": 6,
+      "reconciliations": 2,
+      "acknowledgements": 6,
+      "observations_per_partition": {
+        "dt=a": 3,
+        "dt=b": 3
+      }
+    },
+    {
+      "case": "three_duplicate_notifications",
+      "status": "passed",
+      "producer_seconds": 0.079,
+      "partitions": [
+        "dt=a",
+        "dt=b"
+      ],
+      "notifications": 3,
+      "reconciliations": 1,
+      "acknowledgements": 3,
+      "observations_per_partition": {
+        "dt=a": 3
+      }
+    },
+    {
+      "case": "twelve_deletes_two_partitions",
+      "status": "passed",
+      "producer_seconds": 0.161,
+      "partitions": [],
+      "notifications": 12,
+      "reconciliations": 2,
+      "acknowledgements": 12,
+      "observations_per_partition": {
+        "dt=a": 9,
+        "dt=b": 3
+      }
+    }
+  ],
+  "passed": true,
+  "settings": {
+    "settling_ms": 5000,
+    "maximum_ms": 20000,
+    "queue_lease_seconds": 120,
+    "max_pending_deliveries": 20,
+    "poll_wait_seconds": 0
+  },
+  "started_at": "2026-10-15T05:59:51.313826+00:00",
+  "duration_seconds": 87.966,
+  "rule_control": "external controller",
+  "primary_queue_final": {
+    "queue": {
+      "visible_messages": 6,
+      "in_flight_messages": 6,
+      "size_in_bytes": 10764
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "quarantine_final": {
+    "queue": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "dlq": {
+      "visible_messages": 0,
+      "in_flight_messages": 0,
+      "size_in_bytes": 0
+    },
+    "channel_id": null,
+    "consumer_group_id": null
+  },
+  "worker_records": [
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.56
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.56
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.56
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.56
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.56
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.56
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 14.711,
+      "source_id": "demo",
+      "table_id": "demo.bursts",
+      "partition": "dt=a",
+      "observation_count": 6,
+      "mutation": "ADD",
+      "status": "APPLIED",
+      "reason": "created"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 14.721,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 14.73,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 14.739,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 14.753,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 14.763,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 14.772,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 60.633
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 60.895
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 60.895
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 60.895
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 60.895
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 60.895
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 66.023,
+      "source_id": "demo",
+      "table_id": "demo.bursts",
+      "partition": "dt=a",
+      "observation_count": 3,
+      "mutation": "ADD",
+      "status": "NOOP",
+      "reason": "already_exists_verified"
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 66.034,
+      "source_id": "demo",
+      "table_id": "demo.bursts",
+      "partition": "dt=b",
+      "observation_count": 3,
+      "mutation": "ADD",
+      "status": "APPLIED",
+      "reason": "created"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 66.047,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 66.057,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 66.068,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 66.078,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 66.088,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 66.1,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 66.633
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 66.633
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 66.633
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 71.76,
+      "source_id": "demo",
+      "table_id": "demo.bursts",
+      "partition": "dt=a",
+      "observation_count": 3,
+      "mutation": "ADD",
+      "status": "NOOP",
+      "reason": "already_exists_verified"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 71.77,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 71.781,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 71.791,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 81.545
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 81.806
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 81.806
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 81.806
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 81.806
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 81.806
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 82.579
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 82.579
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 82.579
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 82.579
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 82.579
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 82.579
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 87.723,
+      "source_id": "demo",
+      "table_id": "demo.bursts",
+      "partition": "dt=b",
+      "observation_count": 3,
+      "mutation": "DROP",
+      "status": "APPLIED",
+      "reason": "deleted"
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 87.763,
+      "source_id": "demo",
+      "table_id": "demo.bursts",
+      "partition": "dt=a",
+      "observation_count": 9,
+      "mutation": "DROP",
+      "status": "APPLIED",
+      "reason": "deleted"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.774,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.785,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.796,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.806,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.816,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.828,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.838,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.848,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.858,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.868,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.878,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 87.889,
+      "dead_lettered": false
+    }
+  ]
+}

@@ -1,0 +1,796 @@
+{
+  "status": "passed",
+  "scope": "fresh read-only catalog/schema preservation before shutdown",
+  "observed_at": "2026-10-21T07:26:34.934374+00:00",
+  "endpoint": "thrift://10.76.0.4:9083",
+  "catalog": [
+    {
+      "database": {
+        "name": "gcp_probe_r20261018_e504",
+        "description": "Run-owned catalog safety probe",
+        "locationUri": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261018-e504",
+        "parameters": {
+          "gcp_probe_run_id": "r20261018-e504",
+          "transient_lastDdlTime": "1792440371"
+        },
+        "privileges": null,
+        "ownerName": null,
+        "ownerType": 1,
+        "catalogName": "hive"
+      },
+      "table": {
+        "tableName": "catalog_probe",
+        "dbName": "gcp_probe_r20261018_e504",
+        "owner": "gcp_catalog_probe",
+        "createTime": 1792440378,
+        "lastAccessTime": 0,
+        "retention": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261018-e504",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "partitionKeys": [
+          {
+            "name": "dt",
+            "type": "string",
+            "comment": "ordered partition value"
+          }
+        ],
+        "parameters": {
+          "external.table.purge": "false",
+          "EXTERNAL": "TRUE",
+          "gcp_probe_run_id": "r20261018-e504",
+          "transient_lastDdlTime": "1792440378"
+        },
+        "viewOriginalText": null,
+        "viewExpandedText": null,
+        "tableType": "EXTERNAL_TABLE",
+        "privileges": null,
+        "temporary": false,
+        "rewriteEnabled": false,
+        "creationMetadata": null,
+        "catName": "hive",
+        "ownerType": 1,
+        "writeId": 1
+      },
+      "partitions": []
+    },
+    {
+      "database": {
+        "name": "gcp_probe_r20261019_p1",
+        "description": "Run-owned catalog safety probe",
+        "locationUri": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1",
+        "parameters": {
+          "gcp_probe_run_id": "r20261019-p1",
+          "transient_lastDdlTime": "1792440955"
+        },
+        "privileges": null,
+        "ownerName": null,
+        "ownerType": 1,
+        "catalogName": "hive"
+      },
+      "table": {
+        "tableName": "catalog_probe",
+        "dbName": "gcp_probe_r20261019_p1",
+        "owner": "gcp_catalog_probe",
+        "createTime": 1792440963,
+        "lastAccessTime": 0,
+        "retention": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "tiny probe fixture"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-live-probe/r20261019-p1",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "catalog_probe",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "partitionKeys": [
+          {
+            "name": "dt",
+            "type": "string",
+            "comment": "ordered partition value"
+          }
+        ],
+        "parameters": {
+          "external.table.purge": "false",
+          "EXTERNAL": "TRUE",
+          "gcp_probe_run_id": "r20261019-p1",
+          "transient_lastDdlTime": "1792440963"
+        },
+        "viewOriginalText": null,
+        "viewExpandedText": null,
+        "tableType": "EXTERNAL_TABLE",
+        "privileges": null,
+        "temporary": false,
+        "rewriteEnabled": false,
+        "creationMetadata": null,
+        "catName": "hive",
+        "ownerType": 1,
+        "writeId": 2
+      },
+      "partitions": []
+    },
+    {
+      "database": {
+        "name": "gcp_native_r20261019n1",
+        "description": "RTMSF owned native GCP validation",
+        "locationUri": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data",
+        "parameters": {
+          "gcp_probe_run_id": "r20261019n1",
+          "transient_lastDdlTime": "1792445544"
+        },
+        "privileges": null,
+        "ownerName": null,
+        "ownerType": 1,
+        "catalogName": "hive"
+      },
+      "table": {
+        "tableName": "native_events",
+        "dbName": "gcp_native_r20261019n1",
+        "owner": "rtmsf_native_test",
+        "createTime": 1792445545,
+        "lastAccessTime": 0,
+        "retention": 0,
+        "sd": {
+          "cols": [
+            {
+              "name": "value",
+              "type": "string",
+              "comment": "native fixture value"
+            }
+          ],
+          "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data",
+          "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+          "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+          "compressed": false,
+          "numBuckets": -1,
+          "serdeInfo": {
+            "name": "native_events",
+            "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+            "parameters": {},
+            "description": null,
+            "serializerClass": null,
+            "deserializerClass": null,
+            "serdeType": null
+          },
+          "bucketCols": [],
+          "sortCols": [],
+          "parameters": {},
+          "skewedInfo": {
+            "skewedColNames": [],
+            "skewedColValues": [],
+            "skewedColValueLocationMaps": {}
+          },
+          "storedAsSubDirectories": false
+        },
+        "partitionKeys": [
+          {
+            "name": "dt",
+            "type": "string",
+            "comment": "ordered native partition"
+          }
+        ],
+        "parameters": {
+          "external.table.purge": "false",
+          "EXTERNAL": "TRUE",
+          "gcp_probe_run_id": "r20261019n1",
+          "transient_lastDdlTime": "1792445545"
+        },
+        "viewOriginalText": null,
+        "viewExpandedText": null,
+        "tableType": "EXTERNAL_TABLE",
+        "privileges": null,
+        "temporary": false,
+        "rewriteEnabled": false,
+        "creationMetadata": null,
+        "catName": "hive",
+        "ownerType": 1,
+        "writeId": 3
+      },
+      "partitions": [
+        {
+          "values": [
+            "a"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451389,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=a",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792451389"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "b"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792449019,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=b",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792449019"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "burst_one"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451385,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=burst_one",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "2628",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "6",
+            "transient_lastDdlTime": "1792451385"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "marker_keep"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451403,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=marker_keep",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792451403"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "marker_only"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451393,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=marker_only",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "0",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "0",
+            "transient_lastDdlTime": "1792451393"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "marker_slash"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451382,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=marker_slash",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "0",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "0",
+            "transient_lastDdlTime": "1792451382"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "nested_marker"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451391,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=nested_marker",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "0",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "0",
+            "transient_lastDdlTime": "1792451391"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "raw+%20 space#?"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451384,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=raw+%20 space#?",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792451384"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "recovery_add_after"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451135,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=recovery_add_after",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792451135"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "recovery_add_before"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792451031,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=recovery_add_before",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792451031"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        },
+        {
+          "values": [
+            "versions"
+          ],
+          "dbName": "gcp_native_r20261019n1",
+          "tableName": "native_events",
+          "createTime": 1792452844,
+          "lastAccessTime": 0,
+          "sd": {
+            "cols": [
+              {
+                "name": "value",
+                "type": "string",
+                "comment": "native fixture value"
+              }
+            ],
+            "location": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-native/native-r20261019n1/data/dt=versions",
+            "inputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+            "outputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+            "compressed": false,
+            "numBuckets": -1,
+            "serdeInfo": {
+              "name": "native_events",
+              "serializationLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+              "parameters": {},
+              "description": null,
+              "serializerClass": null,
+              "deserializerClass": null,
+              "serdeType": null
+            },
+            "bucketCols": [],
+            "sortCols": [],
+            "parameters": {},
+            "skewedInfo": {
+              "skewedColNames": [],
+              "skewedColValues": [],
+              "skewedColValueLocationMaps": {}
+            },
+            "storedAsSubDirectories": false
+          },
+          "parameters": {
+            "totalSize": "438",
+            "gcp_probe_run_id": "r20261019n1",
+            "numFiles": "1",
+            "transient_lastDdlTime": "1792452844"
+          },
+          "privileges": null,
+          "catName": "hive",
+          "writeId": -1
+        }
+      ]
+    }
+  ]
+}

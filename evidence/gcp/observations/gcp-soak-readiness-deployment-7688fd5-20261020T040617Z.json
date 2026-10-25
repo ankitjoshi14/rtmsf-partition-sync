@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-20T04:06:37.398437+00:00",
+  "candidate": "7688fd5523b8e1ca1677ae9cc0d9373df516e77c",
+  "old_processes_absent": 49,
+  "locks_held_during_install": 2,
+  "old_source_hashes": {
+    "soak": "7a011bf1a11fabe966407804f23dda9eccf22eee8cdd9578f161055d2b02beee",
+    "run": "ad05eb8d775953294ffbe49ad39c36448ad7447b9c8ff81292cb8b14719b0ee0",
+    "crash": "3b5dc6a60b19d1a281a1af428a5c3630122fe9e2e9951beb4bad6b9a853c869a",
+    "gcp": "2576905ecc56c69e0cf997570fc383892ea2fbac890cd60f756c1b3f78187e97"
+  },
+  "new_source_hashes": {
+    "soak": "6df26c8a45f5bdaa156ab9f2d0751400c2a472fd7b402ac90e2ca13b975d84b4",
+    "run": "ad05eb8d775953294ffbe49ad39c36448ad7447b9c8ff81292cb8b14719b0ee0",
+    "crash": "3b5dc6a60b19d1a281a1af428a5c3630122fe9e2e9951beb4bad6b9a853c869a",
+    "gcp": "2576905ecc56c69e0cf997570fc383892ea2fbac890cd60f756c1b3f78187e97"
+  },
+  "wheel_sha256": "f515eac00a615ec44d29d604da83fa496403ff8d46b3b17f9758600eff3ed308",
+  "install_exit": 0,
+  "pip_check_exit": 0,
+  "retained_prior_artifact": "/home/joshi_ankit1492_gmail_com/gcp-soak-artifact-79122ca"
+}

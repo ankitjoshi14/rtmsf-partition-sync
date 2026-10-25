@@ -1,0 +1,22 @@
+{
+  "commit": "7688fd5523b8e1ca1677ae9cc0d9373df516e77c",
+  "directory": "work/gcp-soak-reviewed-7688fd5",
+  "archive_sha256": "e719e14c66c3937fe128c4cd4df3c30a07832e80059a92378456329ed53df1d0",
+  "suite_exit": 0,
+  "tests_passed": 1369,
+  "suite_evidence": "outputs/gcp-soak-readiness-suite-7688fd5-20261020.log",
+  "initial_build_tool_failure": "outputs/gcp-soak-readiness-build-7688fd5-20261020.log",
+  "initial_build_tool_failure_reason": "No installed build module; existing setuptools backend used without new dependency",
+  "build_exit": 0,
+  "build_evidence": "outputs/gcp-soak-readiness-build-setuptools-7688fd5-20261020.log",
+  "source_hashes": {
+    "soak": "6df26c8a45f5bdaa156ab9f2d0751400c2a472fd7b402ac90e2ca13b975d84b4",
+    "run": "ad05eb8d775953294ffbe49ad39c36448ad7447b9c8ff81292cb8b14719b0ee0",
+    "crash": "3b5dc6a60b19d1a281a1af428a5c3630122fe9e2e9951beb4bad6b9a853c869a",
+    "gcp": "2576905ecc56c69e0cf997570fc383892ea2fbac890cd60f756c1b3f78187e97"
+  },
+  "wheel": "work/gcp-soak-reviewed-7688fd5/dist/rtmsf_partition_sync-0.2.0-py3-none-any.whl",
+  "wheel_sha256": "f515eac00a615ec44d29d604da83fa496403ff8d46b3b17f9758600eff3ed308",
+  "sdist": "work/gcp-soak-reviewed-7688fd5/dist/rtmsf_partition_sync-0.2.0.tar.gz",
+  "sdist_sha256": "c62604d30c21dbc5c81375517f398224ed1813eab3d46a1e87c6ba9b7437c6b6"
+}

@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "supervisor_status": "failed",
+  "creates": 944,
+  "deletes": 944,
+  "own_receipts": 1893,
+  "own_acknowledgments": 1888,
+  "own_terminal_events": 0,
+  "own_unacknowledged": 0,
+  "restarts": 47,
+  "failed_children": 48,
+  "all_child_exits_recorded": true,
+  "final_delete_correlated": true,
+  "serialized_ack_barriers_and_minimum_interval": true,
+  "scope": "completed cycles of stopped failed run; not 24-hour completion",
+  "minimum_seconds_after_mutation_confirmation": 5.006607601000724,
+  "actual_old_children_absent": 48,
+  "all_recorded_exits_precede_replacements": true,
+  "wrapper_exit_status": 1,
+  "wrapper_finished_utc": "2026-10-20T03:46:18Z",
+  "evidence": "outputs/gcp-soak-failed-final-archive-20261020T035252Z/gcp-soak-24h-79122ca-20261020T0038"
+}

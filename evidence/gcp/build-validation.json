@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-21T07:33:22.979252+00:00",
+  "branch": "gcp-native-proof",
+  "remote_main_is_ancestor": true,
+  "commits_behind_remote_main": 0,
+  "commits_ahead_before_documentation_commit": 32,
+  "remote_main": "47a81e395360e2f5370bb7c4d5a979bb33bc1edf",
+  "local_tests_passed": 1369,
+  "test_seconds": 7.4,
+  "wheel_source_bytes_match_reviewed_checkout": true,
+  "sdist_contains_gcp_implementation": true,
+  "artifacts": [
+    {
+      "file": "rtmsf_partition_sync-0.2.0-py3-none-any.whl",
+      "size": 160099,
+      "sha256": "7159dbdea8ba72999690befee3f69ec6e51949ff2b03b626993bbdbf947e5d9d"
+    },
+    {
+      "file": "rtmsf_partition_sync-0.2.0.tar.gz",
+      "size": 473961,
+      "sha256": "411e57c518b3e0a3615c8b9ae8cf40d7a41317d28e43a29a8eff66ef36abd18d"
+    }
+  ],
+  "cloud_experiments_rerun": false,
+  "remote_pushed": false
+}

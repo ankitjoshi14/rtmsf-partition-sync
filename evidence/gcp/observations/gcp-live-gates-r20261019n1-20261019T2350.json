@@ -1,0 +1,53 @@
+{
+  "run_id": "r20261019n1",
+  "gates": {
+    "native_add_query": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "lifecycle_drop_query": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "recovery_before_add": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "recovery_after_add": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "recovery_before_drop": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "recovery_after_drop": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "markers": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "special_names": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "burst": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "malformed_quarantine": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "versions": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    },
+    "stale_duplicate_replay": {
+      "status": "passed",
+      "evidence": "observations/gcp-live-gate-evidence-index-r20261019n1-20261019T2349.json"
+    }
+  }
+}

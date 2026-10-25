@@ -1,0 +1,28 @@
+{
+  "catalog": "in-memory test double",
+  "prefix": "compute-restart-20261015T055635/",
+  "authentication": "instance principal",
+  "passed": false,
+  "stage": "buffer",
+  "renewal_succeeded": true,
+  "buffered_without_ack": true,
+  "event_ids": [
+    "5bb881ff-1f02-9280-e5ec-72d02a6c73fe"
+  ],
+  "worker_records": [
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 9.029
+    }
+  ],
+  "event_identities": [
+    {
+      "eventID": "5bb881ff-1f02-9280-e5ec-72d02a6c73fe",
+      "eventType": "com.oraclecloud.objectstorage.createobject",
+      "eventTime": "2026-10-15T06:01:22Z"
+    }
+  ]
+}

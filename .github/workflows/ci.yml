@@ -20,8 +20,8 @@ jobs:
           version: "0.12.12"
           python-version: "3.12"
       - name: Install locked dependencies
-        run: uv sync --frozen --extra dev --extra oci
+        run: uv sync --frozen --extra dev --extra oci --extra azure --extra gcp
       - name: Run local tests
-        run: uv run --frozen --extra dev --extra oci pytest -q
+        run: uv run --frozen --extra dev --extra oci --extra azure --extra gcp pytest -q
       - name: Build distributions
         run: uv build

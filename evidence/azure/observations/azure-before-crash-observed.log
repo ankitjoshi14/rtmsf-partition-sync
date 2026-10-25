@@ -1,0 +1,11 @@
+Enable succeeded:
+[stdout]
+{"crash_check": "before_processing", "result": "PASS", "point": "before_processing", "pid": 2800, "table": "rtmsf_azure_proof_20261014.rtmsf_proof.worker_probe", "utc": "2026-10-16T08:28:17.135985+00:00", "pending_events": [{"event_id": "6949d31b-af77-423a-8dff-89f3ad62b252", "message_id": "c5750276-23cc-41c6-b9f5-0f74e378c1ec", "sequence_number": 27, "delivery_count": 0, "subject": "/blobServices/default/containers/proof/blobs/worker_probe/dt=recovery/recover.parquet"}], "journal": null}
+MainPID=0
+ExecMainCode=2
+ExecMainStatus=9
+ActiveState=failed
+
+{"stage": "recovery-queued", "result": "PASS", "return_code": 0, "rows": 12, "partitions": ["dt=burst"], "pending_queue": 1, "dlq_messages": 0, "sha256": "25ad2b6c73f48ef99198b807d723c17195e3da6515990f49628ed9126bfed6fa", "gzip_base64": "H4sIACvg0WoC/+1YwY7bNhC99ysMXRtaJEWJkgEfttm06CHNIt4egqIQKIps2diSSlLebIL99w4pO8m2sLqJLwXqmzVv3mj0ZjhD+EPivPhNJatFYpXs98reoz9HNao2ebZIRi8DQjEtEMGIFLe4XNFyRcol5TnjxbcYrzAOrv1dp2xw1i0TTZUpxDMpESMNQw1vJaICl4RkpVKEB8IgrDfe9J0D1i9J69fNaJ1PfgXM9nfR+gHMIeaEAGBaeCQYPzxbnMLIDEZnsGwGYzNYPoMVMxifwcoZrDqNkRldCHkIyjrf26neIO4g/O/B9a63b5WtB9s3Kv1YCPBu7r0KhZjizrqnGi+hpNA7j5ispE/hknO4Z734nDfTM7jZGVx2Bjc/g1ucweVncMszuNXXcLdGq6f3/3FwfjkjPfw4lWM4sXEa14NSb6dDu1POwQmu47FOZM5zTHmB6DRtZYGaSucIa85UxktJlAxRnYI4nVR1N+6aOKgpB3OrtiYkUst+7MLYwGBUe9X5Q/yiYlWbkQYJzTliNBOobLVGZaUz0Ra0oTkN8X0/mLgrUjc2TlozxNGeagULgFOCsCQaMUUK4FcMtSSjjaJa6KwEFVw/Wql+sP04uNT6ndNIvB+tQiBZr1FYQDDZWQqPe9Mq69KXRtre9dovN9NISw+j7UrGbzmEifwjnTOcRzHG5g8l45RMm23fbJTdG6lc2iotxq1PZd95Ybrwnhggern0S8o4iejvh7hb/5Ht8juI+Nwq4adNKwYT/G5GH4BkmtVTWnE9voR0bn68Xsdd++KdksGw8bBDbw10hBe7Yf29NYtPq3oRVjVfUbb4+fb531h+dOsq2K6kh/oHi1prYbaQTHjzsJPD1G1wA6h3MXn4xK4NjZkQXlFY5LigGc84LkMg2e+GvlOxhw7tHj9LhjYIthCyhkKDvLEEseCHJosaxy4SzfZojOWrYxfU0aE+lnE5QdG4/Lwmj64VIcbnuwwKCHqKAH3sdgb23ejF0f/q+jomFxUKhp9evboJFiiUm1zEFn6397V6Z5x3NVTdaAOyxfM+oxZhlBG4AF3UepJaOWNwJSP0P63WcU18lVivX9y+fvNYra739d44A4n+u0IF3MBhpJUXhU4qlPMiyyp8UeiUQhwTXvLsotBpheDKkGFyOWUnFSpLXlBSsv+vQvEfi+mbwhXuarNJHr75C7xhdm1ZEQAA"}
+
+[stderr]

@@ -1,0 +1,174 @@
+- button "Skip to main content"
+- banner "Microsoft Azure":
+  - button "Show Microsoft Cloud menu":
+  - button "Show portal menu":
+  - heading "Microsoft Azure" [level=1]:
+    - link "Microsoft Azure":
+      - /url: "#home"
+  - button "Upgrade":
+  - search:
+    - button "Search resources, services, and docs (G+/)":
+  - button "Copilot":
+  - button "More portal tools":
+  - button "Account menu Currently signed in as reachoutankitjoshi@gmail.com, under Default Directory (reachoutankitjoshigmail.onmicrosoft.com) tenant":
+    - 'generic "Name: Ankit Joshi Email: reachoutankitjoshi@gmail.com Directory: Default Directory (9d1533ec-2cf1-4af9-8a5e-93f272f26655) Domain: reachoutankitjoshigmail.onmicrosoft.com Your sign in used multifactor authentication."':
+- main:
+  - navigation "Navigation history":
+    - button "Navigate back to...":
+    - navigation "breadcrumb":
+      - list:
+        - link "object-events (rtmsfproofsb202610157405/object-events)":
+          - /url: "#@reachoutankitjoshigmail.onmicrosoft.com/resource/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38/resourcegroups/rtmsf-azure-proof-20261014/providers/Microsoft.ServiceBus/namespaces/rtmsfproofsb202610157405/queues/object-events/overview"
+  - region "object-events (rtmsfproofsb202610157405/object-events) | Access control (IAM) Service Bus Queue":
+    - generic "object-events (rtmsfproofsb202610157405/object-events) | Access control (IAM) Service Bus Queue":
+      - heading "object-events (rtmsfproofsb202610157405/object-events) | Access control (IAM)" [level=2]
+      - button "Add resource to favorites":
+      - button "More content actions":
+      - button "Close content 'object-events (rtmsfproofsb202610157405/object-events) | Access control (IAM)'":
+      - generic: Service Bus Queue
+    - button "Show the menu for object-events (rtmsfproofsb202610157405/object-events)":
+      - generic: Service menu
+    - toolbar:
+      - button "Add":
+        - generic: Add
+      - button "Download role assignments":
+        - generic: Download role assignments
+      - button "Edit columns":
+        - generic: Edit columns
+      - button "Refresh" [active]:
+        - generic: Refresh
+      - separator:
+      - button "Show more options":
+    - tablist:
+      - tab "Check access":
+        - generic: Check access
+      - tab "Role assignments" [selected]:
+        - generic: Role assignments
+      - tab "Roles":
+        - generic: Roles
+      - tab "Deny assignments":
+        - generic: Deny assignments
+    - generic: Required
+    - tabpanel "Role assignments":
+      - group "Role assignments":
+        - text: Number of role assignments for this subscription
+        - button "Your subscription allows you to add up to 5000 role assignments.":
+        - progressbar
+        - text: 14 5000
+        - generic "Search box":
+          - searchbox "Search box"
+        - list:
+          - 'button "Filter, Type : All"':
+            - generic: Type
+            - generic: ":"
+            - generic: All
+          - generic: Use 'Space' or 'Enter' key to enable edit mode
+          - 'button "Filter, Role : All"':
+            - generic: Role
+            - generic: ":"
+            - generic: All
+          - generic: Use 'Space' or 'Enter' key to enable edit mode
+          - 'button "Filter, Scope : All scopes"':
+            - generic: Scope
+            - generic: ":"
+            - generic: All scopes
+          - generic: Use 'Space' or 'Enter' key to enable edit mode
+          - 'button "Filter, Group by : Role"':
+            - generic: Group by
+            - generic: ":"
+            - generic: Role
+          - generic: Use 'Space' or 'Enter' key to enable edit mode
+        - tablist:
+          - tab "All (3)" [selected]:
+            - generic: All (3)
+          - tab "Job function roles (2)":
+            - generic: Job function roles (2)
+          - tab "Privileged administrator roles (1)":
+            - generic: Privileged administrator roles (1)
+        - generic: Required
+        - tabpanel "All (3)"
+        - treegrid:
+          - row "Selection Name Type Role Scope Condition":
+            - columnheader "Selection":
+              - checkbox "Select all items"
+            - columnheader "Name":
+              - generic: Name
+            - columnheader "Type":
+              - generic: Type
+            - columnheader "Role":
+              - generic: Role
+            - columnheader "Scope":
+              - generic: Scope
+            - columnheader "Condition":
+              - generic: Condition
+          - row "Expand or collapse group Owner (1)" [expanded] [level=1]:
+            - gridcell "Expand or collapse group Owner (1)":
+              - button "Expand or collapse group" [expanded]:
+              - generic: Owner (1)
+          - row "Unselected AJ Ankit Joshi 42784d27-7b1f-423c-8e07-0b2bde623394 User Owner Subscription (Inherited) None" [level=2]:
+            - gridcell "Unselected":
+              - img "Unselected"
+            - gridcell "AJ Ankit Joshi 42784d27-7b1f-423c-8e07-0b2bde623394":
+              - paragraph: AJ
+              - link "Ankit Joshi":
+                - /url: "#"
+              - generic "42784d27-7b1f-423c-8e07-0b2bde623394"
+            - gridcell "User":
+              - generic: User
+            - gridcell "Owner":
+              - link "Owner":
+                - /url: "#blade/Microsoft_Azure_AD/RolePermissionsLandingBlade/allowRoleSelection//priorityRoles/%5B%5D/roleId/%2Fsubscriptions%2Ffe1b4721-0c1f-4e16-8d94-d132be2faf38%2Fproviders%2FMicrosoft.Authorization%2FroleDefinitions%2F8e3af657-a8ff-443c-a75c-2fe8c4bcb635/scope/%2Fsubscriptions%2Ffe1b4721-0c1f-4e16-8d94-d132be2faf38/showLinks/"
+            - gridcell "Subscription (Inherited)":
+              - link "Subscription (Inherited)":
+                - /url: "#@reachoutankitjoshigmail.onmicrosoft.com/resource/subscriptions/fe1b4721-0c1f-4e16-8d94-d132be2faf38"
+            - gridcell "None":
+              - generic: None
+          - row "Expand or collapse group Azure Service Bus Data Receiver (1)" [expanded] [level=1]:
+            - gridcell "Expand or collapse group Azure Service Bus Data Receiver (1)":
+              - button "Expand or collapse group" [expanded]:
+              - generic: Azure Service Bus Data Receiver (1)
+          - row "Unselected rtmsf-proof-worker-20261015 ea392222-1798-45df-bc34-98e8972363d8 Managed identity Azure Service Bus Data Receiver This resource None" [level=2]:
+            - gridcell "Unselected":
+              - img "Unselected"
+            - gridcell "rtmsf-proof-worker-20261015 ea392222-1798-45df-bc34-98e8972363d8":
+              - link "rtmsf-proof-worker-20261015":
+                - /url: "#"
+              - link "ea392222-1798-45df-bc34-98e8972363d8":
+                - /url: "#"
+            - gridcell "Managed identity":
+              - generic: Managed identity
+            - gridcell "Azure Service Bus Data Receiver":
+              - link "Azure Service Bus Data Receiver":
+                - /url: "#blade/Microsoft_Azure_AD/RolePermissionsLandingBlade/allowRoleSelection//priorityRoles/%5B%5D/roleId/%2Fsubscriptions%2Ffe1b4721-0c1f-4e16-8d94-d132be2faf38%2Fproviders%2FMicrosoft.Authorization%2FroleDefinitions%2F4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0/scope/%2Fsubscriptions%2Ffe1b4721-0c1f-4e16-8d94-d132be2faf38%2Fresourcegroups%2Frtmsf-azure-proof-20261014%2Fproviders%2FMicrosoft.ServiceBus%2Fnamespaces%2Frtmsfproofsb202610157405%2Fqueues%2Fobject-events/showLinks/"
+            - gridcell "This resource":
+              - text: This resource
+            - gridcell "None":
+              - generic: None
+          - row "Expand or collapse group Azure Service Bus Data Sender (1)" [expanded] [level=1]:
+            - gridcell "Expand or collapse group Azure Service Bus Data Sender (1)":
+              - button "Expand or collapse group" [expanded]:
+              - generic: Azure Service Bus Data Sender (1)
+          - row "Unselected rtmsfproofevents202610157405 3261144f-dd7c-483e-a699-4feeb6fcd1f0 Managed identity Azure Service Bus Data Sender This resource None" [level=2]:
+            - gridcell "Unselected":
+              - img "Unselected"
+            - gridcell "rtmsfproofevents202610157405 3261144f-dd7c-483e-a699-4feeb6fcd1f0":
+              - link "rtmsfproofevents202610157405":
+                - /url: "#"
+              - link "3261144f-dd7c-483e-a699-4feeb6fcd1f0":
+                - /url: "#"
+            - gridcell "Managed identity":
+              - generic: Managed identity
+            - gridcell "Azure Service Bus Data Sender":
+              - link "Azure Service Bus Data Sender":
+                - /url: "#blade/Microsoft_Azure_AD/RolePermissionsLandingBlade/allowRoleSelection//priorityRoles/%5B%5D/roleId/%2Fsubscriptions%2Ffe1b4721-0c1f-4e16-8d94-d132be2faf38%2Fproviders%2FMicrosoft.Authorization%2FroleDefinitions%2F69a216fc-b8fb-44d8-bc22-1f3c2cd27a39/scope/%2Fsubscriptions%2Ffe1b4721-0c1f-4e16-8d94-d132be2faf38%2Fresourcegroups%2Frtmsf-azure-proof-20261014%2Fproviders%2FMicrosoft.ServiceBus%2Fnamespaces%2Frtmsfproofsb202610157405%2Fqueues%2Fobject-events/showLinks/"
+            - gridcell "This resource":
+              - text: This resource
+            - gridcell "None":
+              - generic: None
+          - generic: Showing 1 - 3 of 3 results.
+          - navigation "Pagination":
+            - list
+- alert
+- alert
+- complementary
+- complementary

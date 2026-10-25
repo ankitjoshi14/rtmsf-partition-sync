@@ -1,0 +1,416 @@
+{
+  "branch": "oci",
+  "base_commit": "e2fbde0233945344aa0f22491d2edcd78b17072f",
+  "uncommitted_source": true,
+  "source_file_count": 65,
+  "archive_sha256": "988a5c8b4c5d2710d6fa547dc9628012cf28708f95fe6284301d3dacc7b574a6",
+  "credential_files_included": false,
+  "archive_source_relative_path": "outputs/oci-compute/rtmsf-oci-source.tar.gz",
+  "archive_bytes": 290117,
+  "comparison_commit": "de9789ea5130a8315163defdccd34dc8820743b1",
+  "files": [
+    {
+      "path": "pyproject.toml",
+      "sha256": "6be1cc7633d0e39b27af0c668e5d61a91e73b3846805d39083788d39292753af",
+      "bytes": 749,
+      "matches_comparison_commit": false
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "5df9f634e3bfb5a1753742f1f85d39c82b3fb607e3d444fe0cb6d258fe29e672",
+      "bytes": 450425,
+      "matches_comparison_commit": false
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "382852b55526118e65a697f7a530d685eb1957db5af2911b9c892b5bf124e462",
+      "bytes": 620,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": ".dockerignore",
+      "sha256": "8c8138c9f2644891f1ae1dd037aa247fbce6356a6aeaf55dc3230798487a1f86",
+      "bytes": 100,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/__init__.py",
+      "sha256": "14cd2e2cdfdabea220f469d692ea160a7c47a03d29d5ee74dd6e35ac4869be7b",
+      "bytes": 45,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/activity_reports.py",
+      "sha256": "1abd89bd27979d531cfdceafe464c58c1ce37d262e11a1fbb97b4132b116b224",
+      "bytes": 6665,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/__init__.py",
+      "sha256": "49b60525edba109c1d61093812ba90bf85d2eaea994f59f66ffc6de47bce7370",
+      "bytes": 66,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/activity.py",
+      "sha256": "cd104944e935a48dd61e08556d8951f6704f4c5f6f5c5a4e3580ff95888197db",
+      "bytes": 28118,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/activity_worker.py",
+      "sha256": "b9402c178cb7b83ce11a6b3d3a9b73938d3fcf975b09004c35ea3d36bc9239f4",
+      "bytes": 2170,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/check_request_metrics.py",
+      "sha256": "62151d00d7131dce737e3e1541c7e340a923ef4684670b2631cf76e7e35aa07f",
+      "bytes": 12276,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/checks.py",
+      "sha256": "a19261591a60c186ca600e675a477fae312ca08651666bbb92f0d5ed7b07511f",
+      "bytes": 29693,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/crash_worker.py",
+      "sha256": "e428931cf0a1ccdfe2adeef204a1095058afd794e45367ac0dd0e03b65ab12ec",
+      "bytes": 10796,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/crawler.py",
+      "sha256": "3871221a9283d19968b621d5b24b0dfffa3c5b1d523ae679961449c6139d93bc",
+      "bytes": 16261,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/deploy.py",
+      "sha256": "106d4f2a6a63d7d1ecd1f14cea21a233c17c09bd45a9a181c79d0d1cded42c2a",
+      "bytes": 6164,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/request_audit.py",
+      "sha256": "0ccdc48c455278ed500fb7205b5a0941fb8782531c218a90d54b70f70c18d7d6",
+      "bytes": 13589,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/request_metrics.py",
+      "sha256": "8a323a7ec7368f021896117b38d20e96b7420c343e425132887b32dced58e7e2",
+      "bytes": 6811,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/run.py",
+      "sha256": "b108a9b9218b01cbb809b1346397ad2096640124e8cb68d517800b56ca402820",
+      "bytes": 24967,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/runtime.py",
+      "sha256": "b4fc238f295fba526eadfd592f8a7e8c6677c81e5f7307f019b144d477b8726f",
+      "bytes": 13935,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/template.yaml",
+      "sha256": "58a380628ead6c7580b273077fd826fba61b6baf25cd6bd13aefb2b71d02a708",
+      "bytes": 16462,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/trial_buckets.py",
+      "sha256": "a8dc3508071fda8e26bbc1a361f1f57ea0f858aaceba02e66fd005188ffd42f8",
+      "bytes": 12289,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/aws/workloads.py",
+      "sha256": "05372b314da9f91dd63d9361a0430ded3739516d64db0808532fff5c9b70876f",
+      "bytes": 35004,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/evidence.py",
+      "sha256": "4b3653be530a6ed4bdc0de322928f6342c725c959aaaad047442c0adc5c01d8e",
+      "bytes": 2890,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/export.py",
+      "sha256": "7db380bacea885b4d605880ad6696a958a9ca4d64ba3c4bb762aafba41e57579",
+      "bytes": 12760,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/figures.py",
+      "sha256": "c85708ca9da5ff367e435be4d1228c37f8d0e0a64413360cdd48bd8fd7a7afe2",
+      "bytes": 31189,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/oci/__init__.py",
+      "sha256": "f2b17641ce3475135ec271f56e80152c97a916015c9eb64eb5d3ca1ac0c73d07",
+      "bytes": 66,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/oci/bursts.py",
+      "sha256": "adc02fa6bf97642802a9ae5a5b971e107dde74275a0d4bb0a188f53a7eadc39a",
+      "bytes": 10402,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/oci/restart.py",
+      "sha256": "4d0e45c87b679ffcaa77b78a2fd818b626ef87c5e9943adf4ccb3052b9106dbf",
+      "bytes": 7576,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/experiments/oci/run.py",
+      "sha256": "fa545877036fe8190a0929bb956f564911cb69e3cea928a42e4565ba7099e21c",
+      "bytes": 7661,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/__init__.py",
+      "sha256": "91f6d654eea06360523df05cfea839d08a56c97df522cbf80d93d4f949d50dd2",
+      "bytes": 52,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/adapters/__init__.py",
+      "sha256": "acbe68dcefdde688d7d54f41c44aabc83c439cf0b485a82ddcfbea3e78c19749",
+      "bytes": 35,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/adapters/aws.py",
+      "sha256": "7612cb891ab498484e3541df9d1254057ea06aa8a45637644988bdd97787f626",
+      "bytes": 21477,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/adapters/oci.py",
+      "sha256": "fa40f899ce7607aefcc13b62605cc355667f7f553be3a448be9001d95727bc39",
+      "bytes": 10004,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/aws_app.py",
+      "sha256": "2f59ab5fe661c7b90b5c46e830f9fba873f727e3822bb2064f165ebbfefd5474",
+      "bytes": 6455,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/interfaces.py",
+      "sha256": "67c2aa6fc01473481260e64ac1e6b13194893d7224de07e376f7ded483c8361e",
+      "bytes": 1719,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/models.py",
+      "sha256": "f4b5cc33183d14af11c3bef663d4e3854638e18351c7e85cb2f24725fc9b0adf",
+      "bytes": 2913,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/oci_function.py",
+      "sha256": "83e06fdff00d629a4ca0d2bec6eebd2b64ec1579ffb003e948d1a76aca2a2397",
+      "bytes": 942,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/pmcp.py",
+      "sha256": "5c557c70122fe7460251f09dcf121e3b9aca19dd496df70f9dfb7282a894cab1",
+      "bytes": 2817,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/routing.py",
+      "sha256": "071885a178efdec83b36e1beb15863e065d424d894e3610641157e6a64b086d4",
+      "bytes": 2201,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/woera.py",
+      "sha256": "b47d2434e502d98bfeb61fa73a8789001a10e9562751ab0f00dbc3054637adb1",
+      "bytes": 3780,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "src/rtmsf/worker.py",
+      "sha256": "73da8048fab7ff4eea16e342d3fdc154f9df21cdf0efde828e06c7f79db202a4",
+      "bytes": 12726,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_activity.py",
+      "sha256": "206d96356645ec3e3729bb61210c8d7c96293a1d9d1ea9985e452c69f024360b",
+      "bytes": 12513,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_app.py",
+      "sha256": "85e5c3e246fa4fabe0413a193e4625e70869f4eba47cfc51b1657f1845b43b68",
+      "bytes": 7218,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_aws_adapters.py",
+      "sha256": "742d9f299b7da1b1e494f2cae0fb9a601a73a0f66b73602ce0d5d2f7e8134de3",
+      "bytes": 18844,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_checks.py",
+      "sha256": "3ded8bdddbbcfe7a792b03071dd75de64ef67054d31654e59e771616f2951e98",
+      "bytes": 13084,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_crash_worker.py",
+      "sha256": "3ff325599ebdfc77c09317dbe93c7f332b8852c23d82f8c09fe2d1e22d9928c1",
+      "bytes": 11189,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_crawler.py",
+      "sha256": "42a8587fd263ea585163ae04089dc74da8a58008fb0ec869b3a53aa394d40ccb",
+      "bytes": 11580,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_deployment.py",
+      "sha256": "bbc21388428b11a74e417240cbc13b9b71ac4b419a29fb8c7cb5c71aacd33b2b",
+      "bytes": 7368,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_evidence_export.py",
+      "sha256": "8db2b176ccebb95f1c07e68abddf82cf7258b4fc9118318f64bcafa72eea7405",
+      "bytes": 4985,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_experiment_runtime.py",
+      "sha256": "011e76c42d0377d42b956ea96bdfeea602b811d77dbfd584241e052a5f02021f",
+      "bytes": 4606,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_figures.py",
+      "sha256": "34d6f0258345b5db8c1e5b0500ca3be4346248ae93c928e13f8ed26173e3207f",
+      "bytes": 13890,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_models_routing.py",
+      "sha256": "38c7bdf5a0b762392d50083b30243298a6f7048d8834abe01208e2dfdc308e6f",
+      "bytes": 3076,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_notification_checks.py",
+      "sha256": "e7e3d771ee639b7134f8fd590c9829535b0655d409cbfc416452942bfb4128a0",
+      "bytes": 9094,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_oci_adapters.py",
+      "sha256": "763269cbc6e6297157066b9fbd885bfbdca87a468f37faae6d07ead46fb98c2a",
+      "bytes": 11542,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_oci_bursts.py",
+      "sha256": "2eb4e201e7fe140d8f96ba878e983d255c2074438380618c5d84f4973fd7887a",
+      "bytes": 3907,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_oci_functional.py",
+      "sha256": "606980c0740fa774f7ad05ea886d24db05b99189dd3f60e7b71918ad0c9d1490",
+      "bytes": 2763,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_pilot.py",
+      "sha256": "162aaf29f8a05b7c70fa63731d8884df0705f575337a2671be213c01a81857e9",
+      "bytes": 13365,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_pilot_measurements.py",
+      "sha256": "447b16428860b415081913b3a000366e7b22a536a67aa4b19612968b3007f663",
+      "bytes": 5805,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_pilot_reporting.py",
+      "sha256": "eaa6fe5f1ca3cb414ff9bc197ed4de85b7ff545688b95fab43454c96cad86545",
+      "bytes": 18554,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_pmcp.py",
+      "sha256": "8b5f3d1544bcd8b6161724f06cc07157c1e131402bb5bc582e20c14448214632",
+      "bytes": 4572,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_request_audit.py",
+      "sha256": "c4b4f93bf4eeea8ae3a2dece0bd16c9be67c16a6c1cfd853aa13933a573ff8f1",
+      "bytes": 10529,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_request_metrics.py",
+      "sha256": "1c5bcd73059e4a5a69ba1f8887e166bddae807ff2eb7cc0e91ef9be1df3f6145",
+      "bytes": 10018,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_trial_buckets.py",
+      "sha256": "ab0fb11118e2385b09663bcb282086ff7fef8cf47d9b0ade8dfd182497e1adec",
+      "bytes": 4989,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_woera.py",
+      "sha256": "b768ec6bce44b2cba45e83eb8fb6b7b9831dff7a16490513d7200e0a549fdae3",
+      "bytes": 2920,
+      "matches_comparison_commit": true
+    },
+    {
+      "path": "tests/test_worker.py",
+      "sha256": "156f5f5584cc725af46d98a14343bc8154db44727ceffae32abf0dbe5a115ca2",
+      "bytes": 18233,
+      "matches_comparison_commit": true
+    }
+  ],
+  "deployed_function_files": [
+    {
+      "source_relative_path": "outputs/oci-events/deployed-bridge/func.py",
+      "sha256": "1334f86a34bff3c6acf732e46784780c673688b4f95266069848ddca00eaf9f2",
+      "bytes": 932
+    },
+    {
+      "source_relative_path": "outputs/oci-events/deployed-bridge/adapters.py",
+      "sha256": "978eef12f3630f10e503f4bbd5a306811b0e74e36f2fa086d5a9fa0856775000",
+      "bytes": 9981
+    }
+  ],
+  "scope": "Guest archive digest agrees with source manifest and successful Compute report. Archive remains outside Git; per-file fingerprints identify the uncommitted deployed source. The current src/rtmsf/oci_function.py handler was relocated into the package after Function validation; the documented manual Function ZIP layout has not been redeployed from this source layout."
+}

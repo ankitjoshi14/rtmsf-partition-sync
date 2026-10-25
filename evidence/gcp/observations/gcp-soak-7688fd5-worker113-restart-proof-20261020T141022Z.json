@@ -1,0 +1,32 @@
+{
+  "verdict": "retryable_exit_pending_zero_all_stopped_child_own_receipts_reconciled_ACKed_replacement_processing",
+  "partial_live_snapshot": "outputs/gcp-soak-live-archive-snapshot-20261020T140921Z",
+  "archive_SHA256_verified": true,
+  "original_VM_archive_retained": "/home/joshi_ankit1492_gmail_com/gcp-soak-evidence-snapshot-20261020T140921Z.tar.gz",
+  "failed_child": 113,
+  "failed_pid": 63890,
+  "finished_at": "2026-10-20T14:06:24.943418+00:00",
+  "pending_deliveries_at_exit": 0,
+  "own_receipts": 781,
+  "own_ACKs": 781,
+  "all_stopped_child_own_identity_receipt_reconciliation_ACK_matches": true,
+  "last_own_ACK_utc": "2026-10-20T14:06:09.933528+00:00",
+  "no_RETRY_reconciliation_in_stopped_child": true,
+  "all_113_finishes_exits_before_replacements": true,
+  "all_113_old_PIDs_independently_absent": true,
+  "old_process_witness": "outputs/gcp-soak-old-child-process-witness-20261020T140926Z.json",
+  "replacement_child": 114,
+  "replacement_pid": 68430,
+  "replacement_native_ACKs_observed": true,
+  "last_completed_cycle_mutation_intervals_seconds": [
+    5.008116909011733,
+    5.219738974003121
+  ],
+  "failed_children": 113,
+  "child_restarts": 113,
+  "forced_kills": 0,
+  "read_only_retries": 0,
+  "cause": "unproven",
+  "code_changes": false,
+  "not_final_barrier_fixture_or_query_verification": true
+}

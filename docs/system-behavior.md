@@ -30,7 +30,11 @@ configuration and a controlled restart. RTMSF does not create or discover tables
 The supplied router requires consecutive `column=value` segments below each table root, in catalog column order.
 For example, columns `day, hour` map to `orders/day=2026-10-05/hour=09/`.
 Existing partition locations and storage descriptors must already match the configured layout and table definition.
-New entries inherit the table storage descriptor. RTMSF does not validate or repair existing partition metadata.
+New entries inherit the table storage descriptor. The core assumes compatible
+metadata and does not repair it. AWS does not validate existing partition
+locations/descriptors; GCP explicitly checks the full descriptor, exact values
+and ownership on partition reads. Azure validates supported table metadata at
+startup. See the provider guides for each catalog boundary.
 Custom partition locations outside this routing contract are unsupported.
 
 Object keys and partition values are preserved exactly. All objects below the
@@ -51,14 +55,24 @@ a later notification can open another window for the same partition.
 
 WOERA uses ADD dominance within a window; the intent remains a candidate. PMCP
 checks actual storage. A DELETE observation can repair an absent catalog entry
-when surviving data proves that the partition should exist. Empty-partition
-checks consider any object under the partition prefix, including marker files.
+when surviving data proves that the partition should exist. Membership follows
+the provider's storage evidence contract:
 
-Deleting the last Parquet file while `_SUCCESS` remains keeps the registration;
-deleting `_SUCCESS` then triggers removal. A marker alone can also cause registration,
-because membership means any stored object, not queryable data. This does not inspect
-schemas or validate file formats. Events outside a fully matched configured partition
-path remain ignored; initial alignment and delivery of relevant events are required.
+- AWS and GCP count any object under the partition prefix, including markers.
+  Deleting the last Parquet file while `_SUCCESS` remains keeps registration;
+  deleting `_SUCCESS` then triggers removal. A marker alone can cause registration.
+- Azure counts eligible files, excluding directories and any path segment
+  beginning with `.` or `_`, including `_SUCCESS` and temporary control paths.
+  It rejects table-root segments and partition-column names with those prefixes
+  at startup. Values such as `dt=_a` remain eligible. Marker-only directories
+  do not preserve registration.
+- OCI's live checks exercised object membership with an in-memory catalog;
+  external catalog integration remains unvalidated.
+
+Storage evidence does not inspect schemas or validate file formats, and
+registration does not imply queryable data. Events outside a fully matched
+configured partition path remain ignored; initial alignment and delivery of
+relevant events are required.
 
 An ADD whose observed data is absent is retried with a bounded policy. If the
 objects were created and then deleted before reconciliation, this can end in a
@@ -122,7 +136,8 @@ Coordinate manual repair with writers and worker shutdown. RTMSF supplies no aut
 
 ## Provider integrations
 
-Providers implement `EventSource`, `ObjectStore`, `PartitionCatalog`, and `TelemetrySink` in `src/rtmsf/interfaces.py`.
+Providers implement `EventSource`, `ObjectStore`, `PartitionCatalog`, and `TelemetrySink` in [src/rtmsf/interfaces.py](../src/rtmsf/interfaces.py).
 The core uses these interfaces for event delivery, storage checks, catalog changes, and telemetry.
 [AWS configuration](aws.md#aws-worker-settings-and-bounds) describes the supplied worker's settings and adapter limits.
-Other cloud implementations need their own setup guide and validation.
+The [OCI guide](oci.md), [Azure guide](azure.md) and [GCP guide](gcp.md) describe
+their launchers, catalog boundaries and distinct functional validation.

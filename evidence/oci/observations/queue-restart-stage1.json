@@ -1,0 +1,6 @@
+{
+  "renewal_succeeded": true,
+  "received": true,
+  "acknowledged": false,
+  "event_id": "rtmsf-restart-probe"
+}

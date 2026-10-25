@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-21T04:16:24.745826+00:00",
+  "archive": "outputs/gcp-soak-final-archive-20261021T041236Z",
+  "producer_duration_seconds": 86400.000308,
+  "creates": 7477,
+  "deletes": 7477,
+  "unique_own_soak_identities_received": 14954,
+  "unique_own_soak_identities_acknowledged": 14954,
+  "unique_pulse_received_and_acknowledged": 1,
+  "total_receipts_including_redelivery_and_pulse": 14981,
+  "total_acknowledgments": 14955,
+  "expired_unacknowledged_handles_settled_by_identity_redelivery": 26,
+  "unsettled_unique_identities": 0,
+  "ack_handle_identity_and_successful_matching_reconciliation": true,
+  "reconciliation_counts": {
+    "ADD_APPLIED": 7475,
+    "DROP_APPLIED": 7473,
+    "DROP_NOOP": 4,
+    "ADD_NOOP": 2
+  },
+  "minimum_mutation_interval_seconds": 5.006158460993902,
+  "minimum_ack_before_next_mutation_seconds": 0.12823023300734349,
+  "all_244_child_actual_finishes_and_exits_before_replacements": true,
+  "wrapper": {
+    "pid": "28853",
+    "started-utc": "2026-10-20T04:08:06Z",
+    "finished-utc": "2026-10-21T04:08:29Z",
+    "exit-status": "0"
+  },
+  "last_child_exit": {
+    "action": "child_exited",
+    "index": 244,
+    "return_code": 1,
+    "status": "failed",
+    "category": "external_retryable",
+    "pending_deliveries": 0,
+    "expected_stop": true,
+    "evidence_error": false,
+    "classification": "external_retryable_process_restart",
+    "cause": "unproven"
+  },
+  "read_only_retries": 2,
+  "historical_fresh_truth": "Enforced by exact reviewed deployed _drop_ready control flow before every upload; successful individual truth reads were not separately logged. Final storage and catalog truth independently witnessed.",
+  "scope": "24-hour serialized lab workload; completed with restarts; underlying retryable RPC causes unproven"
+}

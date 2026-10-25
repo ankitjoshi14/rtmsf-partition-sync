@@ -1,0 +1,84 @@
+{
+  "catalog": "in-memory test double",
+  "prefix": "compute-restart-20261015T055635/",
+  "authentication": "instance principal",
+  "passed": true,
+  "duration_seconds": 131.746,
+  "stage": "replay",
+  "same_event_redelivered": true,
+  "previous_worker_stopped": true,
+  "object_verified": true,
+  "partition_added": true,
+  "replay_summary": {
+    "notifications": 1,
+    "reconciliations": 1,
+    "acknowledgements": 1
+  },
+  "cleanup_delete_reconciled": true,
+  "worker_records": [
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 117.499
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 118.684,
+      "source_id": "demo",
+      "table_id": "demo.restart",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "ADD",
+      "status": "APPLIED",
+      "reason": "created"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 118.708,
+      "dead_lettered": false
+    },
+    {
+      "component": "worker",
+      "action": "delivery_buffered",
+      "event_count": 1,
+      "partition_count": 1,
+      "elapsed_seconds": 130.641
+    },
+    {
+      "component": "worker",
+      "action": "pmcp_result",
+      "elapsed_seconds": 131.705,
+      "source_id": "demo",
+      "table_id": "demo.restart",
+      "partition": "dt=a",
+      "observation_count": 1,
+      "mutation": "DROP",
+      "status": "APPLIED",
+      "reason": "deleted"
+    },
+    {
+      "component": "worker",
+      "action": "delivery_acknowledged",
+      "event_count": 1,
+      "elapsed_seconds": 131.72,
+      "dead_lettered": false
+    }
+  ],
+  "event_identities": [
+    {
+      "eventID": "5bb881ff-1f02-9280-e5ec-72d02a6c73fe",
+      "eventType": "com.oraclecloud.objectstorage.createobject",
+      "eventTime": "2026-10-15T06:01:22Z"
+    },
+    {
+      "eventID": "dde08609-b919-0760-7016-7e0d7c85a230",
+      "eventType": "com.oraclecloud.objectstorage.deleteobject",
+      "eventTime": "2026-10-15T06:03:33Z"
+    }
+  ]
+}

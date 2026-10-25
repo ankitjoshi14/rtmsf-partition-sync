@@ -1,0 +1,6 @@
+{
+  "source_lines": [
+    15
+  ],
+  "terminal_exception": "AssertionError: one reconciliation per partition required"
+}

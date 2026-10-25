@@ -13,6 +13,10 @@ The core algorithm and report format stay separate from this provider's deployme
 
 ![RTMSF deployment on AWS](figures/aws-deployment.svg)
 
+The diagram uses official AWS architecture service and resource icons.
+[Icon sources and fingerprints](figures/aws-icons.md) record the July 31, 2026
+package and exact mappings, including separate ECS and Fargate symbols.
+
 S3 notifications enter SQS. One Fargate task runs routing, WOERA, and PMCP through AWS adapters.
 Routing loads Glue table definitions. PMCP checks S3 and reads, creates, or deletes Glue partitions.
 The worker renews queue visibility, acknowledges completed input, and sends terminal failures to a separate queue.
@@ -569,7 +573,20 @@ Omit an unselected phase option. The exporter keeps each phase separate.
 An existing destination causes an error; choose a fresh path for another export.
 The export omits raw CloudTrail downloads and private configuration fields.
 It replaces account numbers with a consistent placeholder and retains source/image identity.
-Use the verified export as the repository's `evidence/` content after preserving the previous export.
+For a repository evidence refresh, export all AWS phases that will remain in the
+bundle together, including retained phases from their saved runs. A partial
+export's root `SUMMARY.md` and `provenance.json` describe only its selected phases
+and cannot replace the combined AWS metadata while other phase data remains.
+After preserving the previous AWS export, update the exported AWS phase
+directories (`figures/`, `activity/`, `buffer/`) and AWS `SUMMARY.md` / `provenance.json`
+under `evidence/`. Preserve `oci/`, `azure/`, `gcp/` and the combined evidence README.
+The exporter creates an AWS-only README and checksum manifest in its fresh
+destination; do not replace the combined repository evidence directory with it.
+Merge checksums for the updated AWS phase files and AWS summary/provenance into
+`evidence/SHA256SUMS`; retain the combined README's checksum instead of importing
+the export's AWS-only README checksum. Remove entries for superseded AWS files
+and refresh the combined README's fingerprint if it changes. Keep each provider
+bundle's own fingerprints intact, then verify all affected manifests.
 
 Verify the exported files from inside its directory:
 

@@ -1,0 +1,14 @@
+{
+  "verified": true,
+  "scope": "fresh named-table last-file DROP witness",
+  "partitions": [
+    "dt=b"
+  ],
+  "rows": [
+    [
+      "probe-b",
+      "b"
+    ]
+  ],
+  "evidence": "outputs/gcp-query-native-last-delete-20261019T2300"
+}

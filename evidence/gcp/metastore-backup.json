@@ -1,0 +1,33 @@
+{
+  "status": "export_succeeded_downloaded_and_hash_verified",
+  "observed_at": "2026-10-21T07:32:53.918788+00:00",
+  "service": "rtmsf-probe-hms",
+  "location": "us-east1",
+  "service_uid": "81360c4f-a539-4c3b-a72a-0668c07dc5ef",
+  "destination_gcs_uri": "gs://rtmsf-gcp-lab-20261018-e504-fixtures/gcp-preservation/metastore-20261021T072628Z/hive-export-2026-10-21T07:26:29.897Z",
+  "export_operation": "projects/rtmsf-gcp-lab-20261018-e504/locations/us-east1/operations/operation-1792567589627-65e54aa6a66e8-ec18558b-3260a0db",
+  "export_state": "SUCCEEDED",
+  "objects": [
+    {
+      "name": "gcp-preservation/metastore-20261021T072628Z/hive-export-2026-10-21T07:26:29.897Z/hive.sql",
+      "generation": "1792567828563171",
+      "size": 84574,
+      "sha256": "ac4aa17741b6b2460f715c416186de422a75810cf2122a9eed17506e1e1b42a8",
+      "crc32c": "zbnV7g==",
+      "local_file": "outputs/gcp-metastore-preservation-20261021T072628Z/metadata/hive.sql"
+    }
+  ],
+  "catalog_schema": "outputs/gcp-preservation-20261021T072628Z/catalog-schema.json",
+  "restoration_tested": false,
+  "metadata_dump_scope": "Full metadata dump retained privately outside Git; shared record contains fingerprints and export state only.",
+  "metadata_dump_checks": {
+    "gcp_probe_r20261018_e504": true,
+    "gcp_probe_r20261019_p1": true,
+    "gcp_native_r20261019n1": true,
+    "catalog_probe": true,
+    "native_events": true,
+    "mysql_table_definitions": 74,
+    "dump_completion_marker": true
+  },
+  "verified_at": "2026-10-21T07:34:22.808551+00:00"
+}

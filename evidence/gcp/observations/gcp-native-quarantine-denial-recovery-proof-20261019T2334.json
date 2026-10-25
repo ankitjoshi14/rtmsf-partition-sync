@@ -1,0 +1,38 @@
+{
+  "status": "passed",
+  "scope": "real publication failure no ACK, same message redelivery exact durable quarantine -> ACK after IAM restored",
+  "same_source_message_id": "22410346337097557",
+  "quarantine_message_id": "22735245068510438",
+  "payload_attributes_reason_exact": true,
+  "native_worker_correlations": [
+    {
+      "action": "event_received",
+      "handle": "5cabe0f981c849cc95743323457179b1",
+      "message_id": "22410346337097557",
+      "utc": "2026-10-19T23:25:57.062475+00:00",
+      "monotonic_seconds": 14151.617721461
+    },
+    {
+      "action": "lease_renewed",
+      "handle": "5cabe0f981c849cc95743323457179b1",
+      "message_id": "22410346337097557",
+      "utc": "2026-10-19T23:25:57.091854+00:00",
+      "monotonic_seconds": 14151.647112923
+    },
+    {
+      "action": "quarantine_confirmed",
+      "category": "malformed",
+      "handle": "5cabe0f981c849cc95743323457179b1",
+      "message_id": "22410346337097557",
+      "utc": "2026-10-19T23:25:57.164197+00:00",
+      "monotonic_seconds": 14151.719452868
+    },
+    {
+      "action": "message_acknowledged",
+      "handle": "5cabe0f981c849cc95743323457179b1",
+      "message_id": "22410346337097557",
+      "utc": "2026-10-19T23:25:57.203534+00:00",
+      "monotonic_seconds": 14151.758783138
+    }
+  ]
+}

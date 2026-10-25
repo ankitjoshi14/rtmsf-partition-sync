@@ -1,0 +1,125 @@
+{
+  "status": "passed",
+  "scope": "four exact captured payloads, duplicates shuffled oldARCHIVE/currentFINALIZE against live recreatedv3",
+  "events": [
+    {
+      "published": {
+        "index": 0,
+        "captured_message_id": "22414636586964075",
+        "published_message_id": "22415423403238639",
+        "exact_captured_payload": true,
+        "attributes": {
+          "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+          "eventTime": "2026-10-19T23:23:25.834633Z",
+          "eventType": "OBJECT_ARCHIVE",
+          "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+          "objectGeneration": "1792451791947494",
+          "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+          "payloadFormat": "JSON_API_V1"
+        }
+      },
+      "received_handle": "34c1ad03a7b149808c333e15f425503a",
+      "pmcp": {
+        "action": "pmcp_result",
+        "partition": "dt=versions",
+        "status": "NOOP",
+        "mutation": "ADD",
+        "observation_count": 3,
+        "utc": "2026-10-19T23:34:07.552841+00:00",
+        "monotonic_seconds": 14642.108086729
+      },
+      "ACK_after_reconciliation": true
+    },
+    {
+      "published": {
+        "index": 1,
+        "captured_message_id": "22059331589820225",
+        "published_message_id": "22415428277681780",
+        "exact_captured_payload": true,
+        "attributes": {
+          "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+          "eventTime": "2026-10-19T23:32:11.184927Z",
+          "eventType": "OBJECT_FINALIZE",
+          "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+          "objectGeneration": "1792452731177862",
+          "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+          "payloadFormat": "JSON_API_V1"
+        }
+      },
+      "received_handle": "ecd3f6004e9b4fc98d2cc6fa713cce14",
+      "pmcp": {
+        "action": "pmcp_result",
+        "partition": "dt=versions",
+        "status": "APPLIED",
+        "mutation": "ADD",
+        "observation_count": 1,
+        "utc": "2026-10-19T23:34:04.899898+00:00",
+        "monotonic_seconds": 14639.455156976
+      },
+      "ACK_after_reconciliation": true
+    },
+    {
+      "published": {
+        "index": 2,
+        "captured_message_id": "22059331589820225",
+        "published_message_id": "22415654486696898",
+        "exact_captured_payload": true,
+        "attributes": {
+          "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+          "eventTime": "2026-10-19T23:32:11.184927Z",
+          "eventType": "OBJECT_FINALIZE",
+          "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+          "objectGeneration": "1792452731177862",
+          "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+          "payloadFormat": "JSON_API_V1"
+        }
+      },
+      "received_handle": "550e10c1a1a14d219297e4bee398f88e",
+      "pmcp": {
+        "action": "pmcp_result",
+        "partition": "dt=versions",
+        "status": "NOOP",
+        "mutation": "ADD",
+        "observation_count": 3,
+        "utc": "2026-10-19T23:34:07.552841+00:00",
+        "monotonic_seconds": 14642.108086729
+      },
+      "ACK_after_reconciliation": true
+    },
+    {
+      "published": {
+        "index": 3,
+        "captured_message_id": "22414636586964075",
+        "published_message_id": "22415610184752074",
+        "exact_captured_payload": true,
+        "attributes": {
+          "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+          "eventTime": "2026-10-19T23:23:25.834633Z",
+          "eventType": "OBJECT_ARCHIVE",
+          "notificationConfig": "projects/_/buckets/rtmsf-gcp-lab-20261018-e504-fixtures/notificationConfigs/3",
+          "objectGeneration": "1792451791947494",
+          "objectId": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+          "payloadFormat": "JSON_API_V1"
+        }
+      },
+      "received_handle": "bf4757e9894c40adab39039cce5a639e",
+      "pmcp": {
+        "action": "pmcp_result",
+        "partition": "dt=versions",
+        "status": "NOOP",
+        "mutation": "ADD",
+        "observation_count": 3,
+        "utc": "2026-10-19T23:34:07.552841+00:00",
+        "monotonic_seconds": 14642.108086729
+      },
+      "ACK_after_reconciliation": true
+    }
+  ],
+  "worker_lifetime": {
+    "status": "failed",
+    "category": "external_retryable",
+    "pending": 0
+  },
+  "native_v3_original_ack": "still leased by CLI capture; wait expiry",
+  "query": "pending"
+}

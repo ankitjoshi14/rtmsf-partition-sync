@@ -1,0 +1,29 @@
+{
+  "status": "awaiting_native_FINALIZE_redelivery_at_archived_snapshot",
+  "run": "gcp-soak-24h-7688fd5-20261020T040757Z",
+  "failed_child": 39,
+  "failed_worker_pid": 43101,
+  "worker_finished_at": "2026-10-20T08:06:08.848083+00:00",
+  "retry_ADD_utc": "2026-10-20T08:05:53.840278+00:00",
+  "pending_identity": {
+    "message_id": "22415589333853555",
+    "generation": "1792483542254108",
+    "event_type": "OBJECT_FINALIZE",
+    "event_time": "2026-10-20T08:05:42.261903Z"
+  },
+  "partial_failure_archive": "outputs/gcp-soak-live-archive-snapshot-20261020T080654Z",
+  "archive_metadata": "outputs/gcp-soak-live-archive-snapshot-20261020T080654Z/capture-metadata.json",
+  "archive_sha256_verified": true,
+  "VM_archive_retained": "/home/joshi_ankit1492_gmail_com/gcp-soak-evidence-snapshot-20261020T080654Z.tar.gz",
+  "identity_unacknowledged_in_archived_child_evidence": true,
+  "no_producer_mutations_after_target_upload_in_archive": true,
+  "direct_snapshot": "outputs/gcp-soak-burst-diagnostic-20261020T080620Z.json",
+  "direct_snapshot_observed_at": "2026-10-20T08:06:20.072482+00:00",
+  "all_39_recorded_exits_precede_replacements_at_direct_snapshot": true,
+  "all_39_old_pids_independently_absent_at_direct_snapshot": true,
+  "failed_children_at_direct_snapshot": 39,
+  "child_restarts_at_direct_snapshot": 39,
+  "scope": "partial live failure snapshot, not recovery or final verification",
+  "cause": "unproven",
+  "code_changes": false
+}

@@ -1,0 +1,6 @@
+{
+  "source_lines": [
+    14
+  ],
+  "terminal_exception": "rtmsf.interfaces.FatalExternalError: oci_status_404"
+}

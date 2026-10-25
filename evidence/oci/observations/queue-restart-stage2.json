@@ -1,0 +1,5 @@
+{
+  "acknowledged": true,
+  "redelivered_in_new_process": true,
+  "same_event_id": true
+}

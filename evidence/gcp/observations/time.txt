@@ -1,0 +1,23 @@
+	Command being timed: "/usr/bin/timeout --signal=TERM --kill-after=15s 300s /usr/bin/env JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 /opt/rtmsf-query/spark-3.5.8-bin-hadoop3/bin/spark-sql --master local[1] --driver-memory 512m --jars /opt/rtmsf-query/gcs-connector-3.1.13-shaded.jar --conf spark.ui.enabled=false --conf spark.driver.host=127.0.0.1 --conf spark.driver.bindAddress=127.0.0.1 --conf spark.sql.catalogImplementation=hive --conf spark.sql.hive.metastore.version=3.1.3 --conf spark.sql.hive.metastore.jars=maven --conf spark.sql.maven.additionalRemoteRepositories=https://repo.maven.apache.org/maven2/ --conf spark.hadoop.hive.metastore.uris=thrift://10.76.0.4:9083 --conf spark.sql.warehouse.dir=gs://gcs-bucket-rtmsf-probe-hms-81360c4f-a539-4c3b-a72a-0668c07dc5ef/hive-warehouse --conf spark.hadoop.hive.metastore.warehouse.dir=gs://gcs-bucket-rtmsf-probe-hms-81360c4f-a539-4c3b-a72a-0668c07dc5ef/hive-warehouse --conf spark.hadoop.fs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem --conf spark.hadoop.fs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS --conf spark.hadoop.fs.gs.auth.type=COMPUTE_ENGINE --conf spark.sql.shuffle.partitions=1 --conf spark.sql.hive.filesourcePartitionFileCacheSize=0 -i /dev/null -f /home/joshi_ankit1492_gmail_com/gcp-query-final-soak-7688fd5-20261021T041349Z/query.sql"
+	User time (seconds): 71.10
+	System time (seconds): 7.39
+	Percent of CPU this job got: 85%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:32.32
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 460116
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 45
+	Minor (reclaiming a frame) page faults: 138469
+	Voluntary context switches: 40032
+	Involuntary context switches: 16687
+	Swaps: 0
+	File system inputs: 820552
+	File system outputs: 550776
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

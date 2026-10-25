@@ -1,0 +1,68 @@
+{
+  "status": "passed",
+  "scope": "fresh named table after duplicate/shuffled captured stale notifications; live v3 preserved",
+  "partitions": [
+    "dt=a",
+    "dt=b",
+    "dt=burst_one",
+    "dt=marker_keep",
+    "dt=marker_only",
+    "dt=marker_slash",
+    "dt=nested_marker",
+    "dt=raw+%2520 space%23%3F",
+    "dt=recovery_add_after",
+    "dt=recovery_add_before",
+    "dt=versions"
+  ],
+  "rows": [
+    [
+      "probe-a",
+      "a"
+    ],
+    [
+      "probe-b",
+      "b"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "raw+%20 space#?"
+    ],
+    [
+      "probe-a",
+      "recovery_add_after"
+    ],
+    [
+      "probe-a",
+      "recovery_add_before"
+    ],
+    [
+      "probe-a",
+      "versions"
+    ]
+  ],
+  "evidence": "outputs/gcp-query-native-captured-replay-baseline-20261019T2344"
+}

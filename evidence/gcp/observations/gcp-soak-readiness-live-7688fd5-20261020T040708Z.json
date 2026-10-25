@@ -1,0 +1,27 @@
+{
+  "scope": "bounded read-only changed-seam witness; one injected classified transient followed by fresh live truth; no mutations",
+  "status": "passed",
+  "observed_at": "2026-10-20T04:07:08.121272+00:00",
+  "installed_soak_sha256": "6df26c8a45f5bdaa156ab9f2d0751400c2a472fd7b402ac90e2ca13b975d84b4",
+  "report": {
+    "final_delete_generation": null,
+    "final_delete_ack": null,
+    "final_storage_empty": true,
+    "final_catalog_absent": true,
+    "read_only_retries": 1
+  },
+  "retry_evidence": [
+    {
+      "action": "read_only_retry",
+      "stage": "post_drop_catalog_truth",
+      "category": "external_retryable",
+      "count": 1,
+      "utc": "2026-10-20T04:07:07.877438+00:00",
+      "monotonic_seconds": 31022.432679881
+    }
+  ],
+  "storage_truth_reads": 2,
+  "seconds": 0.5656224379999912,
+  "locks_held": 2,
+  "cloud_mutations": 0
+}

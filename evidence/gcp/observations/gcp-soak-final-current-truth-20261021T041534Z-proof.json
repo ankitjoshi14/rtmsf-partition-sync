@@ -1,0 +1,124 @@
+{
+  "status": "passed",
+  "evidence_prefix": "outputs/gcp-soak-final-current-truth-20261021T041534Z",
+  "storage": {
+    "status": "passed",
+    "observed_at": "2026-10-21T04:15:41.568777+00:00",
+    "current_objects": [
+      {
+        "name": "gcp-native/native-r20261019n1/data/_OWNER.json",
+        "generation": "1792445543821304",
+        "size": 103
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/_SOAK_PULSE",
+        "generation": "1792555692277915",
+        "size": 10
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=a/part-00000.parquet",
+        "generation": "1792451299925031",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=b/part-00000.parquet",
+        "generation": "1792448993562638",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_one/part-00000.parquet",
+        "generation": "1792451303686801",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_one/part-00001.parquet",
+        "generation": "1792451304094035",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_one/part-00002.parquet",
+        "generation": "1792451304453253",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_one/part-00003.parquet",
+        "generation": "1792451304703899",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_one/part-00004.parquet",
+        "generation": "1792451304984034",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=burst_one/part-00005.parquet",
+        "generation": "1792451305239383",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=marker_keep/_SUCCESS",
+        "generation": "1792451301817759",
+        "size": 0
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=marker_only/_SUCCESS",
+        "generation": "1792451301062667",
+        "size": 0
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=marker_slash/",
+        "generation": "1792451302577197",
+        "size": 0
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=nested_marker/inner/_SUCCESS",
+        "generation": "1792451302928064",
+        "size": 0
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=raw+%20 space#?/part+%20 雪#?.parquet",
+        "generation": "1792451303303850",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=recovery_add_after/part-00000.parquet",
+        "generation": "1792451109776836",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=recovery_add_before/part-00000.parquet",
+        "generation": "1792450761870541",
+        "size": 438
+      },
+      {
+        "name": "gcp-native/native-r20261019n1/data/dt=versions/part-00000.parquet",
+        "generation": "1792452731177862",
+        "size": 438
+      }
+    ],
+    "exact_current_generations_and_sizes": true,
+    "soak_storage_absent": true
+  },
+  "metastore": {
+    "networkConfig": {
+      "consumers": [
+        {
+          "endpointUri": "thrift://10.76.0.4:9083",
+          "subnetwork": "projects/rtmsf-gcp-lab-20261018-e504/regions/us-east1/subnetworks/rtmsf-lab-subnet-east"
+        }
+      ]
+    },
+    "state": "ACTIVE",
+    "uid": "81360c4f-a539-4c3b-a72a-0668c07dc5ef"
+  },
+  "vm": {
+    "scheduling": {
+      "automaticRestart": true,
+      "onHostMaintenance": "MIGRATE",
+      "preemptible": false,
+      "provisioningModel": "STANDARD"
+    },
+    "status": "RUNNING"
+  },
+  "initial_verifier_metadata_key_error": "Initial local metadata assertion used incorrect hiveMetastoreConfig path. Corrected using actual returned consumers[0].endpointUri; captured cloud observations were successful, retained and checked without repeating the cloud calls."
+}

@@ -1,0 +1,77 @@
+{
+  "status": "passed",
+  "scope": "fresh named Hive table after early failed run; not 24-hour completion",
+  "evidence": "outputs/gcp-query-failed-soak-79122ca-20261020T035511Z",
+  "observed_at": "2026-10-20T03:57:06.421549+00:00",
+  "checks": {
+    "exit_zero": true,
+    "exact_sql": true,
+    "exact_partitions": true,
+    "exact_rows": true,
+    "two_statements": true,
+    "soak_absent": true
+  },
+  "partitions": [
+    "dt=a",
+    "dt=b",
+    "dt=burst_one",
+    "dt=marker_keep",
+    "dt=marker_only",
+    "dt=marker_slash",
+    "dt=nested_marker",
+    "dt=raw+%2520 space%23%3F",
+    "dt=recovery_add_after",
+    "dt=recovery_add_before",
+    "dt=versions"
+  ],
+  "rows": [
+    [
+      "probe-a",
+      "a"
+    ],
+    [
+      "probe-b",
+      "b"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "burst_one"
+    ],
+    [
+      "probe-a",
+      "raw+%20 space#?"
+    ],
+    [
+      "probe-a",
+      "recovery_add_after"
+    ],
+    [
+      "probe-a",
+      "recovery_add_before"
+    ],
+    [
+      "probe-a",
+      "versions"
+    ]
+  ]
+}

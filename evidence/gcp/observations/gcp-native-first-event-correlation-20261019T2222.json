@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "scope": "one real GCS event -> native worker -> HMS ADD -> correlated ACK",
+  "identity": {
+    "bucketId": "rtmsf-gcp-lab-20261018-e504-fixtures",
+    "objectId": "gcp-native/native-r20261019n1/data/dt=a/part-00000.parquet",
+    "objectGeneration": "1792448562788290",
+    "eventType": "OBJECT_FINALIZE"
+  },
+  "message_id": "22056448002846524",
+  "event_received_utc": "2026-10-19T22:23:01.438475+00:00",
+  "pmcp_completed_utc": "2026-10-19T22:23:04.879221+00:00",
+  "ack_confirmed_utc": "2026-10-19T22:23:04.922501+00:00",
+  "worker_final_status": "failed",
+  "worker_error_category": "external_retryable",
+  "pending_at_exit": 0,
+  "query_visibility": "pending",
+  "other_setup_acknowledgments_excluded": 4
+}

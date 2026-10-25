@@ -1,0 +1,72 @@
+Enable succeeded:
+[stdout]
+6, 10, 16, 8, 30, 49, 393671, tzinfo=datetime.timezone.utc))
+
+    def receive_with_ids(source, *args):
+        deliveries = receive(source, *args)
+        for delivery in deliveries:
+            message = source._messages[delivery.handle].message
+            event = json.loads(source._body(message))
+>           pending[delivery.handle] = {"event_id": event["id"],
+                                                    ^^^^^^^^^^^
+                "message_id": str(message.message_id), "sequence_number": message.sequence_number,
+                "delivery_count": message.delivery_count, "subject": event["subject"]}
+E           KeyError: 'id'
+
+src/experiments/azure/crash_worker.py:68: KeyError
+_________ test_drop_intent_repair_add_does_not_trigger_post_drop_crash _________
+
+hooks = <_pytest.monkeypatch.MonkeyPatch object at 0x71f3f7965d90>
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-7/test_drop_intent_repair_add_do0')
+
+    def test_drop_intent_repair_add_does_not_trigger_post_drop_crash(hooks, tmp_path):
+        marker = tmp_path / 'fault.json'
+        journal = tmp_path / 'pending.json'
+        journal.write_text(json.dumps({'statement_id': 'statement-1', 'statement_sha256': hashlib.sha256(b'ADD repair').hexdigest()}))
+        hooks.setattr(fault, 'Path', lambda _: marker)
+        hooks.setattr(fault.azure_app, 'JOURNAL_PATH', journal)
+        sql = object.__new__(fault.DatabricksSQLStatements)
+        sql._journal = journal
+        cleared = []
+        hooks.setattr(fault.DatabricksSQLStatements, '_clear', lambda _: cleared.append(True))
+        def apply(_, value):
+            sql._state({'statement_id': 'statement-1', 'status': {'state': 'SUCCEEDED'}}, 'statement-1', True)
+            sql._clear()
+        hooks.setattr(fault.azure_app._BudgetedPMCP, 'apply', apply)
+        fault.install_fault('after_catalog_change')
+>       fault.azure_app._BudgetedPMCP.apply(None, intent('DROP'))
+
+tests/test_azure_crash_worker.py:119:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src/experiments/azure/crash_worker.py:87: in apply_with_fault
+    return apply(pmcp, intent)
+           ^^^^^^^^^^^^^^^^^^^
+tests/test_azure_crash_worker.py:116: in apply
+    sql._clear()
+src/experiments/azure/crash_worker.py:102: in clear_with_fault
+    crash()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def crash():
+        journal = azure_app.JOURNAL_PATH
+        receipt = json.loads(journal.read_text()) if journal.exists() else None
+        if point == "after_catalog_change":
+            assert receipt and receipt["statement_id"] and last_state == "SUCCEEDED"
+        else:
+            assert receipt is None
+        record = {"point": point, "pid": os.getpid(), "table": TABLE,
+                  "utc": datetime.now(timezone.utc).isoformat(),
+                  "pending_events": list(pending.values()), "journal": receipt}
+>       assert record["pending_events"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+src/experiments/azure/crash_worker.py:50: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_azure_crash_worker.py::test_fault_preserves_native_dlq_for_malformed_deliveries[invalid JSON]
+FAILED tests/test_azure_crash_worker.py::test_fault_preserves_native_dlq_for_malformed_deliveries[[]]
+FAILED tests/test_azure_crash_worker.py::test_fault_preserves_native_dlq_for_malformed_deliveries[{}]
+FAILED tests/test_azure_crash_worker.py::test_drop_intent_repair_add_does_not_trigger_post_drop_crash
+4 failed, 6 passed in 0.31s
+
+[stderr]

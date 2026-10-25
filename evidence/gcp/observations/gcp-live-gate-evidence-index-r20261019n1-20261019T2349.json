@@ -1,0 +1,109 @@
+{
+  "run_id": "r20261019n1",
+  "gates": {
+    "native_add_query": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-first-event-correlation-20261019T2222.json",
+        "observations/gcp-native-first-query-proof-20261019T2226.json"
+      ]
+    },
+    "lifecycle_drop_query": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-last-delete-correlation-20261019T2248.json",
+        "observations/gcp-native-last-delete-query-proof-20261019T2300.json",
+        "observations/gcp-native-final-drop-query-proof-20261019T2338.json"
+      ]
+    },
+    "recovery_before_add": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-recovery-before-add-crash-check-20261019T2305.json",
+        "observations/gcp-recovery-before-add-proof-after-add-fixture-20261019T2306.json",
+        "observations/gcp-native-marker-special-recovery-add-query-proof-20261019T2317.json"
+      ]
+    },
+    "recovery_after_add": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-recovery-after-add-crash-check-20261019T2308.json",
+        "observations/gcp-native-batch-after-add-correlations-20261019T2312.json",
+        "observations/gcp-native-marker-special-recovery-add-query-proof-20261019T2317.json"
+      ]
+    },
+    "recovery_before_drop": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-before-drop-crash-and-version-fixtures-20261019T2320.jsonl",
+        "observations/gcp-native-versions-malformed-before-drop-correlations-20261019T2323.json",
+        "observations/gcp-native-version-current-before-drop-query-proof-20261019T2325.json"
+      ]
+    },
+    "recovery_after_drop": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-recovery-after-drop-crash-check-20261019T2331.json",
+        "observations/gcp-native-final-drop-correlations-20261019T2336.json",
+        "observations/gcp-native-final-drop-query-proof-20261019T2338.json"
+      ]
+    },
+    "markers": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-batch-after-add-correlations-20261019T2312.json",
+        "observations/gcp-native-marker-special-recovery-add-query-proof-20261019T2317.json",
+        "observations/gcp-native-final-drop-correlations-20261019T2336.json",
+        "observations/gcp-native-final-drop-query-proof-20261019T2338.json"
+      ]
+    },
+    "special_names": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-batch-after-add-correlations-20261019T2312.json",
+        "observations/gcp-native-marker-special-recovery-add-query-proof-20261019T2317.json"
+      ]
+    },
+    "burst": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-batch-after-add-correlations-20261019T2312.json",
+        "observations/gcp-native-final-drop-correlations-20261019T2336.json",
+        "observations/gcp-native-final-drop-query-proof-20261019T2338.json"
+      ]
+    },
+    "malformed_quarantine": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-versions-malformed-before-drop-correlations-20261019T2323.json",
+        "observations/gcp-native-quarantine-denial-safety-proof-20261019T2326.json",
+        "observations/gcp-native-quarantine-denial-recovery-proof-20261019T2334.json"
+      ]
+    },
+    "versions": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-versions-malformed-before-drop-correlations-20261019T2323.json",
+        "observations/gcp-native-version-current-before-drop-query-proof-20261019T2325.json",
+        "observations/gcp-native-final-drop-correlations-20261019T2336.json",
+        "observations/gcp-native-final-drop-query-proof-20261019T2338.json",
+        "observations/gcp-soak-baseline-r20261019n1-20261019T2343.json",
+        "observations/gcp-resource-health-before-soak-20261019T2346-bucket.json"
+      ]
+    },
+    "stale_duplicate_replay": {
+      "status": "passed",
+      "source_evidence": [
+        "observations/gcp-native-captured-replay-correlations-20261019T2344.json",
+        "observations/gcp-native-captured-replay-query-proof-20261019T2348.json",
+        "observations/gcp-native-original-v3-redelivery-proof-20261019T2350.json"
+      ]
+    }
+  },
+  "limitations": [
+    "Unicode object filenames passed; Unicode partition-value Thrift lookup timed out and is excluded.",
+    "Idle finite worker external_retryable failures retained; native event/query gates passed separately.",
+    "No sustainable throughput, uninterrupted runtime, exactly-once or billed-cost claim."
+  ],
+  "stale_duplicate_replay": "passed"
+}

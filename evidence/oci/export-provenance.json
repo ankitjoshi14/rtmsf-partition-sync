@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "source_root": "2026-10-06/use-these-criteria-correctness-practical-value",
+  "normalization": "Selected report fields only; omit native receipts, cloud resource IDs, guest metadata, hostnames, process IDs, resource configuration and full event envelopes. Measurements, status, timestamps, event identities and worker records retain original values.",
+  "files": [
+    {
+      "source_relative_path": "outputs/oci-events/live-report.json",
+      "source_sha256": "402f0a3214584b84f0d6ffab7bc79119b4f39ea35c1b501686f2622888ad48aa",
+      "exported_path": "observations/local-lifecycle.json",
+      "exported_sha256": "6052713eaef8ae89e5efe45eb03d33a1190a88abb6cd1a44d4c8e1f731408f88"
+    },
+    {
+      "source_relative_path": "outputs/oci-events/bursts-20261012/burst-report.json",
+      "source_sha256": "fa6fc290876d9d266b9430e429ed0641e28a14fe5d750e66fee40cebf7125b3f",
+      "exported_path": "observations/local-bursts.json",
+      "exported_sha256": "91e701e15fd8aa42b61c798826d771bac3c569d09b0a13ffbc149b8e2af5abcd"
+    },
+    {
+      "source_relative_path": "outputs/oci-events/first-live-report.json",
+      "source_sha256": "e5f2c1a3d16dbcdfb619fd12560af6e20ada0d5e529b21bbd7ca1ca764d2f049",
+      "exported_path": "observations/local-first-failed.json",
+      "exported_sha256": "a4368af911838646b9693cca807757287a2509c0e8bc02c76985bb073ddf254b"
+    },
+    {
+      "source_relative_path": "outputs/oci-events/restart-stage1.json",
+      "source_sha256": "9537d75e2949d135dc8b21c4e6f53972140b650ba2a7dc1c315cf4a08c020e74",
+      "exported_path": "observations/queue-restart-stage1.json",
+      "exported_sha256": "d5583e3c1f90f4f21329cc0c1cd696f629560cab59801bdf2d79e10799b5e6e0"
+    },
+    {
+      "source_relative_path": "outputs/oci-events/restart-stage2.json",
+      "source_sha256": "5f59faf135ab81f0631717f8fd978a6472ca45905894a4f43758b4fddcd4d7ef",
+      "exported_path": "observations/queue-restart-stage2.json",
+      "exported_sha256": "7f3ada0d2abc205ce4c787cef534fa218924b970982bdbd679d1618ff5ee894b"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055634/results/lifecycle/live-report.json",
+      "source_sha256": "427d280d4dfac17c8dea7bcdf2b4bf5d883caba139588a18ae5dd1c1ca822de0",
+      "exported_path": "observations/compute-lifecycle.json",
+      "exported_sha256": "6541a47b6bd17f2cc071a6349daa6fbbd11504e321ab935d6e7fe21c08feb614"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055634/results/bursts/burst-report.json",
+      "source_sha256": "6ce67489fd9e087b383cb1a239ee4bbceeb6fd685b4c51e133a9124b28982f8b",
+      "exported_path": "observations/compute-bursts.json",
+      "exported_sha256": "e866112d19d327f4752f825932d55a2ef78c79762d5b816678de1f54a4306521"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055634/results/restart/buffer-report.json",
+      "source_sha256": "3f028fe04eab085a5813f1774bd915e2bb07bde1db31f6c48a85c9304007cfab",
+      "exported_path": "observations/compute-restart-buffer.json",
+      "exported_sha256": "11a787080ca13fc051f98112fa8d5dda13b4eb2c42efc5c0ebb70da635adab41"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055634/results/restart/replay-report.json",
+      "source_sha256": "ecae93c5619f20f9daf79aa163d96fe0caf68b57657a419f06a554bb313ddbe6",
+      "exported_path": "observations/compute-restart-replay.json",
+      "exported_sha256": "e173c252ab64f23a127629b518e3b18011fafb6a972db1903da27869b2be5314"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055634/compute-report.json",
+      "source_sha256": "0e43d12848b8397d7940bb08cc1d73d343bdd584a7f185e563f4ed389bd2eafb",
+      "exported_path": "observations/compute-final.json",
+      "exported_sha256": "94780c2a164bee090dbd7ff02e9f30d370bebd460fd87a528de058fdb06c1e59"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T053558/compute-report.json",
+      "source_sha256": "fd57c4cbc0ad356b2b2a7c061e6f361cec122b3b8850ed65b18d4adf25781ec5",
+      "exported_path": "observations/compute-detachment-failed.json",
+      "exported_sha256": "603fb3cb07883c13cb54c1274b93f9e97bb223cb1ee73cc858cb05fed08bcea6"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T054557/compute-report.json",
+      "source_sha256": "c4ec6a1547a0f2f031f53acde4d60a48ae63b83eed90a7333ac4101cd5121f79",
+      "exported_path": "observations/compute-storage-failed.json",
+      "exported_sha256": "1af262460589c8a09407028dea94f842652415f12094f929c387eb52c6794998"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055105/compute-report.json",
+      "source_sha256": "0fda04a8c512bdcdd7d595fffdcddf538e000d7016c31fac7253923e3193ce4b",
+      "exported_path": "observations/compute-window-assertion-failed.json",
+      "exported_sha256": "3ffa4c5dc9ec3c9f5a324de64df6694b32d6335b5cd994915adda88d75c6cbdc"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/failed-deployment.json",
+      "source_sha256": "4e97e31015d63168d15e5641b378b60547abc1ce40263ebfa971d0f01900dc67",
+      "exported_path": "observations/compute-provisioning-failed.json",
+      "exported_sha256": "00f4c4fd97d59510d20e3f408aa0188106de929d6d90e866a6ec5d0fd88a0ec7"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/cleanup-readback.json",
+      "source_sha256": "89df74398a476dfef44e2338c61db5b5147eeeeddc13ee34cba041e0d7220452",
+      "exported_path": "observations/compute-cleanup-readback.json",
+      "exported_sha256": "5c5be57a222b962ce33c4352cab02baff87c082796521980b99144e11f8f296c"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/source-manifest.json",
+      "source_sha256": "2787c127e182bfad8381b6e16d5873575e3a4cd5325f32cbccea3c092a7dc97e",
+      "exported_path": "source-provenance.json",
+      "exported_sha256": "e48aff0f0b402fd8d6c5416f7240c3a1835efa5bb883b280345ee6c8e01b949e",
+      "previous_exported_sha256": "72221ced42fa64957c03febbec8414636051ba4a6222ce386d3ec84877c34adf",
+      "correction": "Corrected the source-layout description to reference the existing Function handler and manual ZIP instructions; no original source fingerprints or observations changed."
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T054557/bursts.log",
+      "source_sha256": "aa48eea14eb8d3f562b7ac9b8a00e99d4ed84a8cce9e704eae08d4fc3572a110",
+      "exported_path": "observations/storage-error.json",
+      "exported_sha256": "247893a1f3ecb24924137401a9b1d99ac8916fbc6e1a1dac5c4d464849b5f5b0"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055105/bursts.log",
+      "source_sha256": "5442ebc75fdd81ab563d0e84687166f18d1ed1631943220dd67571df0bdd2ba3",
+      "exported_path": "observations/window-assertion-error.json",
+      "exported_sha256": "be9b1e324a64ba9eb4958c5d619af9ed90f773661b77f75654ffb0038e45f71f"
+    },
+    {
+      "source_relative_path": "outputs/oci-compute/run-20261015T055634/archive-digest.log",
+      "source_sha256": "a89e2ff4c1f8952744117dc743279c5f044bfc49e9372ae63808448180cb81ad",
+      "exported_path": "observations/guest-archive-digest.json",
+      "exported_sha256": "73b66934193f6fbffc57b49a9926ecaf9ce5bffc3ee436ccb56fe9e19cbca1c4"
+    }
+  ],
+  "additional_sources": [
+    {
+      "source_relative_path": "outputs/oci-compute/rtmsf-oci-source.tar.gz",
+      "sha256": "988a5c8b4c5d2710d6fa547dc9628012cf28708f95fe6284301d3dacc7b574a6"
+    },
+    {
+      "source_relative_path": "outputs/oci-events/deployed-bridge/func.py",
+      "sha256": "1334f86a34bff3c6acf732e46784780c673688b4f95266069848ddca00eaf9f2",
+      "bytes": 932
+    },
+    {
+      "source_relative_path": "outputs/oci-events/deployed-bridge/adapters.py",
+      "sha256": "978eef12f3630f10e503f4bbd5a306811b0e74e36f2fa086d5a9fa0856775000",
+      "bytes": 9981
+    }
+  ]
+}
